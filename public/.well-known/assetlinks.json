@@ -1,0 +1,16 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.agent.gamana.ai",
+      "sha256_cert_fingerprints": [
+        "D3:1D:F4:4B:23:E5:06:CF:AE:1E:44:85:C8:00:58:81:E8:44:C0:91:FE:22:77:98:B9:BB:6B:74:C6:A6",
+        "03:1D:F4:48:23:E5:06:CF:AE:1E:44:85:CB:00:58:81:E8:44:C0:91:FE:22:77:98:B9:BB:6B:74:C6:A6:3A:CF"
+      ]
+    }
+  }
+]

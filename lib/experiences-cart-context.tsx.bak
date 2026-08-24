@@ -1,0 +1,96 @@
+"use client";
+
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+
+export interface ExperienceCartItem {
+  id: string;
+  title: string;
+  image: string;
+  price: number;
+  operator: string;
+  quantity: number;
+}
+
+interface ExperiencesCartContextValue {
+  items: ExperienceCartItem[];
+  addItem: (item: Omit<ExperienceCartItem, "quantity">, quantity?: number) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  clearCart: () => void;
+  itemCount: number;
+  subtotal: number;
+}
+
+const ExperiencesCartContext = createContext<ExperiencesCartContextValue | undefined>(undefined);
+
+const STORAGE_KEY = "gamanaExperiencesCart";
+
+/**
+ * Separate from the Gamana Coins cart (lib/cart-context.tsx) on purpose — Experiences are
+ * real-world, third-party-operator bookings paid in real money (card/UPI), not Gamana
+ * Coins. Mixing the two currencies in one cart doesn't reflect how this would really work
+ * once real payment (likely via Bókun, per the draft partnership agreement) exists.
+ */
+export function ExperiencesCartProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<ExperienceCartItem[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) setItems(JSON.parse(raw));
+    } catch {
+      // ignore
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch {
+      // ignore
+    }
+  }, [items, hydrated]);
+
+  const addItem: ExperiencesCartContextValue["addItem"] = (item, quantity = 1) => {
+    setItems((prev) => {
+      const existing = prev.find((i) => i.id === item.id);
+      if (existing) {
+        return prev.map((i) => (i.id === item.id ? { ...i, quantity: i.quantity + quantity } : i));
+      }
+      return [...prev, { ...item, quantity }];
+    });
+  };
+
+  const removeItem = (id: string) => {
+    setItems((prev) => prev.filter((i) => i.id !== id));
+  };
+
+  const updateQuantity = (id: string, quantity: number) => {
+    setItems((prev) => {
+      if (quantity <= 0) return prev.filter((i) => i.id !== id);
+      return prev.map((i) => (i.id === id ? { ...i, quantity } : i));
+    });
+  };
+
+  const clearCart = () => setItems([]);
+
+  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
+  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+  return (
+    <ExperiencesCartContext.Provider
+      value={{ items, addItem, removeItem, updateQuantity, clearCart, itemCount, subtotal }}
+    >
+      {children}
+    </ExperiencesCartContext.Provider>
+  );
+}
+
+export function useExperiencesCart() {
+  const ctx = useContext(ExperiencesCartContext);
+  if (!ctx) throw new Error("useExperiencesCart must be used within an ExperiencesCartProvider");
+  return ctx;
+}

@@ -1,0 +1,20 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": [
+          "AB12CD34EF.com.agent.gamana"
+        ],
+        "components": [
+          {
+            "/": "/storylist/*"
+          },
+          {
+            "/": "/storylists/*"
+          }
+        ]
+      }
+    ]
+  }
+}

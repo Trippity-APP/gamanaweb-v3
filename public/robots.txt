@@ -1,0 +1,15 @@
+User-agent: *
+
+# Allow all pages
+Allow: /
+
+# Disallow API routes
+Disallow: /api/
+
+# Disallow admin/internal routes (if any)
+Disallow: /_next/
+Disallow: /admin/
+
+# Sitemap location
+Sitemap: https://www.gamana.app/sitemap.xml
+
