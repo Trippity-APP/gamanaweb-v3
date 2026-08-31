@@ -10,6 +10,7 @@ import Footer from "@/components/navigation/footer";
 import SiteHeader from "@/components/navigation/site-header";
 import NarratorCard from "@/components/narrator-card";
 import { HeroCitySearch } from "@/components/HeroCitySearch";
+import { BlogCoverImage } from "@/components/blog/blog-cover-image";
 import type { BlogSummary } from "@/lib/blog";
 import { trackStoreClick } from "@/lib/analytics";
 import { useStoreUrl } from "@/hooks/use-store-url";
@@ -818,7 +819,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
                   <div className={`relative w-full overflow-hidden ${
                     singleStoryHighlight ? "aspect-[16/9] mb-8 rounded-2xl" : "aspect-[16/10] mb-6 rounded-t-3xl"
                   }`}>
-                    <Image
+                    <BlogCoverImage
                       src={story.coverImage}
                       alt={story.title}
                       fill

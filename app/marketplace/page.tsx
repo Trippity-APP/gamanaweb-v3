@@ -6,21 +6,11 @@ import { HeroSlideshow } from '@/components/HeroSlideshow';
 import Footer from '@/components/navigation/footer';
 import { MarketplaceBrowser } from '@/components/marketplace/MarketplaceBrowser';
 import { MarketplaceHeroSearch } from '@/components/marketplace/MarketplaceHeroSearch';
+import { MarketplaceSignedInHeroExtras } from '@/components/marketplace/MarketplaceSignedInHeroExtras';
 
 /**
- * Same catalog and cart as /marketplace-redesign. The "Recommended for you" layer and
- * the Feedback widget are no longer tied to which of these two pages you're on — both
- * are gated on live login state inside MarketplaceBrowser / FeedbackWidget themselves,
- * so they appear here too the moment you're signed in, and disappear from
- * /marketplace-redesign the moment you sign out. The Tours search bar now lives in the
- * hero itself (MarketplaceHeroSearch), right under the headline, instead of the white
- * card below — mirrors Home's search-first hero treatment.
- *
- * Hero now matches the sitewide photo-hero standard (min-h-[62vh] sm:min-h-[68vh],
- * same as About/Contact/Ecosystem/Cities/Features/Blog) for visual consistency across
- * the site, per explicit request — this was originally a deliberately slim strip to get
- * visitors to buyable content faster, but that tradeoff has been set aside in favor of
- * matching the rest of the site.
+ * Unified marketplace page — live catalog from public storylists, personalized greeting
+ * when signed in, and the same browsing surface for all visitors.
  */
 export default function MarketplacePage() {
   return (
@@ -54,7 +44,8 @@ export default function MarketplacePage() {
             <p className="text-base sm:text-lg md:text-xl text-white/85 leading-relaxed max-w-2xl mx-auto opacity-0 animate-fade-in" style={{ animationDelay: "450ms" }}>
               Curated audio tours, storylists, and experiences from expert narrators worldwide.
             </p>
-            <div className="opacity-0 animate-fade-in pt-2" style={{ animationDelay: "600ms" }}>
+            <MarketplaceSignedInHeroExtras />
+            <div className="opacity-0 animate-fade-in pt-2" style={{ animationDelay: "750ms" }}>
               <Suspense fallback={null}>
                 <MarketplaceHeroSearch />
               </Suspense>

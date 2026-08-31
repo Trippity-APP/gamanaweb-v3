@@ -1013,7 +1013,7 @@ export default function StartYourJourneyPage() {
                   This is just the start — explore your marketplace now, or download the Gamana app to keep
                   going in person.
                 </p>
-                <Link href="/marketplace-redesign">
+                <Link href="/marketplace">
                   <Button className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] hover:from-[#159895] hover:to-[#1A5F7A] rounded-full px-8">
                     Start Exploring
                   </Button>

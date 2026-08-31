@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { getAllPostSummaries, type BlogSummary } from "@/lib/blog";
+import { BlogCoverImage } from "@/components/blog/blog-cover-image";
 
 interface Props {
   currentSlug: string;
@@ -15,12 +15,12 @@ function scoreOverlap(a: string[], b: string[]): number {
   return b.reduce((n, t) => n + (set.has(t.toLowerCase()) ? 1 : 0), 0);
 }
 
-export default function RelatedPosts({
+export default async function RelatedPosts({
   currentSlug,
   currentTags,
   limit = 3,
 }: Props) {
-  const all = getAllPostSummaries();
+  const all = await getAllPostSummaries();
   const scored = all
     .filter((p) => p.slug !== currentSlug)
     .map((p) => ({ post: p, score: scoreOverlap(currentTags, p.tags) }))
@@ -48,8 +48,8 @@ function RelatedCard({ post }: { post: BlogSummary }) {
     <Link href={`/blog/${post.slug}`} className="group block">
       <div className="rounded-xl border border-gray-100 overflow-hidden hover:border-[#159895]/40 transition-all h-full flex flex-col">
         <div className="relative w-full aspect-[16/10]">
-          <Image
-            src={encodeURI(post.coverImage)}
+          <BlogCoverImage
+            src={post.coverImage}
             alt={post.title}
             fill
             className="object-cover"

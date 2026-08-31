@@ -6,7 +6,7 @@ export const dynamic = "force-static";
 
 export async function GET() {
   try {
-    const stories = getLatestPostSummaries(3);
+    const stories = await getLatestPostSummaries(3);
 
     return NextResponse.json({ stories });
   } catch (error) {

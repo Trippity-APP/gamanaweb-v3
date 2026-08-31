@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import {
-  Search, MapPin, Star, Zap, Heart, Headphones, CloudDownload, Users2, Compass,
-  Briefcase, Check as CheckIcon, Sparkles, Coins as CoinsIcon, Lock, AlertCircle, LogIn,
+  MapPin, Star, Heart, Headphones, CloudDownload, Users2, Compass,
+  Check as CheckIcon, Sparkles, Coins as CoinsIcon, Lock, AlertCircle, LogIn,
   Smartphone,
 } from 'lucide-react';
 import { useStoreUrl } from '@/hooks/use-store-url';
@@ -18,12 +17,19 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Cart } from '@/components/cart/Cart';
 import { CityNotCovered } from '@/components/marketplace/CityNotCovered';
+import { MarketplaceCoverImage } from '@/components/marketplace/marketplace-cover-image';
+import {
+  clearMarketplaceCache,
+  fetchPublicTours,
+  getTourHref,
+  tourMatchesSearch,
+} from '@/lib/marketplace-api';
 import { useCart } from '@/lib/cart-context';
 import { useAccount } from '@/lib/account-context';
 import {
-  tours, combos, experiences, experienceCategories, tierLabels, getTierColor, coinBundles,
-  tourCategoryToInterests, experienceCategoryToInterests,
-  type Tour, type Combo, type Experience, type CoinBundle,
+  tierLabels, getTierColor, coinBundles,
+  tourCategoryToInterests,
+  type Tour, type CoinBundle,
 } from '@/lib/marketplace-data';
 import { interestCategoryOptions } from '@/lib/personalization';
 
@@ -37,6 +43,8 @@ const trustPoints = [
 ];
 
 type UnlockTarget = { id: string; type: 'tour' | 'combo'; title: string; priceCoins: number };
+
+const TOURS_INITIAL_VISIBLE = 9;
 
 /**
  * The full Tours / Combos / Experiences / Buy Coins / Special Offers browsing surface,
@@ -89,7 +97,6 @@ export function MarketplaceBrowser({
 
   const clearCityFilter = () => {
     setSearchQuery('');
-    setExperienceSearch('');
     router.replace(pathname);
   };
 
@@ -99,7 +106,6 @@ export function MarketplaceBrowser({
   // way the old in-card search box used to do it directly.
   useEffect(() => {
     setInternalSearchQuery(cityFromUrl);
-    setExperienceSearch(cityFromUrl);
     if (cityFromUrl && (!hasRecommendations || activeTab === 'recommended')) {
       setActiveTab('tours');
     }
@@ -174,23 +180,15 @@ export function MarketplaceBrowser({
     }
   };
 
-  // --- Real-money cart: Experiences + Coin bundles ---
+  // --- Real-money cart: Coin bundles ---
   const { addItem, items: cartItems } = useCart();
-  const [justAddedExperience, setJustAddedExperience] = useState<string | null>(null);
   const [justAddedBundle, setJustAddedBundle] = useState<string | null>(null);
   // "Buy Coins" used to be its own tab, duplicating the "Buy more" chip next to the
   // balance — collapsed into one cue: "Buy more" now opens this bundle-picker dialog
   // directly instead of switching tabs.
   const [buyCoinsOpen, setBuyCoinsOpen] = useState(false);
 
-  const isExperienceInCart = (id: string) => cartItems.some((i) => i.id === id && i.kind === 'experience');
   const isBundleInCart = (id: string) => cartItems.some((i) => i.id === id && i.kind === 'coins');
-
-  const handleAddExperience = (exp: Experience) => {
-    addItem({ id: exp.id, kind: 'experience', title: exp.title, image: exp.image, price: exp.price, operator: exp.operator });
-    setJustAddedExperience(exp.id);
-    setTimeout(() => setJustAddedExperience((current) => (current === exp.id ? null : current)), 1500);
-  };
 
   const handleAddBundle = (bundle: CoinBundle) => {
     const totalCoins = bundle.baseCoins + bundle.bonusCoins;
@@ -206,8 +204,37 @@ export function MarketplaceBrowser({
     setTimeout(() => setJustAddedBundle((current) => (current === bundle.id ? null : current)), 1500);
   };
 
-  const [experienceSearch, setExperienceSearch] = useState(cityFromUrl);
-  const [experienceCategory, setExperienceCategory] = useState('All');
+  const [tours, setTours] = useState<Tour[]>([]);
+  const [toursLoading, setToursLoading] = useState(true);
+  const [toursError, setToursError] = useState<string | null>(null);
+  const [visibleTourCount, setVisibleTourCount] = useState(TOURS_INITIAL_VISIBLE);
+
+  const loadTours = async () => {
+    setToursLoading(true);
+    setToursError(null);
+    try {
+      const nextTours = await fetchPublicTours();
+      setTours(nextTours);
+    } catch {
+      setTours([]);
+      setToursError('We couldn’t load tours right now. Please try again.');
+    } finally {
+      setToursLoading(false);
+    }
+  };
+
+  const retryTours = () => {
+    clearMarketplaceCache();
+    void loadTours();
+  };
+
+  useEffect(() => {
+    void loadTours();
+  }, []);
+
+  useEffect(() => {
+    setVisibleTourCount(TOURS_INITIAL_VISIBLE);
+  }, [searchQuery, selectedTier, cityFromUrl]);
 
   // --- Personalization: score the same catalog against the traveler's saved interests ---
   const interestIds = useMemo(
@@ -220,30 +247,23 @@ export function MarketplaceBrowser({
   const active = !!account && interestIds.length > 0;
 
   const tourMatches = (t: Tour) => (tourCategoryToInterests[t.category] || []).some((id) => interestIds.includes(id));
-  const expMatches = (e: Experience) => (experienceCategoryToInterests[e.category] || []).some((id) => interestIds.includes(id));
 
   const recommendedTours = active ? tours.filter(tourMatches) : [];
-  const recommendedExperiences = active ? experiences.filter(expMatches) : [];
-  const hasRecommendations = active && (recommendedTours.length > 0 || recommendedExperiences.length > 0);
+  const hasRecommendations = active && recommendedTours.length > 0;
 
   // A city search always wins over the recommended-tab default — the visitor came in
   // asking for a specific place, not a personalized mix.
-  const [activeTab, setActiveTab] = useState(cityFromUrl ? 'tours' : hasRecommendations ? 'recommended' : 'tours');
+  const [activeTab, setActiveTab] = useState(cityFromUrl ? 'tours' : 'tours');
 
-  const filteredExperiences = experiences
-    .filter((exp) => {
-      const matchesSearch =
-        exp.title.toLowerCase().includes(experienceSearch.toLowerCase()) ||
-        exp.location.toLowerCase().includes(experienceSearch.toLowerCase());
-      const matchesCategory = experienceCategory === 'All' || exp.category === experienceCategory;
-      return matchesSearch && matchesCategory;
-    })
-    .sort((a, b) => (active ? Number(expMatches(b)) - Number(expMatches(a)) : 0));
+  useEffect(() => {
+    if (!cityFromUrl && hasRecommendations && activeTab === 'tours' && !toursLoading) {
+      setActiveTab('recommended');
+    }
+  }, [cityFromUrl, hasRecommendations, activeTab, toursLoading]);
 
   const filteredTours = tours
     .filter((tour) => {
-      const matchesSearch = tour.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tour.location.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = tourMatchesSearch(tour, searchQuery);
       const matchesTier = selectedTier === 'all' || tour.tier === selectedTier;
       return matchesSearch && matchesTier;
     })
@@ -262,26 +282,13 @@ export function MarketplaceBrowser({
     mistaken for cause 3.
   */
   const tourSearchTerm = searchQuery.trim();
-  const experienceSearchTerm = experienceSearch.trim();
-
-  const matchesLocation = (haystackTitle: string, haystackLocation: string, term: string) => {
-    const q = term.toLowerCase();
-    return haystackTitle.toLowerCase().includes(q) || haystackLocation.toLowerCase().includes(q);
-  };
 
   const toursForSearch = tourSearchTerm
-    ? tours.filter((t) => matchesLocation(t.title, t.location, tourSearchTerm)).length
-    : 0;
-  const experiencesForTourSearch = tourSearchTerm
-    ? experiences.filter((e) => matchesLocation(e.title, e.location, tourSearchTerm)).length
+    ? tours.filter((t) => tourMatchesSearch(t, tourSearchTerm)).length
     : 0;
 
-  const toursForExperienceSearch = experienceSearchTerm
-    ? tours.filter((t) => matchesLocation(t.title, t.location, experienceSearchTerm)).length
-    : 0;
-  const experiencesForSearch = experienceSearchTerm
-    ? experiences.filter((e) => matchesLocation(e.title, e.location, experienceSearchTerm)).length
-    : 0;
+  const visibleTours = filteredTours.slice(0, visibleTourCount);
+  const hasMoreTours = filteredTours.length > visibleTourCount;
 
   const unlockButton = (target: UnlockTarget) => {
     const key = `${target.type}-${target.id}`;
@@ -305,48 +312,49 @@ export function MarketplaceBrowser({
 
   const tourCard = (tour: Tour, index: number, recommended = false) => (
     <Card key={tour.id} className="overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow duration-200 bg-white group">
-      <Link href="#" className="block relative h-40 overflow-hidden bg-gray-100">
-        <Image
-          src={tour.image}
-          alt={tour.title}
-          width={400}
-          height={300}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          priority={index < 3}
-        />
-        <span className={`absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded ${getTierColor(tour.tier)}`}>
-          {tierLabels[tour.tier]?.toUpperCase() ?? tour.tier.toUpperCase()}
-        </span>
-        <button
-          type="button"
-          aria-label="Save"
-          className="absolute top-2 right-2 h-7 w-7 rounded-full bg-white/90 flex items-center justify-center text-gray-500 hover:text-red-500"
-        >
-          <Heart className="h-3.5 w-3.5" />
-        </button>
-      </Link>
-
-      <CardHeader className="p-3 pb-0 space-y-1">
-        {recommended && (
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#0B6E4F]">Recommended for you</p>
-        )}
-        {!recommended && tour.discount && (
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-red-600">Special offer</p>
-        )}
-        <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">{tour.title}</h3>
-        <p className="text-xs text-gray-500 flex items-center gap-1">
-          <MapPin className="h-3 w-3" /> {tour.location} · {tour.duration}
-        </p>
-      </CardHeader>
-
-      <CardContent className="p-3 pt-2 space-y-1.5">
-        <div className="flex items-center gap-1 text-xs">
-          <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-          <span className="font-semibold text-gray-900">{tour.rating}</span>
-          <span className="text-gray-500">({tour.reviews.toLocaleString()})</span>
+      <Link href={getTourHref(tour)} className="block">
+        <div className="relative h-40 overflow-hidden bg-gray-100">
+          <MarketplaceCoverImage
+            src={tour.image}
+            alt={tour.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            priority={index < 3}
+          />
+          <span className={`absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded ${getTierColor(tour.tier)}`}>
+            {tierLabels[tour.tier]?.toUpperCase() ?? tour.tier.toUpperCase()}
+          </span>
+          <button
+            type="button"
+            aria-label="Save"
+            onClick={(e) => e.preventDefault()}
+            className="absolute top-2 right-2 h-7 w-7 rounded-full bg-white/90 flex items-center justify-center text-gray-500 hover:text-red-500"
+          >
+            <Heart className="h-3.5 w-3.5" />
+          </button>
         </div>
-        <p className="text-xs text-gray-500">Narrated by {tour.narrator}</p>
-      </CardContent>
+
+        <CardHeader className="p-3 pb-0 space-y-1">
+          {recommended && (
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#0B6E4F]">Recommended for you</p>
+          )}
+          {!recommended && tour.discount && (
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-red-600">Special offer</p>
+          )}
+          <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">{tour.title}</h3>
+          <p className="text-xs text-gray-500 flex items-center gap-1">
+            <MapPin className="h-3 w-3" /> {tour.location} · {tour.duration}
+          </p>
+        </CardHeader>
+
+        <CardContent className="p-3 pt-2 space-y-1.5">
+          <div className="flex items-center gap-1 text-xs">
+            <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+            <span className="font-semibold text-gray-900">{tour.rating}</span>
+            <span className="text-gray-500">({tour.reviews.toLocaleString()})</span>
+          </div>
+          <p className="text-xs text-gray-500">Narrated by {tour.narrator}</p>
+        </CardContent>
+      </Link>
 
       <CardFooter className="p-3 pt-0 flex items-center justify-between">
         <div>
@@ -361,101 +369,6 @@ export function MarketplaceBrowser({
           )}
         </div>
         {unlockButton({ id: tour.id, type: 'tour', title: tour.title, priceCoins: tour.price })}
-      </CardFooter>
-    </Card>
-  );
-
-  const comboCard = (combo: Combo) => (
-    <Card key={combo.id} className="overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow duration-200">
-      <div className="bg-[#0B6E4F] p-5 text-white">
-        <h3 className="text-lg font-semibold mb-1">{combo.title}</h3>
-        <p className="text-sm text-white/85">{combo.description}</p>
-      </div>
-      <CardContent className="p-4 space-y-3">
-        <div>
-          <p className="text-xs font-semibold text-gray-500 mb-1.5">Includes {combo.tours.length} tours</p>
-          <ul className="space-y-1">
-            {combo.tours.map((tour, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
-                <Zap className="h-3.5 w-3.5 text-[#159895] shrink-0" />
-                <span>{tour}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <p className="text-xs text-gray-500 pt-2 border-t">Valid for {combo.validity}</p>
-      </CardContent>
-      <CardFooter className="p-4 pt-0 flex items-center justify-between border-t">
-        <div>
-          <div className="flex items-center gap-1.5">
-            <CoinsIcon className="h-3.5 w-3.5 text-amber-500" />
-            <p className="text-lg font-bold text-gray-900">{combo.price}</p>
-            <p className="text-sm text-gray-400 line-through">{combo.originalPrice}</p>
-          </div>
-          <p className="text-xs text-emerald-700 font-semibold">
-            Save {combo.originalPrice - combo.price} Coins
-          </p>
-        </div>
-        {unlockButton({ id: combo.id, type: 'combo', title: combo.title, priceCoins: combo.price })}
-      </CardFooter>
-    </Card>
-  );
-
-  const experienceCard = (exp: Experience, index: number, recommended = false) => (
-    <Card key={exp.id} className="overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow duration-200 bg-white group">
-      <div className="relative h-40 overflow-hidden bg-gray-100">
-        <Image
-          src={exp.image}
-          alt={exp.title}
-          width={400}
-          height={300}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          priority={index < 3}
-        />
-        <span className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded bg-white/95 text-gray-700">
-          {exp.category}
-        </span>
-      </div>
-      <CardHeader className="p-3 pb-0 space-y-1">
-        {recommended && (
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-orange-700">Recommended for you</p>
-        )}
-        <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">{exp.title}</h3>
-        <p className="text-xs text-gray-500 flex items-center gap-1">
-          <MapPin className="h-3 w-3" /> {exp.location} · {exp.duration}
-        </p>
-      </CardHeader>
-      <CardContent className="p-3 pt-2 space-y-1.5">
-        <div className="flex items-center gap-1 text-xs">
-          <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-          <span className="font-semibold text-gray-900">{exp.rating}</span>
-          <span className="text-gray-500">({exp.reviews.toLocaleString()})</span>
-        </div>
-        <p className="text-xs text-gray-500 flex items-center gap-1">
-          <Briefcase className="h-3 w-3" /> {exp.operator}
-        </p>
-      </CardContent>
-      <CardFooter className="p-3 pt-0 flex items-center justify-between">
-        <p className="text-base font-bold text-gray-900">${exp.price}</p>
-        <Button
-          size="sm"
-          onClick={() => handleAddExperience(exp)}
-          className={
-            justAddedExperience === exp.id || isExperienceInCart(exp.id)
-              ? 'bg-green-600 hover:bg-green-700 text-white'
-              : 'bg-orange-600 hover:bg-orange-700 text-white'
-          }
-        >
-          {justAddedExperience === exp.id || isExperienceInCart(exp.id) ? (
-            <>
-              <CheckIcon className="mr-1.5 h-3.5 w-3.5" /> Added
-            </>
-          ) : (
-            <>
-              <Briefcase className="mr-1.5 h-3.5 w-3.5" /> Add
-            </>
-          )}
-        </Button>
       </CardFooter>
     </Card>
   );
@@ -613,21 +526,19 @@ export function MarketplaceBrowser({
                 Because you told us you&apos;re into {interestLabels.join(', ')}.
               </p>
 
-              {recommendedTours.length > 0 && (
+              {recommendedTours.length > 0 ? (
                 <div className="space-y-3">
                   <h2 className="text-lg font-semibold text-gray-900">Tours for you</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {recommendedTours.map((tour, i) => tourCard(tour, i, true))}
                   </div>
                 </div>
-              )}
-
-              {recommendedExperiences.length > 0 && (
-                <div className="space-y-3">
-                  <h2 className="text-lg font-semibold text-gray-900">Experiences for you</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {recommendedExperiences.map((exp, i) => experienceCard(exp, i, true))}
-                  </div>
+              ) : (
+                <div className="text-center py-12 space-y-3">
+                  <p className="text-gray-500">No personalized matches yet — browse the full catalog.</p>
+                  <Button variant="outline" onClick={() => setActiveTab('tours')}>
+                    Browse all tours
+                  </Button>
                 </div>
               )}
             </TabsContent>
@@ -667,24 +578,34 @@ export function MarketplaceBrowser({
               <p className="text-sm text-gray-500">{filteredTours.length} tours</p>
             </div>
 
-            {filteredTours.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredTours.map((tour, index) => tourCard(tour, index, active && tourMatches(tour)))}
-              </div>
-            ) : tourSearchTerm && toursForSearch === 0 && experiencesForTourSearch === 0 ? (
-              /* Genuinely uncovered — the highest-intent dead end on the page, so capture
-                 the demand instead of showing a blank grid. */
-              <CityNotCovered city={tourSearchTerm} source="tours" />
-            ) : tourSearchTerm && toursForSearch === 0 ? (
+            {toursLoading ? (
+              <p className="text-center text-gray-500 py-12">Loading tours...</p>
+            ) : toursError ? (
               <div className="text-center py-12 space-y-3">
-                <p className="text-gray-500">
-                  No audio tours for {tourSearchTerm} yet — but there{' '}
-                  {experiencesForTourSearch === 1 ? 'is 1 experience' : `are ${experiencesForTourSearch} experiences`} to book.
-                </p>
-                <Button variant="outline" onClick={() => setActiveTab('experiences')}>
-                  See experiences in {tourSearchTerm}
+                <p className="text-gray-500">{toursError}</p>
+                <Button variant="outline" onClick={retryTours}>
+                  Try again
                 </Button>
               </div>
+            ) : filteredTours.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {visibleTours.map((tour, index) => tourCard(tour, index, active && tourMatches(tour)))}
+                </div>
+                {hasMoreTours && (
+                  <div className="flex justify-center pt-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setVisibleTourCount((count) => count + TOURS_INITIAL_VISIBLE)}
+                      className="min-w-40"
+                    >
+                      View more
+                    </Button>
+                  </div>
+                )}
+              </>
+            ) : tourSearchTerm && toursForSearch === 0 ? (
+              <CityNotCovered city={tourSearchTerm} source="tours" />
             ) : (
               <p className="text-center text-gray-500 py-12">
                 No tours match this filter{tourSearchTerm ? ` for ${tourSearchTerm}` : ''}. Try a different tier.
@@ -696,77 +617,31 @@ export function MarketplaceBrowser({
           <TabsContent value="experiences" className="space-y-6">
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Real-world experiences</h2>
-              {/* Positioned against the audio tours rather than as a payment footnote —
-                  the Coins/currency distinction is already clear at the point of booking,
-                  and leading with it sold the human side short. */}
               <p className="text-sm text-gray-600 max-w-2xl">
                 Put away those headphones and mingle with a real local guide. Enjoy
                 authentic experiences with real people.
               </p>
             </div>
 
-            <div className="flex gap-2 flex-wrap items-center justify-between">
-              <div className="flex gap-2 flex-wrap items-center">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search experiences or cities..."
-                    value={experienceSearch}
-                    onChange={(e) => setExperienceSearch(e.target.value)}
-                    className="pl-9 w-60"
-                  />
-                </div>
-                {experienceCategories.map((cat) => (
-                  <Button
-                    key={cat}
-                    variant={experienceCategory === cat ? 'default' : 'outline'}
-                    onClick={() => setExperienceCategory(cat)}
-                    size="sm"
-                    className={experienceCategory === cat ? 'bg-orange-600 hover:bg-orange-700' : ''}
-                  >
-                    {cat}
-                  </Button>
-                ))}
-              </div>
-              <p className="text-sm text-gray-500">{filteredExperiences.length} experiences</p>
-            </div>
-
-            {filteredExperiences.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredExperiences.map((exp, index) => experienceCard(exp, index, active && expMatches(exp)))}
-              </div>
-            ) : experienceSearchTerm && experiencesForSearch === 0 && toursForExperienceSearch === 0 ? (
-              <CityNotCovered city={experienceSearchTerm} source="experiences" />
-            ) : experienceSearchTerm && experiencesForSearch === 0 ? (
-              <div className="text-center py-12 space-y-3">
-                <p className="text-gray-500">
-                  No bookable experiences in {experienceSearchTerm} yet — but there{' '}
-                  {toursForExperienceSearch === 1 ? 'is 1 audio tour' : `are ${toursForExperienceSearch} audio tours`} to listen to.
-                </p>
-                <Button variant="outline" onClick={() => setActiveTab('tours')}>
-                  See tours in {experienceSearchTerm}
-                </Button>
-              </div>
-            ) : (
-              <p className="text-center text-gray-500 py-12">
-                No experiences match this filter{experienceSearchTerm ? ` for ${experienceSearchTerm}` : ''}. Try another category.
+            <div className="rounded-xl border border-dashed border-orange-200 bg-orange-50/70 px-5 py-8 text-center space-y-3">
+              <p className="text-sm font-semibold uppercase tracking-wide text-orange-700">Coming soon</p>
+              <p className="text-sm text-gray-600 max-w-xl mx-auto">
+                Bookable experiences with local operators are on the way. For now, explore our live audio tours
+                {cityFromUrl ? ` in ${cityFromUrl}` : ''}.
               </p>
-            )}
+              {cityFromUrl ? (
+                <div className="pt-2">
+                  <CityNotCovered city={cityFromUrl} source="experiences" />
+                </div>
+              ) : (
+                <Button variant="outline" onClick={() => setActiveTab('tours')}>
+                  Browse audio tours
+                </Button>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="deals" className="space-y-10">
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Bundle and save</h2>
-                <p className="text-sm text-gray-500">Multiple premium tours at a discounted price</p>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {combos.map((combo) => comboCard(combo))}
-              </div>
-            </div>
-
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Limited time offers</h2>
               <p className="text-sm text-gray-500">Exclusive deals and promotions</p>

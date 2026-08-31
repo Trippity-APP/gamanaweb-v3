@@ -6,7 +6,7 @@ import { ChevronDown, ChevronUp, MapPin, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { City } from "@/lib/data/cities";
-import { ApiCity } from "@/lib/services/cityService";
+import { ApiCity, getCityHref } from "@/lib/services/cityService";
 import { cn } from "@/lib/utils";
 
 interface CityCardProps {
@@ -34,9 +34,31 @@ export const CityCard = ({ city }: CityCardProps) => {
         languages: ["English"] // Default
     };
 
+    const cityHref = "id" in city && city.id ? getCityHref(city as ApiCity) : null;
     const [imgSrc, setImgSrc] = useState(imageUrl);
 
     const handleImgError = () => setImgSrc(FALLBACK_IMAGE);
+
+    const titleBlock = (
+        <>
+            <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-semibold uppercase tracking-wider opacity-90">
+                    {countryName}
+                </span>
+                {isNew && (
+                    <Badge variant="secondary" className="bg-gradient-to-r from-[#1A5F7A] to-[#159895] text-white border-0 text-[10px] h-5 px-1.5 shadow-sm">
+                        NEW
+                    </Badge>
+                )}
+                {isPopular && (
+                    <Badge variant="secondary" className="bg-[#0B6E4F] text-white hover:bg-[#0B6E4F]/90 border-0 text-[10px] h-5 px-1.5 shadow-sm">
+                        POPULAR
+                    </Badge>
+                )}
+            </div>
+            <h3 className="text-2xl font-bold leading-tight drop-shadow-md">{cityName}</h3>
+        </>
+    );
 
     return (
         <div
@@ -60,22 +82,13 @@ export const CityCard = ({ city }: CityCardProps) => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
                 <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-semibold uppercase tracking-wider opacity-90">
-                            {countryName}
-                        </span>
-                        {isNew && (
-                            <Badge variant="secondary" className="bg-gradient-to-r from-[#1A5F7A] to-[#159895] text-white border-0 text-[10px] h-5 px-1.5 shadow-sm">
-                                NEW
-                            </Badge>
-                        )}
-                        {isPopular && (
-                            <Badge variant="secondary" className="bg-[#0B6E4F] text-white hover:bg-[#0B6E4F]/90 border-0 text-[10px] h-5 px-1.5 shadow-sm">
-                                POPULAR
-                            </Badge>
-                        )}
-                    </div>
-                    <h3 className="text-2xl font-bold leading-tight drop-shadow-md">{cityName}</h3>
+                    {cityHref ? (
+                        <Link href={cityHref} className="block hover:opacity-95 transition-opacity">
+                            {titleBlock}
+                        </Link>
+                    ) : (
+                        titleBlock
+                    )}
                 </div>
             </div>
 
@@ -146,6 +159,16 @@ export const CityCard = ({ city }: CityCardProps) => {
                             {/* Routes into Explore pre-filtered to this city rather than out
                                 to the app store — MarketplaceBrowser reads ?city= client-side
                                 and seeds both the Tours and Experiences filters from it. */}
+                            {cityHref && (
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    className="w-full rounded-xl"
+                                >
+                                    <Link href={cityHref}>View city page</Link>
+                                </Button>
+                            )}
+
                             <Button
                                 asChild
                                 className="w-full bg-gradient-to-r from-[#1A5F7A] to-[#159895] text-white hover:opacity-90 shadow-md rounded-xl"

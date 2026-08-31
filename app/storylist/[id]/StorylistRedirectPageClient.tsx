@@ -184,8 +184,8 @@ export default function StorylistRedirectPageClient({ id }: StorylistRedirectPag
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-[#1A5F7A]/20 flex items-center justify-center p-4 relative overflow-hidden">
         {/* Sleek animated blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-[#159895]/10 rounded-full blur-3xl animate-pulse duration-[6s]" />
-          <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#1A5F7A]/10 rounded-full blur-3xl animate-pulse duration-[8s]" />
+          <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-[#159895]/10 rounded-full blur-3xl animate-pulse animation-duration-[6s]" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#1A5F7A]/10 rounded-full blur-3xl animate-pulse animation-duration-[8s]" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-slate-950/50 rounded-full border border-white/5" />
         </div>
 
@@ -275,8 +275,8 @@ export default function StorylistRedirectPageClient({ id }: StorylistRedirectPag
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-[#1A5F7A]/20 flex items-center justify-center p-4 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[20%] left-[10%] w-80 h-80 bg-[#159895]/15 rounded-full blur-3xl animate-pulse duration-[5s]" />
-        <div className="absolute bottom-[20%] right-[10%] w-80 h-80 bg-[#1A5F7A]/15 rounded-full blur-3xl animate-pulse duration-[7s]" />
+        <div className="absolute top-[20%] left-[10%] w-80 h-80 bg-[#159895]/15 rounded-full blur-3xl animate-pulse animation-duration-[5s]" />
+        <div className="absolute bottom-[20%] right-[10%] w-80 h-80 bg-[#1A5F7A]/15 rounded-full blur-3xl animate-pulse animation-duration-[7s]" />
       </div>
 
       <Card className="max-w-md w-full bg-slate-950/50 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 text-center shadow-2xl relative z-10 overflow-hidden">

@@ -18,16 +18,9 @@ import { useAccount } from "@/lib/account-context";
 import { AccountMenu } from "@/components/navigation/AccountMenu";
 
 /**
- * Logged-in visitors get the personalized /marketplace-redesign concept instead of the
- * general /marketplace page when they click "Explore" in nav (nav label — the underlying
- * routes are still /marketplace and /marketplace-redesign). Client-side only — this site
- * is a static export with no middleware/server, so there's no request-time redirect;
- * direct URLs to either page still work regardless of login state.
+ * Explore always routes to the unified /marketplace page.
  */
-function resolveNavHref(item: { name: string; href: string }, loggedIn: boolean) {
-  if (item.name === "Explore") {
-    return loggedIn ? "/marketplace-redesign" : "/marketplace";
-  }
+function resolveNavHref(item: { name: string; href: string }) {
   return item.href;
 }
 
@@ -59,10 +52,6 @@ export default function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
     };
   }, [isMenuOpen]);
 
-  // /marketplace and /marketplace-redesign are one destination as far as the visitor is
-  // concerned — both are "Explore". Without treating them as equivalent, a logged-in
-  // visitor sitting on /marketplace (where the logo sends them) saw no active nav item at
-  // all, because their "Explore" link points at /marketplace-redesign.
   const MARKETPLACE_ROUTES = ["/marketplace", "/marketplace-redesign"];
   const isActive = (href: string) =>
     MARKETPLACE_ROUTES.includes(href)
@@ -102,7 +91,7 @@ export default function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
               (the personalized variant when signed in); otherwise clicking the logo
               dropped signed-in visitors on the generic page while nav pointed elsewhere. */}
           <Link
-            href={resolveNavHref({ name: "Explore", href: "/marketplace" }, loggedIn)}
+            href={resolveNavHref({ name: "Explore", href: "/marketplace" })}
             className="shrink-0 flex items-center"
             onClick={closeMenu}
           >
@@ -118,7 +107,7 @@ export default function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
             aria-label="Main navigation"
           >
             {itemsBeforeFeatures.map((item) => {
-              const href = resolveNavHref(item, loggedIn);
+              const href = resolveNavHref(item);
               return (
                 <Link key={item.href} href={href} className={linkClass(href)}>
                   {item.name}
@@ -156,7 +145,7 @@ export default function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
             </div>
 
             {itemsAfterFeatures.map((item) => {
-              const href = resolveNavHref(item, loggedIn);
+              const href = resolveNavHref(item);
               return (
                 <Link key={item.href} href={href} className={linkClass(href)}>
                   {item.name}
@@ -244,7 +233,7 @@ function MobileDrawer({
             {itemsBeforeFeatures.map((item) => (
               <Link
                 key={item.href}
-                href={resolveNavHref(item, loggedIn)}
+                href={resolveNavHref(item)}
                 onClick={onClose}
                 className={itemClass}
               >
@@ -275,7 +264,7 @@ function MobileDrawer({
             {itemsAfterFeatures.map((item) => (
               <Link
                 key={item.href}
-                href={resolveNavHref(item, loggedIn)}
+                href={resolveNavHref(item)}
                 onClick={onClose}
                 className={itemClass}
               >

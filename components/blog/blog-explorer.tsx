@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowRight, Filter, Library, Search, MapPin } from "lucide-react";
@@ -21,6 +20,7 @@ import HeroHeader from "@/components/navigation/hero-header";
 import RouteCTAModule from "@/components/blog/route-cta-module";
 import { getRouteCTAsForIndex } from "@/lib/data/route-ctas";
 import { HeroSlideshow } from "@/components/HeroSlideshow";
+import { BlogCoverImage } from "@/components/blog/blog-cover-image";
 
 import type { BlogSummary } from "@/lib/blog";
 import type { ArticleRegion } from "@/content/blog/articles";
@@ -280,8 +280,8 @@ const BlogExplorer = ({ posts, highlightSlug }: Props) => {
               >
                 <div className="grid md:grid-cols-2">
                   <div className="relative h-72 md:h-full w-full overflow-hidden">
-                    <Image
-                      src={encodeURI(featuredPost.coverImage)}
+                    <BlogCoverImage
+                      src={featuredPost.coverImage}
                       alt={featuredPost.title}
                       fill
                       className="object-cover"
@@ -457,8 +457,8 @@ function PostCard({ post }: { post: BlogSummary }) {
         className="flex flex-col border border-gray-100 hover:border-[#159895]/40 transition-all cursor-pointer h-full"
       >
         <div className="relative w-full aspect-[16/10]">
-          <Image
-            src={encodeURI(post.coverImage)}
+          <BlogCoverImage
+            src={post.coverImage}
             alt={post.title}
             fill
             className="object-cover rounded-t-2xl"

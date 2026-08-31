@@ -30,6 +30,10 @@ export interface Tour {
   narrator: string;
   isPremium: boolean;
   discount?: number;
+  /** Lowercase tokens for city/search matching — populated by lib/marketplace-api.ts */
+  searchTerms?: string[];
+  /** URL slug derived from tour title — populated by lib/marketplace-api.ts */
+  slug?: string;
 }
 
 export const tours: Tour[] = [

@@ -63,7 +63,7 @@ export function HeroSlideshow({
           onLoad={i === 1 ? () => setReady(true) : undefined}
           /* Slower than the quote fade and eased at both ends, so the change registers as
              ambient drift rather than a slideshow advancing. */
-          className={`${className} transition-opacity duration-[2200ms] ease-in-out ${
+          className={`${className} transition-opacity transition-duration-[2200ms] ease-in-out ${
             i === index ? "opacity-100" : "opacity-0"
           }`}
         />

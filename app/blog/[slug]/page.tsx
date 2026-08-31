@@ -20,14 +20,14 @@ type Params = Promise<{
 }>;
 
 export async function generateStaticParams() {
-  const slugs = getAllPostSlugs();
+  const slugs = await getAllPostSlugs();
   return slugs.filter((slug): slug is string => Boolean(slug)).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: { params: Params }) {
   const { slug } = await params;
   try {
-    const post = getPostBySlug(slug);
+    const post = await getPostBySlug(slug);
     return {
       title: `${post.title} | Gamana Blog`,
       description: post.excerpt,
@@ -87,12 +87,25 @@ const processLinks = (html: string) => {
   });
 };
 
+const articleHtmlClassName =
+  "blog-article-html [&_p]:text-base sm:[&_p]:text-lg [&_p]:text-gray-700 [&_p]:leading-relaxed [&_p]:mb-6 [&_a]:text-[#159895] [&_a]:font-medium [&_a]:underline hover:[&_a]:text-[#1A5F7A] [&_h2]:mt-12 [&_h2]:mb-4 [&_h2]:text-xl sm:[&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h3]:mt-8 [&_h3]:mb-3 [&_h3]:text-lg sm:[&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:font-semibold [&_h3]:text-gray-900 [&_h4]:mt-6 [&_h4]:mb-3 [&_h4]:text-base sm:[&_h4]:text-lg md:[&_h4]:text-xl [&_h4]:font-semibold [&_h4]:text-gray-800 [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-3 [&_ul]:mb-8 [&_ul]:text-gray-700 [&_ol]:list-decimal [&_ol]:list-inside [&_ol]:space-y-3 [&_ol]:mb-8 [&_ol]:text-gray-700 [&_blockquote]:border-l-4 [&_blockquote]:border-[#159895] [&_blockquote]:pl-4 sm:[&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:text-base sm:[&_blockquote]:text-lg md:[&_blockquote]:text-xl [&_blockquote]:mb-8 [&_figure]:mb-10 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-3xl [&_hr]:my-12";
+
 const renderBlock = (
   block: ArticleBlock,
   index: number,
   dividerCount: number = 0
 ) => {
   switch (block.type) {
+    case "html":
+      return (
+        <div
+          key={index}
+          className={articleHtmlClassName}
+          dangerouslySetInnerHTML={{
+            __html: processLinks(formatInline(block.content)),
+          }}
+        />
+      );
     case "hero":
       const isSmallImage = block.image.includes("Lalbagh Botanical Garden- Best Self-Guided Audio Tour App for Visitors") || block.image.includes("A-panoramic-view-of-Cubbon-Park") || block.image.includes("A-panoramic-golden-hour-view-of-Marina-Beach");
       const isSquareImage = block.image.includes("A-close-up-collage-capturing-Marina-Beach-vibrant-culture");
@@ -299,9 +312,9 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     notFound();
   }
 
-  const post = (() => {
+  const post = await (async () => {
     try {
-      return getPostBySlug(slug);
+      return await getPostBySlug(slug);
     } catch {
       notFound();
     }

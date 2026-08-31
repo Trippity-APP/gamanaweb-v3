@@ -1,21 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, MapPin } from "lucide-react";
-import { cities as cityDirectory } from "@/lib/data/cities";
+import { fetchCities, type ApiCity } from "@/lib/services/cityService";
 
 /**
- * Same city-scoped search as Home's HeroCitySearch, but for the two Marketplace hero
- * pages (/marketplace and /marketplace-redesign) — moved up here (was previously buried
- * in the white overlap card below the hero) so the primary action sits right under the
- * "Travel with Confidence" headline instead of a scroll-step away.
- *
- * Commits via `router.replace(pathname + ?city=X)` rather than navigating to a fixed
- * route (unlike HeroCitySearch, which always sends you to /marketplace) — this keeps you
- * on whichever of the two Marketplace pages you're already on. MarketplaceBrowser reads
- * the same `city` param reactively and re-filters Tours/Experiences whenever it changes,
- * so this component doesn't need any direct connection to MarketplaceBrowser itself.
+ * Same city-scoped search as Home's HeroCitySearch, but scoped to the Marketplace hero.
+ * Commits via `router.replace(pathname + ?city=X)` — MarketplaceBrowser reads the same
+ * `city` param reactively and re-filters tours whenever it changes.
  */
 export function MarketplaceHeroSearch() {
   const router = useRouter();
@@ -24,14 +17,46 @@ export function MarketplaceHeroSearch() {
   const cityFromUrl = searchParams.get("city") ?? "";
   const [query, setQuery] = useState(cityFromUrl);
   const [open, setOpen] = useState(false);
+  const [cities, setCities] = useState<ApiCity[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const suggestions = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    return cityDirectory
-      .filter((c) => c.name.toLowerCase().includes(q) || c.country.toLowerCase().includes(q))
-      .slice(0, 6);
+  useEffect(() => {
+    setQuery(cityFromUrl);
+  }, [cityFromUrl]);
+
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setCities([]);
+      return;
+    }
+
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      setLoading(true);
+      try {
+        const response = await fetchCities({
+          search: q,
+          active: true,
+          page_size: 8,
+        });
+        if (!cancelled) {
+          setCities(response.data?.cities ?? []);
+        }
+      } catch {
+        if (!cancelled) setCities([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [query]);
+
+  const suggestions = useMemo(() => cities.slice(0, 6), [cities]);
 
   const applyCity = (name: string) => {
     setOpen(false);
@@ -72,21 +97,25 @@ export function MarketplaceHeroSearch() {
         </button>
       </form>
 
-      {open && suggestions.length > 0 && (
+      {open && query.trim() && (suggestions.length > 0 || loading) && (
         <div className="absolute left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-20">
-          {suggestions.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => applyCity(c.name)}
-              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left hover:bg-[#F0FBFA] transition-colors"
-            >
-              <MapPin className="h-3.5 w-3.5 text-[#159895] shrink-0" />
-              <span className="text-sm font-medium text-gray-900">{c.name}</span>
-              <span className="text-xs text-gray-400">{c.country}</span>
-            </button>
-          ))}
+          {loading && suggestions.length === 0 ? (
+            <p className="px-4 py-3 text-sm text-gray-500">Searching cities...</p>
+          ) : (
+            suggestions.map((city) => (
+              <button
+                key={city.id}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyCity(city.name)}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left hover:bg-[#F0FBFA] transition-colors"
+              >
+                <MapPin className="h-3.5 w-3.5 text-[#159895] shrink-0" />
+                <span className="text-sm font-medium text-gray-900">{city.name}</span>
+                <span className="text-xs text-gray-400">{city.country_name}</span>
+              </button>
+            ))
+          )}
         </div>
       )}
     </div>
