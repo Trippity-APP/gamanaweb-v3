@@ -21,8 +21,10 @@ import RouteCTAModule from "@/components/blog/route-cta-module";
 import { getRouteCTAsForIndex } from "@/lib/data/route-ctas";
 import { HeroSlideshow } from "@/components/HeroSlideshow";
 import { BlogCoverImage } from "@/components/blog/blog-cover-image";
+import { BlogExplorerSkeleton } from "@/components/ui/list-skeletons";
 
 import type { BlogSummary } from "@/lib/blog";
+import { fetchBlogSummariesFromApi } from "@/lib/blog";
 import type { ArticleRegion } from "@/content/blog/articles";
 
 interface RegionSection {
@@ -43,17 +45,39 @@ const regionSectionDefs: { key: ArticleRegion; title: string; subtitle: string }
 ];
 
 type Props = {
-  posts: BlogSummary[];
+  posts?: BlogSummary[];
   highlightSlug?: string;
 };
 
-const BlogExplorer = ({ posts, highlightSlug }: Props) => {
+const BlogExplorer = ({ posts: initialPosts = [], highlightSlug }: Props) => {
+  const [posts, setPosts] = useState<BlogSummary[]>(initialPosts);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [highlightCleared, setHighlightCleared] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      setLoading(true);
+      try {
+        const summaries = await fetchBlogSummariesFromApi();
+        if (!cancelled) setPosts(summaries);
+      } catch {
+        if (!cancelled) setPosts([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const availableTags = useMemo(() => {
     const set = new Set<string>();
@@ -272,7 +296,15 @@ const BlogExplorer = ({ posts, highlightSlug }: Props) => {
         className="container mx-auto px-4 sm:px-6 lg:px-8 pb-24"
       >
         <div className="max-w-6xl mx-auto space-y-10">
-          {featuredPost && (
+          {loading ? (
+            <BlogExplorerSkeleton />
+          ) : posts.length === 0 ? (
+            <div className="text-center py-24 text-muted-foreground">
+              No stories available.
+            </div>
+          ) : null}
+
+          {!loading && featuredPost && (
             <Link href={`/blog/${featuredPost.slug}`}>
               <Card
                 data-post-id={featuredPost.slug}
@@ -335,7 +367,7 @@ const BlogExplorer = ({ posts, highlightSlug }: Props) => {
             </Link>
           )}
 
-          {isFiltering ? (
+          {!loading && posts.length > 0 && (isFiltering ? (
             hasMultiplePosts ? (
               <div
                 className={`grid grid-cols-1 gap-6 ${
@@ -442,7 +474,7 @@ const BlogExplorer = ({ posts, highlightSlug }: Props) => {
                 );
               })}
             </>
-          )}
+          ))}
         </div>
       </section>
     </main>

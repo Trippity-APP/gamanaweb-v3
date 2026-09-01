@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Cart } from '@/components/cart/Cart';
 import { CityNotCovered } from '@/components/marketplace/CityNotCovered';
 import { MarketplaceCoverImage } from '@/components/marketplace/marketplace-cover-image';
+import { TourGridSkeleton } from '@/components/ui/list-skeletons';
 import {
   clearMarketplaceCache,
   fetchPublicTours,
@@ -206,26 +207,18 @@ export function MarketplaceBrowser({
 
   const [tours, setTours] = useState<Tour[]>([]);
   const [toursLoading, setToursLoading] = useState(true);
-  const [toursError, setToursError] = useState<string | null>(null);
   const [visibleTourCount, setVisibleTourCount] = useState(TOURS_INITIAL_VISIBLE);
 
   const loadTours = async () => {
     setToursLoading(true);
-    setToursError(null);
     try {
       const nextTours = await fetchPublicTours();
       setTours(nextTours);
     } catch {
       setTours([]);
-      setToursError('We couldn’t load tours right now. Please try again.');
     } finally {
       setToursLoading(false);
     }
-  };
-
-  const retryTours = () => {
-    clearMarketplaceCache();
-    void loadTours();
   };
 
   useEffect(() => {
@@ -579,14 +572,7 @@ export function MarketplaceBrowser({
             </div>
 
             {toursLoading ? (
-              <p className="text-center text-gray-500 py-12">Loading tours...</p>
-            ) : toursError ? (
-              <div className="text-center py-12 space-y-3">
-                <p className="text-gray-500">{toursError}</p>
-                <Button variant="outline" onClick={retryTours}>
-                  Try again
-                </Button>
-              </div>
+              <TourGridSkeleton count={TOURS_INITIAL_VISIBLE} />
             ) : filteredTours.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -606,6 +592,8 @@ export function MarketplaceBrowser({
               </>
             ) : tourSearchTerm && toursForSearch === 0 ? (
               <CityNotCovered city={tourSearchTerm} source="tours" />
+            ) : tours.length === 0 ? (
+              <p className="text-center text-gray-500 py-12">No tours available.</p>
             ) : (
               <p className="text-center text-gray-500 py-12">
                 No tours match this filter{tourSearchTerm ? ` for ${tourSearchTerm}` : ''}. Try a different tier.

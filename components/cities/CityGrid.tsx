@@ -6,7 +6,8 @@ import { CityCard } from "./CityCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchCities, ApiCity, FetchCitiesParams } from "@/lib/services/cityService";
-import { Loader2 } from "lucide-react";
+import { fetchPublicTours } from "@/lib/marketplace-api";
+import { CityGridSkeleton } from "@/components/ui/list-skeletons";
 
 type FilterType = "all" | "popular" | "new" | "country";
 
@@ -25,9 +26,10 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
     const [cities, setCities] = useState<ApiCity[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
+    const [totalCities, setTotalCities] = useState(0);
+    const [totalTours, setTotalTours] = useState(0);
     const [activeFilter, setActiveFilter] = useState<FilterType>("all");
     const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState(initialSearch);
@@ -78,6 +80,23 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
         };
     }, []);
 
+    useEffect(() => {
+        let cancelled = false;
+
+        void (async () => {
+            try {
+                const tours = await fetchPublicTours();
+                if (!cancelled) setTotalTours(tours.length);
+            } catch {
+                if (!cancelled) setTotalTours(0);
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
     const loadCities = useCallback(async (isLoadMore = false) => {
         try {
             if (isLoadMore) {
@@ -111,13 +130,22 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
                     setPage(currentPage);
                 } else {
                     setCities(response.data.cities);
+                    setTotalCities(response.data.total);
                 }
                 setHasMore(response.data.page < response.data.total_pages);
             } else {
-                setError("Failed to load cities");
+                if (!isLoadMore) {
+                    setCities([]);
+                    setTotalCities(0);
+                }
+                setHasMore(false);
             }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "An unexpected error occurred");
+        } catch {
+            if (!isLoadMore) {
+                setCities([]);
+                setTotalCities(0);
+            }
+            setHasMore(false);
         } finally {
             setLoading(false);
             setLoadingMore(false);
@@ -229,13 +257,12 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
             </div>
 
             {loading && !loadingMore ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-4">
-                    <Loader2 className="h-10 w-10 text-[#159895] animate-spin" />
-                    <p className="text-muted-foreground animate-pulse">Finding incredible destinations...</p>
-                </div>
-            ) : error ? (
-                <div className="text-center py-16 text-destructive">
-                    {error}. Please try again later.
+                <CityGridSkeleton count={isPreview ? 8 : 12} />
+            ) : cities.length === 0 ? (
+                <div className="text-center py-16 md:py-20 text-muted-foreground text-sm sm:text-base">
+                    {searchQuery || activeFilter !== "all" || selectedCountry
+                        ? "No cities found matching your criteria."
+                        : "No cities available."}
                 </div>
             ) : (
                 <>
@@ -244,21 +271,23 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
                             <CityCard key={city.id} city={city} />
                         ))}
                     </div>
-
-                    {cities.length === 0 && (
-                        <div className="text-center py-16 md:py-20 text-muted-foreground text-sm sm:text-base">
-                            No cities found matching your criteria.
-                        </div>
-                    )}
                 </>
             )}
 
             {/* Preview Mode CTA */}
-            {isPreview && (
+            {isPreview && !loading && cities.length > 0 && (
                 <div className="mt-10 md:mt-12 text-center space-y-6">
                     <div className="pt-6 md:pt-8 border-t border-border">
                         <p className="text-muted-foreground mb-6 text-sm sm:text-base">
-                            We have <strong className="text-foreground">700+ audio stories</strong> across <strong className="text-foreground">50+ cities</strong> worldwide.
+                            We have{" "}
+                            <strong className="text-foreground">
+                                {totalTours > 0 ? `${totalTours} audio tours` : "audio tours"}
+                            </strong>{" "}
+                            across{" "}
+                            <strong className="text-foreground">
+                                {totalCities > 0 ? `${totalCities} cities` : "cities worldwide"}
+                            </strong>
+                            .
                         </p>
                         <div className="flex flex-wrap gap-4 justify-center">
                             <a
@@ -291,7 +320,7 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
             )}
 
             {/* Full Mode Pagination (Load More) */}
-            {!isPreview && hasMore && (
+            {!isPreview && hasMore && !loading && cities.length > 0 && (
                 <div className="mt-10 md:mt-12 text-center">
                     <Button
                         variant="outline"
@@ -300,14 +329,7 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
                         disabled={loadingMore}
                         className="rounded-full px-8 shadow-sm border-[#159895] text-[#1A5F7A] hover:bg-gradient-to-r hover:from-[#159895] hover:to-[#1A5F7A] hover:text-white hover:border-transparent min-w-[200px]"
                     >
-                        {loadingMore ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Loading...
-                            </>
-                        ) : (
-                            "Load More Cities"
-                        )}
+                        {loadingMore ? "Loading..." : "Load More Cities"}
                     </Button>
                 </div>
             )}

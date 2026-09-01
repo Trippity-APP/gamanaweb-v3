@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, MapPin } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { fetchCities, type ApiCity } from "@/lib/services/cityService";
 
 /**
@@ -100,7 +101,13 @@ export function MarketplaceHeroSearch() {
       {open && query.trim() && (suggestions.length > 0 || loading) && (
         <div className="absolute left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-20">
           {loading && suggestions.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-gray-500">Searching cities...</p>
+            <div className="px-4 py-3 space-y-2">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <Skeleton key={index} className="h-9 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : suggestions.length === 0 ? (
+            <p className="px-4 py-3 text-sm text-gray-500">No cities found.</p>
           ) : (
             suggestions.map((city) => (
               <button

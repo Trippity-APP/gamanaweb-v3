@@ -34,7 +34,9 @@ const DEFAULT_BLOG_API_URL = "http://localhost:8000/api/v1";
 
 export function getBlogApiBaseUrl(): string {
   return (
+    process.env.NEXT_PUBLIC_MARKETPLACE_API_URL ||
     process.env.NEXT_PUBLIC_BLOG_API_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
     process.env.BLOG_API_URL ||
     DEFAULT_BLOG_API_URL
   ).replace(/\/$/, "");

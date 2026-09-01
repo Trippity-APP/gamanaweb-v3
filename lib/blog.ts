@@ -1,9 +1,12 @@
-import { articles, Article, ArticleBlock } from "@/content/blog/articles";
+import type { Article, ArticleBlock } from "@/content/blog/articles";
 import {
   fetchAllPublishedPosts,
   fetchPublishedPostBySlug,
   type ApiBlogPost,
 } from "@/lib/blog-api";
+
+export type { Article, ArticleBlock };
+export type { ArticleRegion, ArticleTripType } from "@/content/blog/articles";
 
 const WORDS_PER_MINUTE = 200;
 
@@ -71,6 +74,10 @@ function mapApiPostToArticle(post: ApiBlogPost): Article {
 
 let cachedApiPosts: BlogPost[] | null = null;
 
+export function clearBlogCache(): void {
+  cachedApiPosts = null;
+}
+
 async function loadApiPosts(): Promise<BlogPost[]> {
   if (cachedApiPosts) return cachedApiPosts;
 
@@ -83,21 +90,8 @@ async function loadApiPosts(): Promise<BlogPost[]> {
   return cachedApiPosts;
 }
 
-function loadLocalPosts(): BlogPost[] {
-  return [...articles]
-    .map(enrichArticle)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-}
-
 async function loadPosts(): Promise<BlogPost[]> {
-  try {
-    const apiPosts = await loadApiPosts();
-    if (apiPosts.length > 0) return apiPosts;
-  } catch (error) {
-    console.warn("Blog API unavailable, falling back to local articles.ts:", error);
-  }
-
-  return loadLocalPosts();
+  return loadApiPosts();
 }
 
 export async function getAllPosts(): Promise<BlogPost[]> {
@@ -120,21 +114,21 @@ export async function getFeaturedPostSummary(): Promise<BlogSummary | undefined>
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost> {
-  try {
-    const apiPost = await fetchPublishedPostBySlug(slug);
-    if (apiPost) {
-      return enrichArticle(mapApiPostToArticle(apiPost));
-    }
-  } catch (error) {
-    console.warn(`Blog API lookup failed for ${slug}, trying local fallback:`, error);
+  const apiPost = await fetchPublishedPostBySlug(slug);
+  if (!apiPost) {
+    throw new Error(`Post ${slug} not found`);
   }
 
-  const post = articles.find((article) => article.slug === slug);
-  if (!post) throw new Error(`Post ${slug} not found`);
-  return enrichArticle(post);
+  return enrichArticle(mapApiPostToArticle(apiPost));
 }
 
 export async function getAllPostSlugs(): Promise<string[]> {
   const posts = await loadPosts();
   return posts.map((article) => article.slug).filter(Boolean);
+}
+
+/** Client-side fetch — always loads fresh CMS posts (no static fallback). */
+export async function fetchBlogSummariesFromApi(): Promise<BlogSummary[]> {
+  clearBlogCache();
+  return getAllPostSummaries();
 }

@@ -20,8 +20,16 @@ type Params = Promise<{
 }>;
 
 export async function generateStaticParams() {
-  const slugs = await getAllPostSlugs();
-  return slugs.filter((slug): slug is string => Boolean(slug)).map((slug) => ({ slug }));
+  try {
+    const slugs = await getAllPostSlugs();
+    if (slugs.length > 0) {
+      return slugs.filter((slug): slug is string => Boolean(slug)).map((slug) => ({ slug }));
+    }
+  } catch {
+    // Build-time API may be unavailable.
+  }
+
+  return [{ slug: "[slug]" }];
 }
 
 export async function generateMetadata({ params }: { params: Params }) {
