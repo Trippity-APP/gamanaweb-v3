@@ -92,9 +92,9 @@ export function AudioWalkActionCard({
             <div className="flex items-center justify-between gap-3">
               <dt className="flex items-center gap-2 text-gray-500">
                 <User className="h-4 w-4 shrink-0 text-[#159895]" />
-                Narrator
+                Organized by
               </dt>
-              <dd className="text-right font-medium text-gray-900">{walk.narrator}</dd>
+              <dd className="text-right font-medium text-gray-900">Gamana</dd>
             </div>
           </dl>
 

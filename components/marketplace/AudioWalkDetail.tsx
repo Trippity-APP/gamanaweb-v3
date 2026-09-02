@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { ExploreDetailBreadcrumb } from '@/components/marketplace/ExploreDetailBreadcrumb';
 import {
-  AudioWalkBreadcrumb,
   AudioWalkHero,
 } from '@/components/marketplace/walk-detail/AudioWalkHero';
 import { AudioWalkActionCard } from '@/components/marketplace/walk-detail/AudioWalkActionCard';
@@ -96,7 +96,7 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 text-center sm:px-6 lg:px-8">
-        <AudioWalkBreadcrumb />
+        <ExploreDetailBreadcrumb />
         <TourRouteTimeline stops={[]} loading />
       </div>
     );
@@ -121,7 +121,7 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 py-8 pb-28 sm:px-6 lg:px-8 lg:pb-16">
-        <AudioWalkBreadcrumb />
+        <ExploreDetailBreadcrumb />
 
         <AudioWalkHero walk={walk} unlockState={unlockState} daysLeft={daysLeft} />
 

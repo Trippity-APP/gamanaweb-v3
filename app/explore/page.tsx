@@ -7,12 +7,21 @@ import Footer from '@/components/navigation/footer';
 import { MarketplaceBrowser } from '@/components/marketplace/MarketplaceBrowser';
 import { MarketplaceHeroSearch } from '@/components/marketplace/MarketplaceHeroSearch';
 import { MarketplaceSignedInHeroExtras } from '@/components/marketplace/MarketplaceSignedInHeroExtras';
+import { fetchPublicTours } from '@/lib/marketplace-api';
+import type { Tour } from '@/lib/marketplace-data';
 
 /**
  * Unified marketplace page — live catalog from public storylists, personalized greeting
  * when signed in, and the same browsing surface for all visitors.
  */
-export default function MarketplacePage() {
+export default async function MarketplacePage() {
+  let initialTours: Tour[] = [];
+  try {
+    initialTours = await fetchPublicTours();
+  } catch (error) {
+    console.error('Failed to prefetch explore catalog', error);
+  }
+
   return (
     <div className="min-h-screen">
       <section className="relative overflow-hidden h-[62vh] sm:h-[68vh] flex flex-col">
@@ -47,7 +56,7 @@ export default function MarketplacePage() {
             <MarketplaceSignedInHeroExtras />
             <div className="opacity-0 animate-fade-in pt-2" style={{ animationDelay: "750ms" }}>
               <Suspense fallback={null}>
-                <MarketplaceHeroSearch />
+                <MarketplaceHeroSearch catalog={initialTours} />
               </Suspense>
             </div>
           </div>
@@ -56,10 +65,10 @@ export default function MarketplacePage() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent"></div>
       </section>
 
-      {/* MarketplaceBrowser reads the ?city= param client-side (useSearchParams), which
+      {/* MarketplaceBrowser reads the ?q= (or legacy ?city=) param client-side (useSearchParams), which
           needs a Suspense boundary to keep this route statically exportable. */}
       <Suspense fallback={null}>
-        <MarketplaceBrowser />
+        <MarketplaceBrowser initialTours={initialTours} />
       </Suspense>
 
       <Footer />

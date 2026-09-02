@@ -1,8 +1,11 @@
 /** @type {import('next').NextConfig} */
+const DEFAULT_API_PROXY_TARGET = "https://apidev.gamana.app";
+
 const apiProxyTarget =
   process.env.API_PROXY_TARGET ||
-  process.env.NEXT_PUBLIC_BLOG_API_URL?.replace(/\/api\/v1\/?$/, "") ||
-  "http://localhost:8000";
+  process.env.NEXT_PUBLIC_MARKETPLACE_API_URL?.replace(/\/api\/v1\/?$/, "") ||
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, "") ||
+  DEFAULT_API_PROXY_TARGET;
 
 const nextConfig = {
   turbopack: {

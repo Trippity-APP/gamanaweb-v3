@@ -1,9 +1,8 @@
 'use client';
 
-import Link from 'next/link';
-import { ArrowLeft, Check, Clock, Lock, MapPin, Route } from 'lucide-react';
+import { Check, Clock, Lock, MapPin, Route } from 'lucide-react';
 import { GamanaCoinIcon } from '@/components/GamanaCoinIcon';
-import { MarketplaceCoverImage } from '@/components/marketplace/marketplace-cover-image';
+import { MarketplaceCoverImage, isPlaceholderTourImage } from '@/components/marketplace/marketplace-cover-image';
 import { formatWalkDurationLabel } from '@/lib/marketplace-api';
 import type { WalkDetail } from '@/lib/marketplace-data';
 
@@ -61,13 +60,18 @@ export function AudioWalkHero({ walk, unlockState, daysLeft }: AudioWalkHeroProp
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
       <div className="grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <div className="relative min-h-[240px] bg-gray-100 sm:min-h-[300px] lg:min-h-[360px]">
-          <MarketplaceCoverImage
-            src={walk.image}
-            alt={walk.title}
-            fill
-            priority
-            className="object-cover"
-          />
+          {isPlaceholderTourImage(walk.image) ? (
+            <div className="absolute inset-0 bg-gradient-to-br from-[#1A5F7A]/20 via-[#159895]/15 to-gray-200" />
+          ) : (
+            <MarketplaceCoverImage
+              src={walk.image}
+              alt={walk.title}
+              fill
+              priority
+              useDefaultFallback={false}
+              className="object-cover"
+            />
+          )}
         </div>
 
         <div className="flex flex-col justify-center gap-5 p-6 sm:p-8 lg:p-10">
@@ -106,17 +110,5 @@ export function AudioWalkHero({ walk, unlockState, daysLeft }: AudioWalkHeroProp
         </div>
       </div>
     </div>
-  );
-}
-
-export function AudioWalkBreadcrumb() {
-  return (
-    <Link
-      href="/explore"
-      className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[#159895] transition-colors hover:text-[#128a86]"
-    >
-      <ArrowLeft className="h-4 w-4" />
-      Back to explore
-    </Link>
   );
 }

@@ -1,7 +1,21 @@
-import type { Tour, TourStop, WalkDetail } from "@/lib/marketplace-data";
+import type { Tour, TourStop, WalkDetail, StoryDetail } from "@/lib/marketplace-data";
+import { getMarketplaceApiBaseUrl } from "@/lib/api-base-url";
+import { mergeStoryDetailPlaceholders } from "@/lib/story-detail-placeholders";
+import {
+  clearPublicPlacesCache,
+  buildPlaceAudioDurationLookup,
+  fetchPublicStoriesCatalog,
+  fetchPublicStoryDetailByPlaceId,
+} from "@/lib/places-api";
 
 const DEFAULT_API_URL = "https://apidev.gamana.app/api/v1";
-const DEFAULT_TOUR_IMAGE = "/taj-mahal-sunrise-reflection-central-pool-agra.jpg";
+export const DEFAULT_TOUR_IMAGE = "/taj-mahal-sunrise-reflection-central-pool-agra.jpg";
+
+export function getDefaultTourImage(): string {
+  return DEFAULT_TOUR_IMAGE;
+}
+
+export { getMarketplaceApiBaseUrl } from "@/lib/api-base-url";
 
 type ApiPlace = {
   id?: string | null;
@@ -47,6 +61,7 @@ export type ApiStorylist = {
   purchase_count?: number | null;
   starting_points?: ApiStartingPoint[] | null;
   type?: string | null;
+  is_recommended?: boolean | string | null;
 };
 
 type ApiListResponse = {
@@ -86,16 +101,6 @@ const GENERIC_TAGS = new Set([
 let cachedStorylists: ApiStorylist[] | null = null;
 let cachePromise: Promise<ApiStorylist[]> | null = null;
 
-export function getMarketplaceApiBaseUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_MARKETPLACE_API_URL ||
-    process.env.NEXT_PUBLIC_BLOG_API_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    process.env.BLOG_API_URL ||
-    DEFAULT_API_URL
-  ).replace(/\/$/, "");
-}
-
 function normalizeText(value: string): string {
   return value.trim().toLowerCase();
 }
@@ -129,7 +134,10 @@ function assignTourSlugs(tours: Tour[]): Tour[] {
   });
 }
 
-export function getTourHref(tour: Pick<Tour, "id">): string {
+export function getTourHref(tour: Pick<Tour, "id" | "contentKind">): string {
+  if ((tour.contentKind ?? "walk") === "story") {
+    return `/explore/story/${tour.id}`;
+  }
   return `/explore/tours/${tour.id}`;
 }
 
@@ -161,11 +169,28 @@ function extractCityCountry(storylist: ApiStorylist): { city: string; country: s
   return { city: "India", country: "India" };
 }
 
-function extractImage(storylist: ApiStorylist): string {
-  if (storylist.cover_image) return storylist.cover_image;
+function sortedStartingPoints(storylist: ApiStorylist): ApiStartingPoint[] {
+  return [...(storylist.starting_points ?? [])].sort(
+    (a, b) => (a.position ?? 0) - (b.position ?? 0),
+  );
+}
 
-  for (const point of storylist.starting_points ?? []) {
-    const image = point.place?.images?.[0];
+/** Audio walk cover: first story/stop only — never cover_image or a later stop. */
+export function extractFirstStopImageUrl(storylist: ApiStorylist): string | undefined {
+  const firstStop = sortedStartingPoints(storylist)[0];
+  return firstStop?.place?.images?.find((url) => url?.trim());
+}
+
+function extractFirstStopImage(storylist: ApiStorylist): string {
+  return extractFirstStopImageUrl(storylist) ?? DEFAULT_TOUR_IMAGE;
+}
+
+function extractImage(storylist: ApiStorylist): string {
+  const cover = storylist.cover_image?.trim();
+  if (cover) return cover;
+
+  for (const point of sortedStartingPoints(storylist)) {
+    const image = point.place?.images?.find((url) => url?.trim());
     if (image) return image;
   }
 
@@ -261,6 +286,37 @@ function mapContentKind(storylist: ApiStorylist): 'story' | 'walk' {
   return stops > 1 ? 'walk' : 'story';
 }
 
+function mapIsRecommended(value: ApiStorylist['is_recommended']): boolean {
+  if (value === true) return true;
+  if (value === false) return false;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'yes' || normalized === 'true' || normalized === '1' || normalized === 'recommended') {
+      return true;
+    }
+    if (
+      normalized === 'no' ||
+      normalized === 'false' ||
+      normalized === '0' ||
+      normalized === 'not recommended'
+    ) {
+      return false;
+    }
+  }
+  return false;
+}
+
+/** Audio Walks catalog: only items flagged recommended in the CMS/database. */
+export function isWalkCatalogVisible(tour: Pick<Tour, 'contentKind' | 'isRecommended'>): boolean {
+  if ((tour.contentKind ?? 'walk') !== 'walk') return true;
+  return tour.isRecommended === true;
+}
+
+/** @deprecated Use isWalkCatalogVisible */
+export function isCatalogRecommendedWalk(tour: Pick<Tour, 'contentKind' | 'isRecommended'>): boolean {
+  return isWalkCatalogVisible(tour);
+}
+
 export function mapStorylistToTour(storylist: ApiStorylist): Tour | null {
   const id = storylistId(storylist);
   if (!id) return null;
@@ -270,52 +326,71 @@ export function mapStorylistToTour(storylist: ApiStorylist): Tour | null {
   const tier = mapTier(storylist, coinsPrice);
   const placeRating = storylist.starting_points?.[0]?.place?.rating;
   const placeReviews = storylist.starting_points?.[0]?.place?.reviews_count;
+  const contentKind = mapContentKind(storylist);
 
   return {
     id,
     title: storylist.title,
     description: storylist.description?.trim() || "Explore this curated audio tour.",
     location: country && city !== country ? `${city}, ${country}` : city,
-    duration: formatDuration(storylist.estimated_duration, storylist.stops_count),
+    duration: formatDuration(
+      contentKind === "walk"
+        ? resolveWalkAudioDurationMinutes(storylist)
+        : storylist.estimated_duration,
+      storylist.stops_count,
+    ),
     price: coinsPrice,
     rating: placeRating && placeRating > 0 ? placeRating : 4.7,
     reviews: placeReviews && placeReviews > 0 ? placeReviews : storylist.purchase_count ?? 0,
     tier,
     category: mapCategory(storylist),
-    image: extractImage(storylist),
+    image:
+      contentKind === 'walk'
+        ? extractFirstStopImageUrl(storylist) ?? DEFAULT_TOUR_IMAGE
+        : extractImage(storylist),
     highlights: extractHighlights(storylist),
     narrator: storylist.creator_name?.trim() || "Gamana narrator",
     isPremium: tier !== "silver",
     searchTerms: buildSearchTerms(storylist, city, country),
-    contentKind: mapContentKind(storylist),
+    contentKind,
+    isRecommended: mapIsRecommended(storylist.is_recommended),
   };
 }
 
-function resolveTotalDurationMinutes(storylist: ApiStorylist): number | undefined {
+function resolveWalkAudioDurationMinutes(storylist: ApiStorylist): number | undefined {
+  if (storylist.total_audio_duration && storylist.total_audio_duration > 0) {
+    return Math.max(1, Math.round(storylist.total_audio_duration / 60));
+  }
   if (storylist.estimated_duration && storylist.estimated_duration > 0) {
     return storylist.estimated_duration;
   }
   if (storylist.total_duration_seconds && storylist.total_duration_seconds > 0) {
-    return Math.round(storylist.total_duration_seconds / 60);
+    return Math.max(1, Math.round(storylist.total_duration_seconds / 60));
   }
   return undefined;
 }
 
-function mapStorylistStops(storylist: ApiStorylist): TourStop[] {
-  const stopsCount = storylist.stops_count ?? storylist.starting_points?.length ?? 0;
-  const totalAudio = storylist.total_audio_duration ?? 0;
-  const perStopAudio =
-    totalAudio > 0 && stopsCount > 0 ? Math.round(totalAudio / stopsCount) : undefined;
+/** @deprecated Use resolveWalkAudioDurationMinutes */
+function resolveTotalDurationMinutes(storylist: ApiStorylist): number | undefined {
+  return resolveWalkAudioDurationMinutes(storylist);
+}
 
+function mapStorylistStops(
+  storylist: ApiStorylist,
+  placeAudioSecondsById?: Map<string, number>,
+): TourStop[] {
   return [...(storylist.starting_points ?? [])]
     .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
     .map((point, index) => {
       const place = point.place;
       const name = place?.name || point.name || `Stop ${index + 1}`;
+      const placeIdValue = point.object_id || place?.id;
       const id =
-        point.object_id ||
-        place?.id ||
+        placeIdValue ||
         `${storylistId(storylist)}-stop-${point.position ?? index}`;
+
+      const audioDurationSeconds =
+        (placeIdValue && placeAudioSecondsById?.get(placeIdValue)) || undefined;
 
       return {
         id,
@@ -323,9 +398,29 @@ function mapStorylistStops(storylist: ApiStorylist): TourStop[] {
         name,
         description: place?.description?.trim() || undefined,
         image: place?.images?.[0] || undefined,
-        audioDurationSeconds: perStopAudio,
+        audioDurationSeconds,
       };
     });
+}
+
+async function enrichWalkDetailWithPlaceAudio(walk: WalkDetail): Promise<WalkDetail> {
+  const placeIds = walk.stops
+    .map((stop) => stop.id)
+    .filter((id) => id && !id.includes("-stop-"));
+
+  if (placeIds.length === 0) return walk;
+
+  const lookup = await buildPlaceAudioDurationLookup();
+  const stops = walk.stops.map((stop) => {
+    const seconds = lookup.get(stop.id);
+    if (!seconds) return stop;
+    return { ...stop, audioDurationSeconds: seconds };
+  });
+
+  return {
+    ...walk,
+    stops,
+  };
 }
 
 export function mapStorylistToWalkDetail(storylist: ApiStorylist): WalkDetail | null {
@@ -335,17 +430,116 @@ export function mapStorylistToWalkDetail(storylist: ApiStorylist): WalkDetail | 
 
   const stops = mapStorylistStops(storylist);
   const stopsCount = storylist.stops_count ?? stops.length;
-  const totalDurationMinutes = resolveTotalDurationMinutes(storylist);
+  const totalDurationMinutes = resolveWalkAudioDurationMinutes(storylist);
+  const firstStopImage = stops[0]?.image ?? extractFirstStopImageUrl(storylist);
+  const totalAudioDurationSeconds =
+    storylist.total_audio_duration && storylist.total_audio_duration > 0
+      ? storylist.total_audio_duration
+      : undefined;
 
   return {
     ...base,
     contentKind: "walk",
+    image: firstStopImage ?? extractFirstStopImageUrl(storylist) ?? base.image,
     stops,
     stopsCount,
     totalDurationMinutes,
-    totalAudioDurationSeconds: storylist.total_audio_duration ?? undefined,
+    totalAudioDurationSeconds,
     duration: formatDuration(totalDurationMinutes, stopsCount),
   };
+}
+
+function mapStoryTypeLabel(storylist: ApiStorylist): string | undefined {
+  const category = storylist.category?.trim();
+  if (category) return category;
+
+  const tag = (storylist.tags ?? []).find(
+    (value) => !GENERIC_TAGS.has(value.toLowerCase()),
+  );
+  return tag ?? undefined;
+}
+
+function resolveAudioDurationMinutes(storylist: ApiStorylist): number | undefined {
+  return resolveWalkAudioDurationMinutes(storylist);
+}
+
+function mapStoryWhatToNotice(storylist: ApiStorylist, highlights: string[]): string[] {
+  const firstStop = sortedStartingPoints(storylist)[0];
+  const placeDesc = firstStop?.place?.description?.trim();
+  if (placeDesc) {
+    const sentences = placeDesc
+      .split(/[.!?]+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 20);
+    if (sentences.length > 0) {
+      return sentences.slice(0, 3);
+    }
+  }
+
+  const fromHighlights = highlights.filter((h) => h.length > 0);
+  if (fromHighlights.length > 0) {
+    return fromHighlights.slice(0, 3);
+  }
+
+  return [];
+}
+
+export function mapStorylistToStoryDetail(storylist: ApiStorylist): StoryDetail | null {
+  const base = mapStorylistToTour(storylist);
+  if (!base) return null;
+  if (mapContentKind(storylist) !== "story") return null;
+
+  const firstStop = sortedStartingPoints(storylist)[0];
+  const place = firstStop?.place;
+  const firstStopImage = extractFirstStopImageUrl(storylist);
+  const audioDurationMinutes = resolveAudioDurationMinutes(storylist);
+  const whatToNotice = mapStoryWhatToNotice(storylist, base.highlights);
+
+  const narrators =
+    base.narrator && base.narrator !== "Gamana narrator"
+      ? [
+          {
+            id: "primary",
+            name: base.narrator.split(/\s+/)[0] ?? base.narrator,
+            title: "Narrator",
+            description: `Perspective on ${place?.name ?? base.title} from ${base.narrator}.`,
+            durationMinutes: audioDurationMinutes,
+            isPrimary: true,
+          },
+        ]
+      : [];
+
+  const detail: StoryDetail = {
+    ...base,
+    contentKind: "story",
+    image: firstStopImage ?? base.image,
+    placeName: place?.name ?? firstStop?.name ?? undefined,
+    placeDescription: place?.description?.trim() || undefined,
+    subtitle: base.description,
+    coordinates: firstStop?.coordinates ?? undefined,
+    audioDurationMinutes,
+    storyTypeLabel: mapStoryTypeLabel(storylist),
+    duration: audioDurationMinutes
+      ? formatDuration(audioDurationMinutes, null)
+      : base.duration,
+    whatToNotice,
+    sources: [],
+    languages: [],
+    narrators,
+    beforeYouVisit: [],
+    subTopics: [],
+  };
+
+  return mergeStoryDetailPlaceholders(detail);
+}
+
+export function formatStoryDurationLabel(
+  story: Pick<StoryDetail, "audioDurationMinutes" | "duration">,
+): string {
+  if (story.audioDurationMinutes && story.audioDurationMinutes > 0) {
+    return formatDuration(story.audioDurationMinutes, null);
+  }
+  return story.duration;
 }
 
 export function formatAudioDuration(seconds?: number): string | null {
@@ -354,7 +548,12 @@ export function formatAudioDuration(seconds?: number): string | null {
   return `${minutes} min audio`;
 }
 
-export function formatWalkDurationLabel(walk: Pick<WalkDetail, "totalDurationMinutes" | "stopsCount" | "duration">): string {
+export function formatWalkDurationLabel(
+  walk: Pick<WalkDetail, "totalDurationMinutes" | "totalAudioDurationSeconds" | "stopsCount" | "duration">,
+): string {
+  if (walk.totalAudioDurationSeconds && walk.totalAudioDurationSeconds > 0) {
+    return formatDuration(Math.max(1, Math.round(walk.totalAudioDurationSeconds / 60)), null);
+  }
   if (walk.totalDurationMinutes && walk.totalDurationMinutes > 0) {
     return formatDuration(walk.totalDurationMinutes, null);
   }
@@ -378,17 +577,24 @@ export function tourMatchesCity(tour: Tour, cityQuery: string): boolean {
   return aliases.some((alias) => terms.some((term) => term.includes(alias)));
 }
 
+export function getExploreSearchQuery(params: URLSearchParams | { get(name: string): string | null }): string {
+  return (params.get("q") ?? params.get("city") ?? "").trim();
+}
+
 export function tourMatchesSearch(tour: Tour, query: string): boolean {
   const q = normalizeText(query);
   if (!q) return true;
 
   if (tourMatchesCity(tour, q)) return true;
 
-  return (
-    normalizeText(tour.title).includes(q) ||
-    normalizeText(tour.location).includes(q) ||
-    normalizeText(tour.description).includes(q)
-  );
+  if (normalizeText(tour.title).includes(q)) return true;
+  if (normalizeText(tour.location).includes(q)) return true;
+  if (normalizeText(tour.description).includes(q)) return true;
+  if (normalizeText(tour.narrator).includes(q)) return true;
+  if (normalizeText(tour.category).includes(q)) return true;
+
+  const terms = tour.searchTerms ?? [];
+  return terms.some((term) => term.includes(q));
 }
 
 type ApiDetailResponse = {
@@ -401,7 +607,7 @@ async function fetchStorylistDetailById(id: string): Promise<ApiStorylist | null
 
   try {
     const response = await fetch(`${baseUrl}/marketplace/tours/${id}`, {
-      cache: "force-cache",
+      cache: "no-store",
     });
     if (response.ok) {
       const payload = (await response.json()) as ApiDetailResponse;
@@ -415,6 +621,16 @@ async function fetchStorylistDetailById(id: string): Promise<ApiStorylist | null
   return storylists.find((item) => storylistId(item) === id) ?? null;
 }
 
+async function enrichCatalogStorylist(storylist: ApiStorylist): Promise<ApiStorylist> {
+  const isWalk = mapContentKind(storylist) === "walk";
+  const isRecommended = mapIsRecommended(storylist.is_recommended);
+  if (!isWalk || !isRecommended) return storylist;
+
+  // Always hydrate from detail so first-stop images use fresh SAS URLs and full place data.
+  const detail = await fetchStorylistDetailById(storylistId(storylist));
+  return detail ?? storylist;
+}
+
 async function fetchToursPage(skip: number, limit: number, city?: string): Promise<ApiListResponse> {
   const baseUrl = getMarketplaceApiBaseUrl();
   const params = new URLSearchParams({
@@ -426,7 +642,7 @@ async function fetchToursPage(skip: number, limit: number, city?: string): Promi
   }
   const url = `${baseUrl}/marketplace/tours?${params.toString()}`;
 
-  const response = await fetch(url, { cache: "force-cache" });
+  const response = await fetch(url, { cache: "no-store" });
   if (!response.ok) {
     throw new Error(`Marketplace API failed (${response.status})`);
   }
@@ -466,11 +682,26 @@ export async function fetchAllPublicStorylists(): Promise<ApiStorylist[]> {
   }
 }
 
-export async function fetchPublicTours(): Promise<Tour[]> {
+export async function fetchPublicWalksCatalog(): Promise<Tour[]> {
   const storylists = await fetchAllPublicStorylists();
-  return storylists
+  const enriched = await Promise.all(storylists.map(enrichCatalogStorylist));
+  return enriched
     .map(mapStorylistToTour)
-    .filter((tour): tour is Tour => Boolean(tour));
+    .filter((tour): tour is Tour => Boolean(tour))
+    .filter(isWalkCatalogVisible)
+    .filter((tour) => (tour.contentKind ?? "walk") === "walk");
+}
+
+export async function fetchPublicTours(): Promise<Tour[]> {
+  const [storiesResult, walksResult] = await Promise.allSettled([
+    fetchPublicStoriesCatalog(),
+    fetchPublicWalksCatalog(),
+  ]);
+
+  const stories = storiesResult.status === "fulfilled" ? storiesResult.value : [];
+  const walks = walksResult.status === "fulfilled" ? walksResult.value : [];
+
+  return assignTourSlugs([...stories, ...walks]);
 }
 
 export async function fetchPublicTourById(id: string): Promise<Tour | null> {
@@ -480,7 +711,18 @@ export async function fetchPublicTourById(id: string): Promise<Tour | null> {
 
 export async function fetchPublicWalkDetailById(id: string): Promise<WalkDetail | null> {
   const storylist = await fetchStorylistDetailById(id);
-  return storylist ? mapStorylistToWalkDetail(storylist) : null;
+  if (!storylist) return null;
+  const walk = mapStorylistToWalkDetail(storylist);
+  if (!walk) return null;
+  return enrichWalkDetailWithPlaceAudio(walk);
+}
+
+export async function fetchPublicStoryDetailById(id: string): Promise<StoryDetail | null> {
+  const fromPlace = await fetchPublicStoryDetailByPlaceId(id);
+  if (fromPlace) return fromPlace;
+
+  const storylist = await fetchStorylistDetailById(id);
+  return storylist ? mapStorylistToStoryDetail(storylist) : null;
 }
 
 export async function fetchPublicTourBySlug(slug: string): Promise<Tour | null> {
@@ -513,4 +755,5 @@ export async function fetchPublicStorylistById(id: string): Promise<ApiStorylist
 export function clearMarketplaceCache(): void {
   cachedStorylists = null;
   cachePromise = null;
+  clearPublicPlacesCache();
 }

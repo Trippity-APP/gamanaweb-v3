@@ -13,6 +13,7 @@ import NarratorCard from "@/components/narrator-card";
 import { HeroCitySearch } from "@/components/HeroCitySearch";
 import { BlogCoverImage } from "@/components/blog/blog-cover-image";
 import type { BlogSummary } from "@/lib/blog";
+import type { Tour } from "@/lib/marketplace-data";
 import { trackStoreClick } from "@/lib/analytics";
 import { useStoreUrl } from "@/hooks/use-store-url";
 
@@ -35,9 +36,10 @@ const NARRATOR_TEASER = [
 
 type HomeClientProps = {
   latestStories: BlogSummary[];
+  catalog?: Tour[];
 };
 
-export default function HomeClient({ latestStories }: HomeClientProps) {
+export default function HomeClient({ latestStories, catalog = [] }: HomeClientProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [openFAQ, setOpenFAQ] = useState<number | null>(0); // First FAQ open by default
   const { url: storeUrl, platform } = useStoreUrl();
@@ -241,7 +243,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
                 {/* Search-first hero element, VoiceMap-inspired — scoped to Gamana's own
                     city catalog so every result is real coverage, not a dead end. */}
                 <div className="space-y-3">
-                  <HeroCitySearch />
+                  <HeroCitySearch catalog={catalog} />
                   {/* Spread evenly across the same width as the search bar above, rather
                       than clustering to the left with fixed gaps. */}
                   <div className="flex items-center justify-between max-w-md mx-auto lg:mx-0">

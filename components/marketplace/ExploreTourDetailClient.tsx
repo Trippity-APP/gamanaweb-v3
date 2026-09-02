@@ -8,7 +8,6 @@ import {
   fetchPublicTourById,
   fetchPublicWalkDetailById,
 } from '@/lib/marketplace-api';
-import type { Tour, WalkDetail } from '@/lib/marketplace-data';
 
 function resolveTourId(paramId: string): string {
   if (paramId !== '[id]') return paramId;
@@ -19,9 +18,9 @@ function resolveTourId(paramId: string): string {
 
 type ExploreTourDetailClientProps = {
   tourId: string;
-  walk: WalkDetail | null;
-  tour: Tour | null;
-  relatedTours: Tour[];
+  walk: import('@/lib/marketplace-data').WalkDetail | null;
+  tour: import('@/lib/marketplace-data').Tour | null;
+  relatedTours: import('@/lib/marketplace-data').Tour[];
 };
 
 export function ExploreTourDetailClient({
@@ -30,11 +29,11 @@ export function ExploreTourDetailClient({
   tour: initialTour,
   relatedTours: initialRelatedTours,
 }: ExploreTourDetailClientProps) {
-  const [walk, setWalk] = useState<WalkDetail | null>(initialWalk);
-  const [tour, setTour] = useState<Tour | null>(initialTour);
+  const [walk, setWalk] = useState(initialWalk);
+  const [tour, setTour] = useState(initialTour);
   const [relatedTours, setRelatedTours] = useState(initialRelatedTours);
   const [resolving, setResolving] = useState(
-    tourId === '[id]' && !initialWalk && !initialTour
+    tourId === '[id]' && !initialWalk && !initialTour,
   );
 
   useEffect(() => {
@@ -56,9 +55,9 @@ export function ExploreTourDetailClient({
           return;
         }
 
-        const storyTour = await fetchPublicTourById(resolved);
+        const legacyTour = await fetchPublicTourById(resolved);
         if (cancelled) return;
-        setTour(storyTour);
+        setTour(legacyTour);
         setWalk(null);
       } finally {
         if (!cancelled) setResolving(false);

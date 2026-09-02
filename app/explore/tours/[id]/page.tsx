@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import HeroHeader from '@/components/navigation/hero-header';
 import Footer from '@/components/navigation/footer';
@@ -6,8 +7,10 @@ import { ExploreTourDetailClient } from '@/components/marketplace/ExploreTourDet
 import {
   clearMarketplaceCache,
   fetchPublicTourById,
-  fetchPublicTours,
   fetchPublicWalkDetailById,
+  fetchPublicWalksCatalog,
+  fetchPublicStoryDetailById,
+  getTourHref,
   tourMatchesCity,
 } from '@/lib/marketplace-api';
 import type { Tour } from '@/lib/marketplace-data';
@@ -15,9 +18,9 @@ import type { Tour } from '@/lib/marketplace-data';
 export async function generateStaticParams() {
   try {
     clearMarketplaceCache();
-    const tours = await fetchPublicTours();
-    if (tours.length > 0) {
-      return tours.map((tour) => ({ id: tour.id }));
+    const walks = await fetchPublicWalksCatalog();
+    if (walks.length > 0) {
+      return walks.map((tour) => ({ id: tour.id }));
     }
   } catch {
     // Build-time API may be unavailable.
@@ -68,13 +71,21 @@ export default async function MarketplaceTourPage({
   const tourId = id === '[id]' ? null : id;
 
   const walk = tourId ? await fetchPublicWalkDetailById(tourId) : null;
+
+  if (tourId && !walk) {
+    const story = await fetchPublicStoryDetailById(tourId);
+    if (story?.contentKind === 'story') {
+      redirect(getTourHref(story));
+    }
+  }
+
   const tour = walk ?? (tourId ? await fetchPublicTourById(tourId) : null);
 
   let relatedTours: Tour[] = [];
   if (tour) {
-    const allTours = await fetchPublicTours();
+    const allWalks = await fetchPublicWalksCatalog();
     const city = tour.location.split(',')[0]?.trim() ?? '';
-    relatedTours = allTours
+    relatedTours = allWalks
       .filter((item) => item.id !== tour.id && tourMatchesCity(item, city))
       .slice(0, 3);
   }

@@ -36,6 +36,8 @@ export interface Tour {
   slug?: string;
   /** Audio Stories (single-stop) vs Audio Walks (multi-stop) — from API storylist type/stops */
   contentKind?: 'story' | 'walk';
+  /** Curated for catalog — from API is_recommended */
+  isRecommended?: boolean;
 }
 
 export interface TourStop {
@@ -53,6 +55,60 @@ export interface WalkDetail extends Tour {
   stopsCount: number;
   totalDurationMinutes?: number;
   totalAudioDurationSeconds?: number;
+}
+
+export interface StorySource {
+  type: 'academic' | 'oral' | 'archival' | 'mixed';
+  title: string;
+  url?: string;
+}
+
+export interface StoryLanguageOption {
+  code: string;
+  label: string;
+  nativeLabel?: string;
+  isActive?: boolean;
+  availableInApp?: boolean;
+}
+
+export interface StoryNarratorLens {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  durationMinutes?: number;
+  isPrimary?: boolean;
+}
+
+export interface StoryVisitTip {
+  type: 'respect' | 'safety' | 'practical';
+  title: string;
+  description: string;
+}
+
+export interface StorySubTopic {
+  id: string;
+  name: string;
+  durationSeconds?: number;
+  durationLabel?: string;
+}
+
+export interface StoryDetail extends Tour {
+  contentKind: 'story';
+  placeName?: string;
+  placeDescription?: string;
+  subtitle?: string;
+  coordinates?: [number, number];
+  audioDurationMinutes?: number;
+  storyTypeLabel?: string;
+  whatToNotice: string[];
+  sources: StorySource[];
+  languages: StoryLanguageOption[];
+  narrators: StoryNarratorLens[];
+  beforeYouVisit: StoryVisitTip[];
+  lensesAvailableCount?: number;
+  /** Audio sub-topics from place audios — shown in Go deeper. */
+  subTopics: StorySubTopic[];
 }
 
 export const tours: Tour[] = [
@@ -389,6 +445,43 @@ export function getTierColor(tier: string) {
     default:
       return 'bg-gray-400 text-white';
   }
+}
+
+export type WalkAccessLabel = 'free' | 'premium';
+
+export function isCatalogFree(tour: Pick<Tour, 'price'>): boolean {
+  return tour.price === 0;
+}
+
+/** Explore catalog badge — matches All/Free/Premium filters (tour.price from coins_price). */
+export function getCatalogAccessLabel(tour: Pick<Tour, 'price'>): WalkAccessLabel {
+  return isCatalogFree(tour) ? 'free' : 'premium';
+}
+
+export function getCatalogAccessBadgeText(tour: Pick<Tour, 'price'>): string {
+  return isCatalogFree(tour) ? 'Free' : 'Premium';
+}
+
+export function getCatalogAccessBadgeClass(tour: Pick<Tour, 'price'>): string {
+  if (isCatalogFree(tour)) {
+    return 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200';
+  }
+  return 'bg-gradient-to-r from-[#1A5F7A] to-[#159895] text-white shadow-sm';
+}
+
+/** @deprecated Use getCatalogAccessLabel */
+export function getWalkAccessLabel(tour: Pick<Tour, 'price'>): WalkAccessLabel {
+  return getCatalogAccessLabel(tour);
+}
+
+/** @deprecated Use getCatalogAccessBadgeText */
+export function getWalkAccessBadgeText(tour: Pick<Tour, 'price'>): string {
+  return getCatalogAccessBadgeText(tour);
+}
+
+/** @deprecated Use getCatalogAccessBadgeClass */
+export function getWalkAccessBadgeClass(tour: Pick<Tour, 'price'>): string {
+  return getCatalogAccessBadgeClass(tour);
 }
 
 /**
