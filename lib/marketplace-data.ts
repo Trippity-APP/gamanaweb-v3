@@ -34,6 +34,25 @@ export interface Tour {
   searchTerms?: string[];
   /** URL slug derived from tour title — populated by lib/marketplace-api.ts */
   slug?: string;
+  /** Audio Stories (single-stop) vs Audio Walks (multi-stop) — from API storylist type/stops */
+  contentKind?: 'story' | 'walk';
+}
+
+export interface TourStop {
+  id: string;
+  position: number;
+  name: string;
+  description?: string;
+  image?: string;
+  audioDurationSeconds?: number;
+}
+
+export interface WalkDetail extends Tour {
+  contentKind: 'walk';
+  stops: TourStop[];
+  stopsCount: number;
+  totalDurationMinutes?: number;
+  totalAudioDurationSeconds?: number;
 }
 
 export const tours: Tour[] = [

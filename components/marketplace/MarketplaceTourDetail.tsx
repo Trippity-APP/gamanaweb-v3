@@ -5,12 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Check as CheckIcon,
-  Coins as CoinsIcon,
   Lock,
   MapPin,
   Smartphone,
   Star,
 } from "lucide-react";
+import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MarketplaceCoverImage } from "@/components/marketplace/marketplace-cover-image";
@@ -193,7 +193,7 @@ export function MarketplaceTourDetail({
                   <p className="text-xl font-bold text-emerald-700">Free</p>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <CoinsIcon className="h-5 w-5 text-amber-500" />
+                    <GamanaCoinIcon className="h-5 w-5" aria-hidden />
                     <p className="text-xl font-bold text-gray-900">{tour.price} Coins</p>
                   </div>
                 )}

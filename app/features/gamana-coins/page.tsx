@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
-import { Coins, TrendingUp, Gift as GiftIcon, Shield, Wallet, DollarSign, Award } from 'lucide-react';
+import { TrendingUp, Gift as GiftIcon, Shield, Wallet, DollarSign, Award } from 'lucide-react';
 import EnhancedPageLayout from '@/components/enhanced-page-layout';
+import { GamanaCoinIcon } from '@/components/GamanaCoinIcon';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
@@ -58,7 +59,7 @@ export default function GamanaCoinsPage() {
         }}
       />
       <EnhancedPageLayout
-      icon={Coins}
+      icon={GamanaCoinIcon}
       title="Gamana Coins"
       subtitle="Loyalty rewards that turn your adventures into tangible benefits"
       gradient="from-[#159895] via-[#1A5F7A] to-[#57C5B6]"

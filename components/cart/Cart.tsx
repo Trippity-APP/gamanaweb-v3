@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ShoppingBag, Minus, Plus, X, Check, CreditCard, Smartphone as UpiIcon, Smartphone, MapPin, Coins as CoinsIcon } from "lucide-react";
+import { ShoppingBag, Minus, Plus, X, Check, CreditCard, Smartphone as UpiIcon, Smartphone, MapPin } from "lucide-react";
+import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -126,7 +127,7 @@ export function Cart() {
                   <div key={`${item.kind}-${item.id}`} className="flex gap-3 border-b border-gray-100 pb-4">
                     <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-gray-100 flex items-center justify-center">
                       {item.kind === "coins" ? (
-                        <CoinsIcon className="h-7 w-7 text-amber-500" />
+                        <GamanaCoinIcon className="h-7 w-7" aria-hidden />
                       ) : (
                         <Image src={item.image} alt={item.title} fill className="object-cover" />
                       )}
@@ -300,7 +301,7 @@ export function Cart() {
               </p>
               {coinsCredited > 0 && (
                 <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm text-amber-800 flex items-center gap-2 justify-center">
-                  <CoinsIcon className="h-4 w-4 text-amber-500" />
+                  <GamanaCoinIcon className="h-4 w-4" aria-hidden />
                   {coinsCredited} Coins added, already live in your Gamana app account, ready to unlock Tours and Combos.
                 </div>
               )}

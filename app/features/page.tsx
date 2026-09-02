@@ -6,13 +6,13 @@ import {
   BookOpen,
   Headphones,
   User,
-  Coins,
   Share2,
   Globe,
   ArrowRight,
   Zap,
   Users,
 } from "lucide-react";
+import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import HeroHeader from "@/components/navigation/hero-header";
 import Footer from "@/components/navigation/footer";
 import { HeroSlideshow } from "@/components/HeroSlideshow";
@@ -68,7 +68,7 @@ export default function FeaturesPage() {
     },
     {
       id: "gamana-coins",
-      icon: Coins,
+      icon: GamanaCoinIcon,
       title: "Gamana Coins",
       description: "Earn rewards as you explore",
       details: [
@@ -200,7 +200,11 @@ export default function FeaturesPage() {
                       <Card className="border-2 hover:shadow-xl transition-shadow duration-300">
                         <CardContent className="p-8">
                           <div className={`aspect-square rounded-xl bg-gradient-to-br ${feature.gradient} opacity-10 flex items-center justify-center`}>
-                            <Icon className={`h-32 w-32 bg-gradient-to-br ${feature.gradient} bg-clip-text text-transparent opacity-30`} />
+                            {feature.id === "gamana-coins" ? (
+                              <GamanaCoinIcon className="h-32 w-32 opacity-30" aria-hidden />
+                            ) : (
+                              <Icon className={`h-32 w-32 bg-gradient-to-br ${feature.gradient} bg-clip-text text-transparent opacity-30`} />
+                            )}
                           </div>
                         </CardContent>
                       </Card>

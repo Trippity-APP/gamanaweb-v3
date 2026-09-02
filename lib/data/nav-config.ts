@@ -19,20 +19,18 @@ export const featureItems = [
 // (footerCompanyLinks below) and reachable from inline CTAs elsewhere on the site.
 // Order here is the explicit sitewide nav order: Home, Explore, Blog, Partner with
 // Gamana, Cities, [Features dropdown — inserted in site-header.tsx, not part of this
-// array], About. Keep this array's order in sync with that spec if it changes again.
+// array]. About lives in the footer only for now.
 export const primaryNavItems = [
   { name: "Home", href: "/" },
   { name: "Explore", href: "/explore" },
   { name: "Blog", href: "/blog" },
   { name: "Partner with Gamana", href: "/ecosystem" },
   { name: "Cities", href: "/cities" },
-  { name: "About", href: "/about" },
 ] as const;
 
 export const footerCompanyLinks = [
   { name: "Cities", href: "/cities" },
   { name: "Explore", href: "/explore" },
-  { name: "Subscription", href: "/subscription" },
   { name: "Partner with Gamana", href: "/ecosystem" },
   { name: "Blog", href: "/blog" },
   { name: "About", href: "/about" },

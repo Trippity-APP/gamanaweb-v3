@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Store, Hotel, Utensils, Plane, Car, Ticket, TrendingUp, Users, Coins, ArrowRight, CircleCheck as CheckCircle2, ChartBar as BarChart3, Globe, Sparkles, Award, Target, Handshake, MapPinned } from "lucide-react";
+import { Store, Hotel, Utensils, Plane, Car, Ticket, TrendingUp, Users, ArrowRight, CircleCheck as CheckCircle2, ChartBar as BarChart3, Globe, Sparkles, Award, Target, Handshake, MapPinned } from "lucide-react";
 import HeroHeader from "@/components/navigation/hero-header";
 import PartnerForm from "@/components/partner-form";
 import { HeroSlideshow } from "@/components/HeroSlideshow";

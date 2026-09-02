@@ -32,7 +32,7 @@ import { trackStoreClick } from "@/lib/analytics";
 
 /**
  * Sample landing page built to the social/digital marketing team's provided structure —
- * a dedicated cold-traffic acquisition page (see app/landing/page.tsx for the noindex
+ * a dedicated cold-traffic acquisition page (see app/download-app/page.tsx for the noindex
  * rationale). Deliberately diverges from the sitewide "photo-hero" pattern used across
  * Home/About/Cities/Ecosystem/etc: the hero here leads with an app-screenshot mockup
  * rather than a destination photo, because a first-time, ad-driven visitor benefits more

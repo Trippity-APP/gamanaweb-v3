@@ -1,4 +1,5 @@
 import { LucideIcon, Check, Sparkles, Star, TrendingUp } from 'lucide-react';
+import type { ComponentType } from 'react';
 import { HeroSlideshow } from '@/components/HeroSlideshow';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,7 +24,7 @@ interface QuickFeature {
 }
 
 interface EnhancedPageLayoutProps {
-  icon: LucideIcon;
+  icon: ComponentType<{ className?: string }>;
   title: string;
   subtitle: string;
   introTitle: string;

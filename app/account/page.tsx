@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ComponentType } from "react";
 import Link from "next/link";
 import SiteHeader from "@/components/navigation/site-header";
 import Footer from "@/components/navigation/footer";
@@ -15,9 +15,9 @@ import {
   LogOut,
   Headphones,
   Briefcase,
-  Coins,
   Pencil,
 } from "lucide-react";
+import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import { useAccount } from "@/lib/account-context";
 import { PersonalizationEditor } from "@/components/account/PersonalizationEditor";
 
@@ -26,10 +26,10 @@ import { PersonalizationEditor } from "@/components/account/PersonalizationEdito
  * history, and mock payment methods. All state is the same localStorage-backed
  * AccountProvider used across the site; nothing here is a real backend yet.
  */
-const orderMeta: Record<string, { icon: typeof Headphones; label: string; coinsDenominated: boolean }> = {
+const orderMeta: Record<string, { icon: ComponentType<{ className?: string }>; label: string; coinsDenominated: boolean }> = {
   unlock: { icon: Headphones, label: "Audio Tour", coinsDenominated: true },
   experience: { icon: Briefcase, label: "Experience", coinsDenominated: false },
-  "coins-purchase": { icon: Coins, label: "Coin Bundle", coinsDenominated: false },
+  "coins-purchase": { icon: GamanaCoinIcon, label: "Coin Bundle", coinsDenominated: false },
   mixed: { icon: ShoppingBag, label: "Order", coinsDenominated: false },
 };
 
@@ -183,7 +183,7 @@ export default function AccountPage() {
           <div className="rounded-2xl border border-gray-200 p-5 space-y-3">
             <div className="flex items-center justify-between rounded-xl bg-amber-50 border border-amber-100 px-4 py-3">
               <div className="flex items-center gap-2 text-sm font-semibold text-amber-800">
-                <Coins className="h-4 w-4 text-amber-500" /> Gamana Coins balance
+                <GamanaCoinIcon className="h-4 w-4" aria-hidden /> Gamana Coins balance
               </div>
               <p className="text-sm font-bold text-amber-800">{coinBalance.toLocaleString()} Coins</p>
             </div>

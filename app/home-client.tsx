@@ -5,7 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, User, Headphones, Coins, Share2, Globe, ArrowRight, Download, ChevronLeft, ChevronDown, Play, MapPin } from "lucide-react";
+import { BookOpen, User, Headphones, Share2, Globe, ArrowRight, Download, ChevronLeft, ChevronDown, Play, MapPin } from "lucide-react";
+import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import Footer from "@/components/navigation/footer";
 import SiteHeader from "@/components/navigation/site-header";
 import NarratorCard from "@/components/narrator-card";
@@ -108,7 +109,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
       slug: "virtual-travel-guides",
     },
     {
-      icon: Coins,
+      icon: GamanaCoinIcon,
       title: "Gamana Coins",
       description: "Earn rewards as you explore",
       slug: "gamana-coins",

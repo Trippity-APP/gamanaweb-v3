@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LogIn, ShoppingBag, Sparkles, Settings, LogOut, User as UserIcon, Coins } from "lucide-react";
+import { LogIn, ShoppingBag, Sparkles, Settings, LogOut, User as UserIcon } from "lucide-react";
+import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -140,7 +141,7 @@ export function AccountMenu() {
           </p>
           <p className="text-xs text-gray-400 font-normal truncate">{account.email}</p>
           <p className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-amber-700">
-            <Coins className="h-3 w-3 text-amber-500" /> {coinBalance.toLocaleString()} Coins
+            <GamanaCoinIcon className="h-3 w-3" aria-hidden /> {coinBalance.toLocaleString()} Coins
           </p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

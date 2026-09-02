@@ -39,6 +39,11 @@
   ],
   "redirects": [
     {
+      "source": "/landing",
+      "destination": "/download-app",
+      "permanent": true
+    },
+    {
       "source": "/marketplace",
       "destination": "/explore",
       "permanent": true

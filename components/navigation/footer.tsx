@@ -129,11 +129,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/subscription" className="hover:text-[#57C5B6] transition-colors text-sm">
-                  Subscription Plans
-                </Link>
-              </li>
-              <li>
                 <Link href="/ecosystem" className="hover:text-[#57C5B6] transition-colors text-sm">
                   Ecosystem
                 </Link>

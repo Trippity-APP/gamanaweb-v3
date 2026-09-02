@@ -68,11 +68,8 @@ export default function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
       isActive(href) && "text-[#159895] font-semibold"
     );
 
-  // primaryNavItems (lib/data/nav-config.ts) is already in the full requested order —
-  // Home, Explore, Blog, Partner with Gamana, Cities, About — so the only thing left to
-  // do here is slot the Features dropdown in, right before About.
-  const itemsBeforeFeatures = primaryNavItems.filter((i) => i.name !== "About");
-  const itemsAfterFeatures = primaryNavItems.filter((i) => i.name === "About");
+  // primaryNavItems order: Home, Explore, Blog, Partner with Gamana, Cities — Features
+  // dropdown is inserted in site-header.tsx after Cities.
 
   return (
     <>
@@ -106,7 +103,7 @@ export default function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
             className="hidden lg:flex items-center gap-1 xl:gap-2"
             aria-label="Main navigation"
           >
-            {itemsBeforeFeatures.map((item) => {
+            {primaryNavItems.map((item) => {
               const href = resolveNavHref(item);
               return (
                 <Link key={item.href} href={href} className={linkClass(href)}>
@@ -144,15 +141,6 @@ export default function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
               )}
             </div>
 
-            {itemsAfterFeatures.map((item) => {
-              const href = resolveNavHref(item);
-              return (
-                <Link key={item.href} href={href} className={linkClass(href)}>
-                  {item.name}
-                </Link>
-              );
-            })}
-
             <Button
               asChild
               size="sm"
@@ -168,7 +156,7 @@ export default function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
               </a>
             </Button>
 
-            <AccountMenu />
+            {loggedIn && <AccountMenu />}
           </nav>
 
           <button
@@ -209,11 +197,6 @@ function MobileDrawer({
   const { account, logout } = useAccount();
   const loggedIn = !!account;
 
-  // Same ordering as the desktop nav above — primaryNavItems is already in the full
-  // requested order, Features just gets slotted in right before About.
-  const itemsBeforeFeatures = primaryNavItems.filter((i) => i.name !== "About");
-  const itemsAfterFeatures = primaryNavItems.filter((i) => i.name === "About");
-
   return (
     <>
       <div
@@ -230,7 +213,7 @@ function MobileDrawer({
             </button>
           </div>
           <nav className="flex-1 overflow-y-auto space-y-1">
-            {itemsBeforeFeatures.map((item) => (
+            {primaryNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={resolveNavHref(item)}
@@ -261,43 +244,26 @@ function MobileDrawer({
                   {item.name}
                 </Link>
               ))}
-            {itemsAfterFeatures.map((item) => (
-              <Link
-                key={item.href}
-                href={resolveNavHref(item)}
-                onClick={onClose}
-                className={itemClass}
-              >
-                {item.name}
-              </Link>
-            ))}
-
-            <div className="pt-2 mt-2 border-t border-gray-100">
-              {loggedIn ? (
-                <>
-                  <Link href="/account" onClick={onClose} className={itemClass}>
-                    Profile & settings
-                  </Link>
-                  <Link href="/account#bookings" onClick={onClose} className={itemClass}>
-                    My bookings
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      logout();
-                      onClose();
-                    }}
-                    className={cn("w-full text-left text-red-600", itemClass)}
-                  >
-                    Log out
-                  </button>
-                </>
-              ) : (
-                <Link href="/start-your-journey" onClick={onClose} className={itemClass}>
-                  Log in / Start your journey
+            {loggedIn && (
+              <div className="pt-2 mt-2 border-t border-gray-100">
+                <Link href="/account" onClick={onClose} className={itemClass}>
+                  Profile & settings
                 </Link>
-              )}
-            </div>
+                <Link href="/account#bookings" onClick={onClose} className={itemClass}>
+                  My bookings
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    onClose();
+                  }}
+                  className={cn("w-full text-left text-red-600", itemClass)}
+                >
+                  Log out
+                </button>
+              </div>
+            )}
           </nav>
           <div className="pt-4 border-t space-y-3">
             <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" onClick={onClose}>
