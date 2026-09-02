@@ -1,6 +1,6 @@
 import { mergeStoryDetailPlaceholders } from "@/lib/story-detail-placeholders";
 import type { StoryDetail, StorySubTopic, Tour } from "@/lib/marketplace-data";
-import { getMarketplaceApiBaseUrl } from "@/lib/api-base-url";
+import { getMarketplaceApiBaseUrl, getCatalogFetchInit } from "@/lib/api-base-url";
 
 type ApiPlaceAudioTopic = {
   id?: string;
@@ -309,9 +309,7 @@ async function fetchPublicPlacesPage(
   });
   if (city?.trim()) params.set("city", city.trim());
 
-  const response = await fetch(`${baseUrl}/places/search/public/location?${params}`, {
-    cache: "no-store",
-  });
+  const response = await fetch(`${baseUrl}/places/search/public/location?${params}`, getCatalogFetchInit());
   if (!response.ok) {
     throw new Error(`Places API failed (${response.status})`);
   }

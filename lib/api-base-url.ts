@@ -14,3 +14,11 @@ export function getMarketplaceApiBaseUrl(): string {
     DEFAULT_API_URL
   ).replace(/\/$/, "");
 }
+
+/** Fetch options for catalog API calls — must be cacheable during static export builds. */
+export function getCatalogFetchInit(): RequestInit {
+  if (typeof window !== "undefined") {
+    return { cache: "no-store" };
+  }
+  return { cache: "force-cache" };
+}

@@ -1,5 +1,5 @@
 import type { Tour, TourStop, WalkDetail, StoryDetail } from "@/lib/marketplace-data";
-import { getMarketplaceApiBaseUrl } from "@/lib/api-base-url";
+import { getCatalogFetchInit, getMarketplaceApiBaseUrl } from "@/lib/api-base-url";
 import { mergeStoryDetailPlaceholders } from "@/lib/story-detail-placeholders";
 import {
   clearPublicPlacesCache,
@@ -606,9 +606,7 @@ async function fetchStorylistDetailById(id: string): Promise<ApiStorylist | null
   const baseUrl = getMarketplaceApiBaseUrl();
 
   try {
-    const response = await fetch(`${baseUrl}/marketplace/tours/${id}`, {
-      cache: "no-store",
-    });
+    const response = await fetch(`${baseUrl}/marketplace/tours/${id}`, getCatalogFetchInit());
     if (response.ok) {
       const payload = (await response.json()) as ApiDetailResponse;
       if (payload.data) return payload.data;
@@ -642,7 +640,7 @@ async function fetchToursPage(skip: number, limit: number, city?: string): Promi
   }
   const url = `${baseUrl}/marketplace/tours?${params.toString()}`;
 
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetch(url, getCatalogFetchInit());
   if (!response.ok) {
     throw new Error(`Marketplace API failed (${response.status})`);
   }
