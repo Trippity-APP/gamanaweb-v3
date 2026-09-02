@@ -22,7 +22,7 @@ export const featureItems = [
 // array], About. Keep this array's order in sync with that spec if it changes again.
 export const primaryNavItems = [
   { name: "Home", href: "/" },
-  { name: "Explore", href: "/marketplace" },
+  { name: "Explore", href: "/explore" },
   { name: "Blog", href: "/blog" },
   { name: "Partner with Gamana", href: "/ecosystem" },
   { name: "Cities", href: "/cities" },
@@ -31,7 +31,7 @@ export const primaryNavItems = [
 
 export const footerCompanyLinks = [
   { name: "Cities", href: "/cities" },
-  { name: "Explore", href: "/marketplace" },
+  { name: "Explore", href: "/explore" },
   { name: "Subscription", href: "/subscription" },
   { name: "Partner with Gamana", href: "/ecosystem" },
   { name: "Blog", href: "/blog" },

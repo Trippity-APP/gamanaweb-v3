@@ -60,7 +60,7 @@ export function CityAutocomplete({ id, placeholder, value, onChange, className }
       // script, since a blank key throws an intrusive "This page can't load Google Maps
       // correctly" dialog. Fall back silently to a plain text input instead.
       console.warn(
-        "[CityAutocomplete] NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not set — falling back to plain text input. " +
+        "[CityAutocomplete] NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not set, falling back to plain text input. " +
           "Set it in .env.local and restart the dev server to enable live suggestions."
       );
       return () => inputEl.removeEventListener("input", handleTyping);
@@ -81,7 +81,7 @@ export function CityAutocomplete({ id, placeholder, value, onChange, className }
         script.defer = true;
         script.onload = initAutocomplete;
         script.onerror = () =>
-          console.error("[CityAutocomplete] Failed to load the Google Maps script — check the API key and network access.");
+          console.error("[CityAutocomplete] Failed to load the Google Maps script, check the API key and network access.");
         document.head.appendChild(script);
       }
     }

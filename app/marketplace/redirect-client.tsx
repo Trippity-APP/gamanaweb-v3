@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function MarketplaceRedesignRedirectPage() {
+export default function MarketplaceRedirectPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -14,7 +14,7 @@ export default function MarketplaceRedesignRedirectPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center text-sm text-gray-500">
-      Redirecting to marketplace...
+      Redirecting to explore...
     </div>
   );
 }

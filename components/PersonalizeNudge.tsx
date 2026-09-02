@@ -27,7 +27,7 @@ export function PersonalizeNudge({ onContinue }: { onContinue: () => void }) {
     <div className="space-y-4">
       <div className="text-center space-y-1">
         <p className="text-sm font-semibold text-gray-900">Before you check out</p>
-        <p className="text-xs text-gray-500">A couple of things could make this better for you — totally optional.</p>
+        <p className="text-xs text-gray-500">A couple of things could make this better for you, totally optional.</p>
       </div>
 
       {needsPersonalization && (

@@ -46,7 +46,7 @@ export const Hero = () => {
                             <div className="h-2 bg-white/60 rounded-full opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}></div>
                         </div>
                         <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/95 leading-relaxed max-w-3xl mx-auto opacity-0 animate-fade-in" style={{ animationDelay: "450ms" }}>
-                            Explore cities through immersive, location-aware audio stories.
+                            Explore cities with audio stories that play as you walk.
                             <br className="hidden md:block" />
                             No reading. No planning. Just walk and listen.
                         </p>

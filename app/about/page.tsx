@@ -20,21 +20,21 @@ export default function AboutPage() {
     {
       name: "Ananth Pharshy",
       designation: "Founder & Chief Executive Officer",
-      bio: "The hidden story behind a landmark is always better than the landmark itself — that's the conviction Gamana is built on. I started this to close the gap between standing somewhere remarkable and actually understanding it.",
+      bio: "The hidden story behind a landmark is always better than the landmark itself, that's the conviction Gamana is built on. I started this to close the gap between standing somewhere remarkable and actually understanding it.",
       image: "/team/ananth-pharshy.jpg",
       linkedin: "", // Update with actual LinkedIn URL
     },
     {
       name: "Parikshit Roy Chowdhury",
       designation: "Founder & Chief Operating Officer",
-      bio: "My love for travel and storytelling started while backpacking across India. Gamana exists to make cultural exploration accessible through authentic local narratives — technology should enhance our connection to places, never replace it.",
+      bio: "My love for travel and storytelling started while backpacking across India. Gamana exists to make local history and culture easy to hear while you walk, technology should enhance our connection to places, never replace it.",
       image: "/team/parikshit-roy-chowdhury.jpg",
       linkedin: "", // Update with actual LinkedIn URL
     },
     {
       name: "Syed Sameer",
       designation: "Chief Technology Officer",
-      bio: "Technology is my playground. I love solving complex problems and building scalable systems. What excites me most about Gamana is using AI and location tech to turn a simple walk through a city into an immersive storytelling experience.",
+      bio: "Technology is my playground. I love solving complex problems and building scalable systems. What excites me most about Gamana is using AI and location tech to turn a simple walk through a city into a walk with a story in your headphones.",
       image: "/team/syed-sameer.jpg",
       linkedin: "", // Update with actual LinkedIn URL
     },
@@ -48,7 +48,7 @@ export default function AboutPage() {
     {
       name: "Jaskaran Singh",
       designation: "Backend Lead",
-      bio: "I make sure everything works smoothly behind the scenes. There's something satisfying about building robust systems that millions rely on. I enjoy scaling our infrastructure and take pride in writing code that's elegant and maintainable.",
+      bio: "I make sure everything works smoothly behind the scenes. There's something satisfying about building systems that stay up when traffic spikes. I enjoy scaling our infrastructure and take pride in writing code that's elegant and maintainable.",
       image: "/team/jaskaran-singh.jpg",
       linkedin: "", // Update with actual LinkedIn URL
     },
@@ -62,7 +62,7 @@ export default function AboutPage() {
     {
       name: "Afaf Ruknuddin",
       designation: "Frontend Lead (Web)",
-      bio: "I believe great tools empower great work. I'm passionate about building dashboards that make complex data feel approachable and actionable. I love creating interfaces that our team and partners actually enjoy using.",
+      bio: "I believe good tools should get out of the way. I'm passionate about building dashboards that make complex data feel approachable and actionable. I love creating interfaces that our team and partners actually enjoy using.",
       image: "/team/afaf-ruknuddin.jpg",
       linkedin: "", // Update with actual LinkedIn URL
     },
@@ -74,7 +74,7 @@ export default function AboutPage() {
         {/* Hero Section */}
         <section className="relative h-[62vh] sm:h-[68vh] flex items-center justify-center overflow-hidden">
           {/* Founder-team-in-the-field photo behind the brand gradient, matching the treatment
-              on /marketplace-redesign, /cities, and /ecosystem — a flat gradient read as
+              on /marketplace-redesign, /cities, and /ecosystem, a flat gradient read as
               inconsistent with the rest of the site. */}
           <div className="absolute inset-0">
             <HeroSlideshow
@@ -118,7 +118,7 @@ export default function AboutPage() {
                 <div className="mx-auto h-px w-20 bg-gradient-to-r from-transparent via-white/70 to-transparent opacity-0 animate-fade-in" style={{ animationDelay: "150ms" }}></div>
 
                 <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white leading-snug max-w-4xl mx-auto font-light opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
-                  India&apos;s first dedicated app for heritage travel and cultural exploration, powered by immersive storytelling.
+                  India&apos;s first dedicated app for heritage travel and cultural exploration, built around audio tours and local stories.
                 </p>
               </div>
 
@@ -129,7 +129,7 @@ export default function AboutPage() {
         </section>
 
         {/* Overlaps the hero photo above, matching the floating-card pattern used on
-            Explore/Cities/Contact — the negative top margin pulls it up over the hero and
+            Explore/Cities/Contact, the negative top margin pulls it up over the hero and
             the z-index keeps it above the hero's bottom fade. */}
         <section className="relative z-10 -mt-28 sm:-mt-36 pb-16 bg-transparent">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -142,7 +142,7 @@ export default function AboutPage() {
         </section>
 
         {/* Origin story, placed first so everything after it reads as consequence rather
-            than assertion. Founder-voiced deliberately — the claim that Gamana came out of
+            than assertion. Founder-voiced deliberately, the claim that Gamana came out of
             two people's own travelling is only credible in first person. */}
         <section className="py-24 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -164,14 +164,14 @@ export default function AboutPage() {
                 </p>
 
                 <p className="text-lg text-gray-700 leading-relaxed">
-                  Which is why real connection only ever came from sharing those stories — the
+                  Which is why real connection only ever came from sharing those stories, the
                   shopkeeper, the priest, the man who has swept the same steps for thirty years,
                   telling them what they were actually looking at and why it mattered to him.
                 </p>
 
                 <p className="text-lg text-gray-700 leading-relaxed">
                   We are a storytelling species, and understanding has never come from standing
-                  closer to one another — only from listening to what the other person has to say
+                  closer to one another, only from listening to what the other person has to say
                   about themselves. Get us telling each other our stories, and we may yet solve
                   for &lsquo;world peace&rsquo;.
                 </p>
@@ -213,22 +213,22 @@ export default function AboutPage() {
                 </h2>
 
                 <p className="text-lg sm:text-xl text-gray-800 leading-relaxed">
-                  <span lang="sa" className="font-medium text-gray-900">गमन</span> is Sanskrit —
-                  one of the world&apos;s oldest living languages — for the act of going. Not the
+                  <span lang="sa" className="font-medium text-gray-900">गमन</span> is Sanskrit,
+                  one of the world&apos;s oldest living languages, for the act of going. Not the
                   destination, and not the distance. The going itself.
                 </p>
 
                 <p className="text-lg text-gray-700 leading-relaxed">
                   Every traveller who has ever set out has been doing{" "}
                   <span lang="sa" className="text-gray-900">गमन</span>. We took the name because
-                  what changes you is never arriving somewhere — it&apos;s moving through it with
+                  what changes you is never arriving somewhere, it&apos;s moving through it with
                   your eyes open.
                 </p>
 
                 <p className="text-lg text-gray-700 leading-relaxed">
                   And the going is made of stories. A wall is just a wall until someone tells you
                   who built it, who it kept out, and who wept when it fell. That telling is the
-                  oldest technology humans have for making a place mean something — older than
+                  oldest technology humans have for making a place mean something, older than
                   the guidebook, older than the map.
                 </p>
               </div>
@@ -257,7 +257,7 @@ export default function AboutPage() {
         </section>
 
         {/* The problem, told from the reader's side of it. Nothing is offered here on
-            purpose — the page has to earn the rest by naming something felt first. */}
+            purpose, the page has to earn the rest by naming something felt first. */}
         <section className="py-24 bg-gradient-to-br from-gray-50 via-white to-[#159895]/5">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
@@ -276,7 +276,7 @@ export default function AboutPage() {
                 </p>
                 <p className="text-lg text-gray-700 leading-relaxed">
                   So you take the photograph, and you move on, and something that should have
-                  stayed with you doesn&apos;t. Not because the place had nothing to say — because
+                  stayed with you doesn&apos;t. Not because the place had nothing to say, because
                   nobody was there to say it.
                 </p>
               </div>
@@ -313,7 +313,7 @@ export default function AboutPage() {
               <p className="text-lg sm:text-xl text-white/90 leading-relaxed">
                 Every other travel app wants your attention on the screen. We think that&apos;s
                 exactly backwards. Audio is the only medium that leaves you free to look at the
-                thing you came to see — to keep walking, keep looking, and let the story arrive
+                thing you came to see, to keep walking, keep looking, and let the story arrive
                 in your ears while your eyes stay where they belong.
               </p>
               <p className="text-lg sm:text-xl text-white/90 leading-relaxed">
@@ -354,13 +354,13 @@ export default function AboutPage() {
                 </h2>
                 <p className="text-lg text-gray-700 leading-relaxed">
                   Almost everything worth knowing about a place has already been written down.
-                  Centuries of scholarship, temple records, colonial surveys, local histories — it
+                  Centuries of scholarship, temple records, colonial surveys, local histories, it
                   exists, in books you&apos;ll never carry and archives you&apos;d never think to
                   search, least of all while standing in the sun with an hour to spare.
                 </p>
                 <p className="text-lg text-gray-700 leading-relaxed">
                   So we built something that reads all of it, and speaks it aloud in the place it
-                  belongs — in your language, at the moment you&apos;re standing there.
+                  belongs, in your language, at the moment you&apos;re standing there.
                 </p>
                 <div className="flex flex-wrap gap-3 pt-2">
                   <Badge className="bg-gradient-to-r from-[#159895] to-[#57C5B6] text-white border-0 px-4 py-2 text-sm font-semibold shadow-md">
@@ -382,13 +382,13 @@ export default function AboutPage() {
               </h2>
               <p className="text-lg text-gray-700 leading-relaxed">
                 The world&apos;s travel apps have covered Rome and Paris a hundred times over,
-                and treated the subcontinent as a footnote — a handful of monuments, thinly
+                and treated the subcontinent as a footnote, a handful of monuments, thinly
                 described. A country with this much layered history deserves better than
                 thin coverage of its greatest hits.
               </p>
               <p className="text-lg text-gray-700 leading-relaxed">
                 So we started here, and went deep before going wide. Gamana travels beyond
-                India too — but home is where we set the standard, and it&apos;s the standard
+                India too, but home is where we set the standard, and it&apos;s the standard
                 everywhere else has to meet.
               </p>
             </div>
@@ -414,7 +414,7 @@ export default function AboutPage() {
               </p>
               <p className="text-lg sm:text-xl text-white/90 leading-relaxed">
                 It is all three, and depth means refusing to choose between them. Our AI narrators
-                let us examine a place from every side and hand you all of it — in your language,
+                let us examine a place from every side and hand you all of it, in your language,
                 in the voice you&apos;d rather hear it in, at the moment you&apos;re standing in
                 front of it.
               </p>
@@ -439,7 +439,7 @@ export default function AboutPage() {
                   .
                 </h2>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  A small team spread across engineering, design and storytelling — most of us
+                  A small team spread across engineering, design and storytelling, most of us
                   drawn here by the same thing, which is having stood somewhere remarkable and
                   wished someone had been there to explain it.
                 </p>
@@ -520,7 +520,7 @@ export default function AboutPage() {
                 .
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Each one is a character we wrote and gave a voice to — a meticulous historian, a
+                Each one is a character we wrote and gave a voice to, a historian who won't let a date go unverified, a
                 comedian who can&apos;t resist a tangent, someone who sounds like they grew up
                 three streets away. Pick whichever you&apos;d rather spend an afternoon with. The
                 same place sounds genuinely different in each of them.
@@ -592,7 +592,7 @@ export default function AboutPage() {
                 Wherever you&apos;re going next.
               </h2>
               <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-                Take a narrator with you — or bring your own corner of the world to travellers
+                Take a narrator with you, or bring your own corner of the world to travellers
                 who&apos;d love to hear about it.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-4">

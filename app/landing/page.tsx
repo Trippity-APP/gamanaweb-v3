@@ -6,7 +6,7 @@ import LandingContent from "./landing-content";
 // ground, just restructured for a cold, ad-driven visitor). Flip `index: true` if the
 // marketing team wants this URL to also rank on its own.
 export const metadata: Metadata = {
-  title: "Gamana — Your Pocket Audio Tour Guide | Download the App",
+  title: "Gamana, Your Pocket Audio Tour Guide | Download the App",
   description:
     "GPS-triggered audio tours that turn any walk into a story. No guide, no wifi, no planning. Download Gamana free on iOS and Android.",
   robots: { index: false, follow: true },

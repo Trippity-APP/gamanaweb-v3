@@ -5,13 +5,13 @@ import EnhancedPageLayout from '@/components/enhanced-page-layout';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
   title: 'On-Demand Personalization for Every Journey',
-  description: 'On-demand personalization tailors stories and experiences to your interests, pace, and style for smarter, more meaningful journeys.',
+  description: 'On-demand personalization tailors stories and experiences to your interests, pace, and style for tours that match how you like to travel.',
   alternates: {
     canonical: 'https://www.gamana.app/features/on-demand-personalization',
   },
   openGraph: {
     title: 'On-Demand Personalization for Every Journey | Gamana',
-    description: 'On-demand personalization tailors stories and experiences to your interests, pace, and style for smarter, more meaningful journeys.',
+    description: 'On-demand personalization tailors stories and experiences to your interests, pace, and style for tours that match how you like to travel.',
     url: 'https://www.gamana.app/features/on-demand-personalization',
     siteName: 'Gamana',
     type: 'website',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'On-Demand Personalization for Every Journey | Gamana',
-    description: 'On-demand personalization tailors stories and experiences to your interests, pace, and style for smarter, more meaningful journeys.',
+    description: 'On-demand personalization tailors stories and experiences to your interests, pace, and style for tours that match how you like to travel.',
     images: ['/gamana-logo.svg'],
   },
 };
@@ -62,9 +62,9 @@ export default function OnDemandPersonalizationPage() {
       title="On-Demand Personalization"
       subtitle="Stories and experiences that adapt to your unique preferences and interests"
       gradient="from-[#159895] via-[#1A5F7A] to-[#57C5B6]"
-      introTitle="Your Journey, Perfectly Tailored"
+      introTitle="Tours That Match How You Travel"
       introText={[
-        'Every traveler is unique, and your tour should be too. Gamana learns from your preferences, interests, and travel style to deliver personalized content that resonates with you.',
+        'Every traveler is unique, and your tour should be too. Gamana learns from your preferences, interests, and travel style to deliver stories and stops that fit your interests.',
         'Whether you\'re a history buff, foodie, architecture enthusiast, or adventure seeker, Gamana dynamically adjusts narratives to match your interests, ensuring every story you hear is relevant and engaging.',
       ]}
       benefits={[
@@ -78,18 +78,18 @@ export default function OnDemandPersonalizationPage() {
       examples={[
         {
           icon: Brain,
-          title: 'Smart Learning',
+          title: 'Learns Your Tastes',
           description: 'Gamana analyzes your interactions, ratings, and preferences to continuously refine your experience.',
         },
         {
           icon: Wand2,
-          title: 'Dynamic Adaptation',
+          title: 'Adjusts as You Go',
           description: 'Content automatically adjusts based on your pace, location, and expressed interests.',
         },
         {
           icon: Target,
-          title: 'Precision Matching',
-          description: 'Get stories and recommendations that align perfectly with your travel style and curiosities.',
+          title: 'Better Matches',
+          description: 'Get stories and recommendations that fit how you actually like to explore and curiosities.',
         },
       ]}
       quickFeatures={[

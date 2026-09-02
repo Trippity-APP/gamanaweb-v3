@@ -106,7 +106,7 @@ export function FeedbackWidget() {
                 ))}
               </div>
               <Textarea
-                placeholder="A destination we're missing, something confusing, an idea for the marketplace — anything."
+                placeholder="A destination we're missing, something confusing, an idea for the marketplace, anything."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}
@@ -131,7 +131,7 @@ export function FeedbackWidget() {
                 <DialogTitle className="text-center">Thanks for the note</DialogTitle>
               </DialogHeader>
               <p className="text-sm text-gray-600">
-                We read every submission — this genuinely shapes what we build next.
+                We read every submission, this genuinely shapes what we build next.
               </p>
               <Button onClick={() => setOpen(false)} variant="outline" className="w-full">
                 Close

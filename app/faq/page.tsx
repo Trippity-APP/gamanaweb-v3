@@ -24,7 +24,7 @@ export default function FAQPage() {
         },
         {
           question: "How does the AI personalization work?",
-          answer: "Gamana lets you choose from different narrators who have unique personalities and interests—like history, architecture, art, etc. Over time, we'll recommend content and voices based on your preferences and listening habits."
+          answer: "Gamana lets you choose from different narrators who have unique personalities and interests, like history, architecture, art, etc. Over time, we'll recommend content and voices based on your preferences and listening habits."
         }
       ]
     },
@@ -56,7 +56,7 @@ export default function FAQPage() {
         },
         {
           question: "Does the app work with headphones and speakers?",
-          answer: "Absolutely. Gamana works with wired and Bluetooth headphones, earbuds, car speakers, and external speakers—whatever suits your style of exploring."
+          answer: "Absolutely. Gamana works with wired and Bluetooth headphones, earbuds, car speakers, and external speakers, whatever suits your style of exploring."
         },
         {
           question: "Can I share tours with family and friends?",
@@ -96,7 +96,7 @@ export default function FAQPage() {
         },
         {
           question: "What makes Gamana different from other tour apps?",
-          answer: "We focus on depth, storytelling, and personalization—not checklists or trivia. With AI-assisted content, local flavor, and multiple narrator options, Gamana gives you a more human and culturally rich experience. We aim to move humanity to connect through the power of story."
+          answer: "We focus on depth, storytelling, and personalization, not checklists or trivia. With AI-assisted content, local flavor, and multiple narrator options, Gamana gives you a more human and culturally rich experience. We aim to move humanity to connect through the power of story."
         }
       ]
     }

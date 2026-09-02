@@ -39,7 +39,7 @@ export async function generateMetadata({
     }
 
     const title = `${city.name} Audio Tours | Gamana`;
-    const description = `Explore ${city.name} with Gamana's self-guided audio tours. Walk at your own pace and listen to immersive stories across ${city.country_name}.`;
+    const description = `Explore ${city.name} with Gamana's self-guided audio tours. Walk at your own pace and listen to stories across ${city.country_name}.`;
 
     return {
         title,

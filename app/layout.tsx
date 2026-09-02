@@ -16,10 +16,10 @@ const caveat = Caveat({ subsets: ['latin'], weight: ['600', '700'], variable: '-
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
   title: {
-    default: "India's First Heritage Travel App for Personalized Audio Tours | Gamana",
+    default: "Audio Walking Tours for Heritage Cities",
     template: '%s | Gamana',
   },
-  description: "Gamana is India's first heritage travel app, offering personalized audio tours and smart travel guides. Explore destinations smarter and plan trips effortlessly.",
+  description: "Gamana is an audio tour app with GPS-triggered walking tours. Walk, listen, and skip the guidebook.",
   alternates: {
     canonical: 'https://www.gamana.app',
   },
@@ -31,21 +31,21 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://www.gamana.app',
     siteName: 'Gamana',
-    title: "India's First Heritage Travel App for Personalized Audio Tours | Gamana",
-    description: "Gamana is India's first heritage travel app, offering personalized audio tours and smart travel guides. Explore destinations smarter and plan trips effortlessly.",
+    title: "Audio Walking Tours for Heritage Cities",
+    description: "Gamana is an audio tour app with GPS-triggered walking tours. Walk, listen, and skip the guidebook.",
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: "Gamana - India's First Heritage Travel and Cultural Exploration App",
+        alt: "Gamana Audio Travel App",
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "India's First Heritage Travel App for Personalized Audio Tours | Gamana",
-    description: "Gamana is India's first heritage travel app, offering personalized audio tours and smart travel guides. Explore destinations smarter and plan trips effortlessly.",
+    title: "Audio Walking Tours for Heritage Cities",
+    description: "Gamana is an audio tour app with GPS-triggered walking tours. Walk, listen, and skip the guidebook.",
     images: ['/og-image.jpg'],
     creator: '@gamana',
   },

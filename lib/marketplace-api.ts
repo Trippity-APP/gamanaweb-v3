@@ -119,7 +119,7 @@ function assignTourSlugs(tours: Tour[]): Tour[] {
 }
 
 export function getTourHref(tour: Pick<Tour, "id">): string {
-  return `/marketplace/tours/${tour.id}`;
+  return `/explore/tours/${tour.id}`;
 }
 
 function extractCityCountry(storylist: ApiStorylist): { city: string; country: string } {
@@ -396,7 +396,7 @@ export async function fetchPublicTourBySlug(slug: string): Promise<Tour | null> 
   const bySlug = tours.find((tour) => tour.slug?.toLowerCase() === normalized);
   if (bySlug) return bySlug;
 
-  // Backward compatibility for old /marketplace/tours/{id} links.
+  // Backward compatibility for old /explore/tours/{id} and /marketplace/tours/{id} links.
   const byId = tours.find((tour) => tour.id === slug);
   if (byId) return byId;
 

@@ -23,7 +23,7 @@ type Quote = {
 
 const QUOTES: Quote[] = [
   {
-    text: "Travelling — it leaves you speechless, then turns you into a storyteller.",
+    text: "Travelling, it leaves you speechless, then turns you into a storyteller.",
     author: "Ibn Battuta",
     source: "traveller, 1304–1369",
     attributed: true,
@@ -104,7 +104,7 @@ export function TravelQuotes({ intervalMs = 12000 }: { intervalMs?: number }) {
           style={{ transitionDuration: `${FADE_MS}ms` }}
         >
           {/* Upright rather than italic, and the same weight/tracking as section headings
-              elsewhere on the site — the italic serif-ish treatment read as a different
+              elsewhere on the site, the italic serif-ish treatment read as a different
               typeface next to the rest of the page. */}
           <blockquote className="text-xl sm:text-2xl md:text-3xl text-gray-900 leading-snug font-semibold tracking-tight">
             &ldquo;{quote.text}&rdquo;

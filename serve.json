@@ -37,6 +37,18 @@
       ]
     }
   ],
+  "redirects": [
+    {
+      "source": "/marketplace",
+      "destination": "/explore",
+      "permanent": true
+    },
+    {
+      "source": "/marketplace/tours/:id",
+      "destination": "/explore/tours/:id",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/v1/:path*",
@@ -51,8 +63,12 @@
       "destination": "/cities/[id]/index.html"
     },
     {
+      "source": "/explore/tours/:id",
+      "destination": "/explore/tours/[id]/index.html"
+    },
+    {
       "source": "/marketplace/tours/:id",
-      "destination": "/marketplace/tours/[id]/index.html"
+      "destination": "/explore/tours/[id]/index.html"
     },
     {
       "source": "/storylist/:id",

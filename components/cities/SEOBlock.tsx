@@ -15,7 +15,7 @@ export const SEOBlock = () => {
                         and local stories right in your ear.
                     </p>
                     <p>
-                        We focus on <strong>supported travel cities</strong> where walking is the best way to discover hidden gems. Unlike traditional guidebooks,
+                        We focus on <strong>supported travel cities</strong> where walking is the best way to find the streets and stops worth walking. Unlike traditional guidebooks,
                         Gamana offers a hands-free, heads-up way to travel. Auto-playing audio ensures you never miss a story as you pass by landmarks.
                     </p>
                 </div>
@@ -44,7 +44,7 @@ export const FinalCTA = () => {
                         Ready to extract the <span className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] bg-clip-text text-transparent">city differently?</span>
                     </h2>
                     <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-medium">
-                        Join our travellers community discovering authentic local experiences with Gamana
+                        Join travellers who explore cities with Gamana in their ears
                     </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

@@ -212,7 +212,7 @@ export default function EnhancedPageLayout({
                       Ready to <span className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] bg-clip-text text-transparent">Explore?</span>
                     </h2>
                     <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium">
-                      Join our travellers community discovering authentic local experiences with Gamana
+                      Join travellers who explore cities with Gamana in their ears
                     </p>
                   </div>
                   <div className="flex gap-4 justify-center">

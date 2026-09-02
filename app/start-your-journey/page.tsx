@@ -336,7 +336,7 @@ export default function StartYourJourneyPage() {
                 <X className="h-4 w-4" />
               </button>
 
-              <p className="text-sm font-semibold text-gray-900 pr-6">Don&apos;t lose this — save your progress</p>
+              <p className="text-sm font-semibold text-gray-900 pr-6">Don&apos;t lose this, save your progress</p>
               <p className="text-xs text-gray-500 mt-1">
                 We&apos;ll keep everything you&apos;ve told us so far, tied to your Gamana account.
               </p>
@@ -454,14 +454,14 @@ export default function StartYourJourneyPage() {
             {step === STEP_WELCOME && (
               <div className="max-w-2xl mx-auto text-center space-y-6">
                 <p className="text-sm font-semibold text-[#159895] uppercase tracking-wider">
-                  Design concept — not live
+                  Design concept, not live
                 </p>
                 <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
                   Let&apos;s shape your Gamana journey
                 </h1>
                 <p className="text-gray-600 leading-relaxed">
-                  A few honest questions — who you&apos;re traveling as, what pulls you in, which kind of guide
-                  you&apos;d want beside you. Share as much or as little as you like — nothing here is shared or
+                  A few honest questions, who you&apos;re traveling as, what pulls you in, which kind of guide
+                  you&apos;d want beside you. Share as much or as little as you like, nothing here is shared or
                   sold; it exists only to make what you see, on the web and later in the app, feel like it was
                   made for you.
                 </p>
@@ -528,7 +528,7 @@ export default function StartYourJourneyPage() {
                   Traveling with young children or elders who&apos;ll need a gentler pace
                 </label>
                 <p className="text-xs text-gray-400 pt-2">
-                  We only ask this to shape pacing and safety tips — never shared, never sold.
+                  We only ask this to shape pacing and safety tips, never shared, never sold.
                 </p>
               </StepShell>
             )}
@@ -537,7 +537,7 @@ export default function StartYourJourneyPage() {
               <StepShell
                 eyebrow="3 · Timing"
                 title="When do you expect to travel?"
-                subtitle="Optional — add as many windows as apply, or skip this for now. Pick each range off the calendar."
+                subtitle="Optional, add as many windows as apply, or skip this for now. Pick each range off the calendar."
               >
                 <div className="space-y-3">
                   {answers.travelWindows.map((w, i) => (
@@ -604,7 +604,7 @@ export default function StartYourJourneyPage() {
               <StepShell
                 eyebrow="4 · Your travel companions"
                 title="Want to share some info on who travels with you?"
-                subtitle="Totally optional — share as much or as little as you're comfortable with. If you add someone, give them at least one interest so we know how to plan for them. We'll ask for your name later, when you save your journey."
+                subtitle="Totally optional, share as much or as little as you're comfortable with. If you add someone, give them at least one interest so we know how to plan for them. We'll ask for your name later, when you save your journey."
               >
                 <div className="space-y-4">
                   {answers.travelerProfiles.map((profile, i) => (
@@ -653,7 +653,7 @@ export default function StartYourJourneyPage() {
                             return (
                               <div key={catId} className="space-y-1.5">
                                 <p className="text-xs font-semibold text-gray-500">
-                                  {cat?.label} — fine-tune (optional)
+                                  {cat?.label}, fine-tune (optional)
                                 </p>
                                 <div className="flex flex-wrap gap-1.5">
                                   {subs.map((s) => (
@@ -736,8 +736,8 @@ export default function StartYourJourneyPage() {
                 title="Meet a few of the voices you might hear"
                 subtitle={
                   groupInterestIds.length > 0
-                    ? "Based on what you shared, these are the closest fits — you'll get to pick a narrator once you're in the app."
-                    : "Sixteen narrator personalities live in the app — here's a preview. No need to choose one now."
+                    ? "Based on what you shared, these are the closest fits, you'll get to pick a narrator once you're in the app."
+                    : "Sixteen narrator personalities live in the app, here's a preview. No need to choose one now."
                 }
               >
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -766,11 +766,11 @@ export default function StartYourJourneyPage() {
               <StepShell
                 eyebrow="8 · A few practicalities"
                 title="Anything else we should keep in mind?"
-                subtitle="A few details per traveler help us keep recommendations safe and comfortable — all optional."
+                subtitle="A few details per traveler help us keep recommendations safe and comfortable, all optional."
               >
                 {answers.groupType && answers.groupType !== "Just me" && answers.travelerProfiles.length === 1 && (
                   <p className="text-xs text-[#159895] bg-[#159895]/5 border border-[#159895]/20 rounded-lg px-3 py-2">
-                    You mentioned traveling as &ldquo;{answers.groupType}&rdquo; — want to add the others below too?
+                    You mentioned traveling as &ldquo;{answers.groupType}&rdquo;, want to add the others below too?
                   </p>
                 )}
                 <div className="space-y-4">
@@ -833,7 +833,7 @@ export default function StartYourJourneyPage() {
                   <Label htmlFor="notes">Anything else you&apos;d like to tell us? (optional)</Label>
                   <Textarea
                     id="notes"
-                    placeholder="Share as much as you'd like — mobility needs, a place you're avoiding, an occasion you're celebrating..."
+                    placeholder="Share as much as you'd like, mobility needs, a place you're avoiding, an occasion you're celebrating..."
                     value={answers.additionalNotes}
                     onChange={(e) => update("additionalNotes", e.target.value)}
                     rows={4}
@@ -928,7 +928,7 @@ export default function StartYourJourneyPage() {
                 )}
 
                 <p className="text-xs text-gray-400 pt-2">
-                  Prototype note: this step doesn&apos;t create a real account or OAuth session yet — it&apos;s
+                  Prototype note: this step doesn&apos;t create a real account or OAuth session yet, it&apos;s
                   here to show where account creation fits in the flow.
                 </p>
               </StepShell>
@@ -1010,10 +1010,10 @@ export default function StartYourJourneyPage() {
                   <p>Account: {answers.authMethod ? `Signed up via ${answers.authMethod}` : "Not created yet"}</p>
                 </div>
                 <p className="text-sm text-gray-500">
-                  This is just the start — explore your marketplace now, or download the Gamana app to keep
+                  This is just the start, explore your marketplace now, or download the Gamana app to keep
                   going in person.
                 </p>
-                <Link href="/marketplace">
+                <Link href="/explore">
                   <Button className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] hover:from-[#159895] hover:to-[#1A5F7A] rounded-full px-8">
                     Start Exploring
                   </Button>

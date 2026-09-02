@@ -11,13 +11,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   return {
     title: "Explore Audio Stories on Gamana",
-    description: "Immersive, location-based audio tours created for your mobile device. Open this link on mobile to begin your journey.",
+    description: "Location-based audio tours for your phone. Open this link on mobile to begin your journey.",
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
       title: "Discover Local Stories - Gamana App",
-      description: "Scan or open this link on mobile to explore curated audio storylists around you.",
+      description: "Scan or open this link on mobile to explore audio storylists near you.",
       url: canonicalUrl,
       siteName: "Gamana",
       images: [
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     twitter: {
       card: "summary_large_image",
       title: "Explore Audio Stories on Gamana",
-      description: "Immersive, location-based audio tours created for your mobile device. Scan to begin.",
+      description: "Location-based audio tours for your phone. Scan to begin.",
       images: ["https://shareable.gamana.app/ai-travel-guide-app.jpg"],
     },
   };

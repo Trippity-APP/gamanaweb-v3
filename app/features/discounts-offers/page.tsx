@@ -5,13 +5,13 @@ import EnhancedPageLayout from '@/components/enhanced-page-layout';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
   title: 'Discounts & Offers on Travel Tours',
-  description: 'Discover exclusive discounts, offers, and deals on immersive audio travel experiences. Save more while exploring unforgettable destinations with Gamana.',
+  description: 'Member discounts on audio tours and partner deals at restaurants, shops, and attractions. Save while you explore with Gamana.',
   alternates: {
     canonical: 'https://www.gamana.app/features/discounts-offers',
   },
   openGraph: {
     title: 'Discounts & Offers on Travel Tours | Gamana',
-    description: 'Discover exclusive discounts, offers, and deals on immersive audio travel experiences. Save more while exploring unforgettable destinations with Gamana.',
+    description: 'Member discounts on audio tours and partner deals at restaurants, shops, and attractions. Save while you explore with Gamana.',
     url: 'https://www.gamana.app/features/discounts-offers',
     siteName: 'Gamana',
     type: 'website',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Discounts & Offers on Travel Tours | Gamana',
-    description: 'Discover exclusive discounts, offers, and deals on immersive audio travel experiences. Save more while exploring unforgettable destinations with Gamana.',
+    description: 'Member discounts on audio tours and partner deals at restaurants, shops, and attractions. Save while you explore with Gamana.',
     images: ['/gamana-logo.svg'],
   },
 };
@@ -60,7 +60,7 @@ export default function DiscountsOffersPage() {
       <EnhancedPageLayout
       icon={Gift}
       title="Discounts & Offers"
-      subtitle="Exclusive partner deals that make your travel experiences more affordable and rewarding"
+      subtitle="Partner deals for Gamana members that make your travel experiences more affordable and rewarding"
       gradient="from-[#159895] via-[#1A5F7A] to-[#57C5B6]"
       introTitle="Save More, Experience More"
       introText={[
@@ -89,11 +89,11 @@ export default function DiscountsOffersPage() {
         {
           icon: Store,
           title: 'Local Business Deals',
-          description: 'Support local businesses while saving money with our curated network of partner establishments.',
+          description: 'Support local businesses while saving money with our partner restaurants, shops, and attractions.',
         },
       ]}
       quickFeatures={[
-        { icon: ShoppingBag, title: 'Exclusive Deals' },
+        { icon: ShoppingBag, title: 'Member Deals' },
         { icon: CreditCard, title: 'Instant Savings' },
         { icon: BadgePercent, title: 'Partner Network' },
       ]}

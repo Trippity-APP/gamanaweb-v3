@@ -74,7 +74,7 @@ export const tours: Tour[] = [
   {
     id: '3',
     title: 'Tokyo Street Food Journey',
-    description: 'Experience authentic Tokyo through its incredible street food culture',
+    description: "A walking tour of Tokyo's best street food neighbourhoods",
     location: 'Tokyo, Japan',
     duration: '2 hours',
     price: 0,
@@ -223,7 +223,7 @@ export const experiences: Experience[] = [
   {
     id: 'exp3',
     title: 'Home-Style Rajasthani Cooking Class',
-    description: "Cook a full thali in a family kitchen — dal baati churma, gatte ki sabzi, and the stories behind them.",
+    description: "Cook a full thali in a family kitchen, dal baati churma, gatte ki sabzi, and the stories behind them.",
     location: 'Jaipur, India',
     duration: '3 hours',
     price: 32,
@@ -249,7 +249,7 @@ export const experiences: Experience[] = [
   {
     id: 'exp5',
     title: 'Hampi Sunset Coracle Ride',
-    description: 'Round boat, still water, boulder-strewn hills turning gold — a quiet way to close a day among the ruins.',
+    description: 'Round boat, still water, boulder-strewn hills turning gold, a quiet way to close a day among the ruins.',
     location: 'Hampi, India',
     duration: '1 hour',
     price: 15,
@@ -275,7 +275,7 @@ export const experiences: Experience[] = [
   {
     id: 'exp7',
     title: 'Sunrise Photography Walk at the Taj Mahal',
-    description: 'Beat the crowds and the heat — a guided walk timed to first light, with tips for the shot everyone wants.',
+    description: 'Beat the crowds and the heat, a guided walk timed to first light, with tips for the shot everyone wants.',
     location: 'Agra, India',
     duration: '2 hours',
     price: 28,
@@ -336,7 +336,7 @@ export const coinBundles: CoinBundle[] = [
   {
     id: 'bundle-traveler',
     name: "Traveler's Pack",
-    blurb: 'Best value per Coin — great for a full trip',
+    blurb: 'Best value per Coin, great for a full trip',
     baseCoins: 120,
     bonusCoins: 20,
     price: 19.99,

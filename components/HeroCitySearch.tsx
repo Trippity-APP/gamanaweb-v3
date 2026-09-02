@@ -31,7 +31,7 @@ export function HeroCitySearch() {
 
   const goToCity = (name: string) => {
     setOpen(false);
-    router.push(`/marketplace?city=${encodeURIComponent(name)}`);
+    router.push(`/explore?city=${encodeURIComponent(name)}`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -5,13 +5,13 @@ import EnhancedPageLayout from '@/components/enhanced-page-layout';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
   title: 'Gamana Coins Rewards & Benefits',
-  description: 'Earn and redeem Gamana Coins for discounts, upgrades, and exclusive travel perks. Get more value from every self-guided audio tour on Gamana.',
+  description: 'Earn and redeem Gamana Coins for discounts, upgrades, and discounts and perks on tours. Get more value from every self-guided audio tour on Gamana.',
   alternates: {
     canonical: 'https://www.gamana.app/features/gamana-coins',
   },
   openGraph: {
     title: 'Gamana Coins Rewards & Benefits | Gamana',
-    description: 'Earn and redeem Gamana Coins for discounts, upgrades, and exclusive travel perks. Get more value from every self-guided audio tour on Gamana.',
+    description: 'Earn and redeem Gamana Coins for discounts, upgrades, and discounts and perks on tours. Get more value from every self-guided audio tour on Gamana.',
     url: 'https://www.gamana.app/features/gamana-coins',
     siteName: 'Gamana',
     type: 'website',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Gamana Coins Rewards & Benefits | Gamana',
-    description: 'Earn and redeem Gamana Coins for discounts, upgrades, and exclusive travel perks. Get more value from every self-guided audio tour on Gamana.',
+    description: 'Earn and redeem Gamana Coins for discounts, upgrades, and discounts and perks on tours. Get more value from every self-guided audio tour on Gamana.',
     images: ['/gamana-logo.svg'],
   },
 };
@@ -66,14 +66,14 @@ export default function GamanaCoinsPage() {
       introTitle="Earn While You Explore"
       introText={[
         'Gamana Coins are our loyalty reward system that recognizes and rewards your engagement with the platform. Every tour you complete, review you write, and milestone you reach earns you coins that have real value.',
-        'Use your accumulated coins to unlock premium content, get discounts on future tours, access exclusive experiences, or even exchange them with other travelers. It is a sustainable reward ecosystem that grows with your adventures.',
+        'Use your accumulated coins to unlock premium content, get discounts on future tours, access exclusive experiences, or even exchange them with other travelers. It is a reward system. Earn Coins as you explore, spend them on tours.',
       ]}
       benefits={[
         { text: 'Earn coins for tours, reviews, and engagement' },
         { text: 'Securely tracked in your wallet' },
         { text: 'Redeem for discounts and upgrades' },
         { text: 'Exchange with other travelers' },
-        { text: 'Unlock exclusive premium content' },
+        { text: 'Unlock premium tours' },
         { text: 'Track your earning history' },
       ]}
       examples={[

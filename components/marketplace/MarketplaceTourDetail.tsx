@@ -28,7 +28,7 @@ import { getTierColor, tierLabels, type Tour } from "@/lib/marketplace-data";
 function resolveTourId(paramId: string): string {
   if (paramId !== "[id]") return paramId;
   if (typeof window === "undefined") return paramId;
-  const match = window.location.pathname.match(/\/marketplace\/tours\/([^/]+)/);
+  const match = window.location.pathname.match(/\/(?:explore|marketplace)\/tours\/([^/]+)/);
   return match?.[1] ?? paramId;
 }
 
@@ -118,7 +118,7 @@ export function MarketplaceTourDetail({
             Try again
           </Button>
           <Button asChild variant="outline">
-            <Link href="/marketplace">Back to marketplace</Link>
+            <Link href="/explore">Back to explore</Link>
           </Button>
         </div>
       </div>
@@ -129,11 +129,11 @@ export function MarketplaceTourDetail({
     <div className="max-w-5xl mx-auto px-4 pb-16">
       <div className="pt-6">
         <Link
-          href="/marketplace"
+          href="/explore"
           className="inline-flex items-center gap-2 text-sm font-medium text-[#159895] hover:text-[#128a86]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to marketplace
+          Back to explore
         </Link>
       </div>
 

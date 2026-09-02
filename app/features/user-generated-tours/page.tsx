@@ -65,7 +65,7 @@ export default function UserGeneratedToursPage() {
       heroImage="/kerala-backwaters-alleppey-houseboat-golden-hour.jpg"
       introTitle="Your Story, Your Way"
       introText={[
-        'Gamana empowers you to become a storyteller. Create your own custom tours and storylists, share your unique perspectives, and help other travelers discover hidden gems through your eyes. Whether it is your favorite neighborhood spots, a themed walking tour, or a personal journey, you can craft and publish it for the community.',
+        'You can build your own tours and storylists: your neighborhood walk, your favourite food route, your take on a city.',
         'Explore tours created by other passionate travelers from around the world. Discover niche experiences, local favorites, and unique perspectives that you will not find in traditional guidebooks. The best tours are often created by those who love a place most.',
       ]}
       benefits={[

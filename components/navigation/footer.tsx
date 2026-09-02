@@ -42,7 +42,7 @@ export default function Footer() {
               className="h-8 w-auto brightness-0 invert"
             />
             <p className="text-sm leading-relaxed text-gray-400">
-              Experience truly immersive travel with cutting-edge technology, authentic local experiences, and seamless online-offline integration.
+              Walk with audio tours that work offline, tell you what you're looking at, and don't need you to stare at your phone.
             </p>
             {/* Social Links */}
             <div className="flex space-x-4 pt-2">

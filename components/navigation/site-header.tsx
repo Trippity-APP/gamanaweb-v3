@@ -52,7 +52,7 @@ export default function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
     };
   }, [isMenuOpen]);
 
-  const MARKETPLACE_ROUTES = ["/marketplace", "/marketplace-redesign"];
+  const MARKETPLACE_ROUTES = ["/explore", "/marketplace", "/marketplace-redesign"];
   const isActive = (href: string) =>
     MARKETPLACE_ROUTES.includes(href)
       ? MARKETPLACE_ROUTES.includes(pathname)
@@ -91,7 +91,7 @@ export default function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
               (the personalized variant when signed in); otherwise clicking the logo
               dropped signed-in visitors on the generic page while nav pointed elsewhere. */}
           <Link
-            href={resolveNavHref({ name: "Explore", href: "/marketplace" })}
+            href={resolveNavHref({ name: "Explore", href: "/explore" })}
             className="shrink-0 flex items-center"
             onClick={closeMenu}
           >

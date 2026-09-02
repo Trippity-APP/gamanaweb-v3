@@ -59,17 +59,17 @@ const FEATURES = [
   {
     icon: Sparkles,
     title: "AI Narration",
-    desc: "16 distinct narrator personalities — from scholarly to comic — bring every story to life in a voice that suits you.",
+    desc: "16 distinct narrator personalities, from scholarly to comic, tell each story in a voice you'll actually want to listen to.",
   },
   {
     icon: MapPin,
     title: "GPS Auto-Play",
-    desc: "Stories start themselves the moment you're in range. No searching, no tapping — just walk.",
+    desc: "Stories start themselves the moment you're in range. No searching, no tapping, just walk.",
   },
   {
     icon: WifiOff,
     title: "Offline Access",
-    desc: "Download a tour before you go and it plays fully offline — no signal, no wifi, no data charges.",
+    desc: "Download a tour before you go and it plays fully offline, no signal, no wifi, no data charges.",
   },
   {
     icon: Languages,
@@ -78,13 +78,13 @@ const FEATURES = [
   },
   {
     icon: Compass,
-    title: "Curated Walking Tours",
+    title: "Walking Tours",
     desc: "Routes designed by people who know the city, not an algorithm guessing at your interests.",
   },
   {
     icon: Heart,
     title: "Save Favourite Tours",
-    desc: "Build your own Storylist and revisit — or share — the places that stayed with you.",
+    desc: "Build your own Storylist and revisit, or share, the places that stayed with you.",
   },
 ];
 
@@ -111,7 +111,7 @@ const COMPARISONS = [
     title: "Gamana vs. Traditional Tour Guide",
     altLabel: "Traditional Guide",
     gamana: [
-      "Start anytime — 6am or midnight, entirely on your schedule",
+      "Start anytime, 6am or midnight, entirely on your schedule",
       "One-time unlock, use it again on your next trip",
       "Available in 6+ languages instantly",
     ],
@@ -122,8 +122,8 @@ const COMPARISONS = [
     altLabel: "Google Maps",
     gamana: [
       "Tells you why a place matters, not just where it is",
-      "Curated routes that connect the dots between places",
-      "Hands-free audio — eyes up, not on a screen",
+      "Routes that link the stops that matter",
+      "Hands-free audio, eyes up, not on a screen",
     ],
     alt: ["Shows you a pin, not the story behind it", "Turn-by-turn directions, no narrative thread", "Eyes down the whole walk"],
   },
@@ -131,8 +131,8 @@ const COMPARISONS = [
     title: "Gamana vs. Travel Blogs",
     altLabel: "Travel Blogs",
     gamana: [
-      "Stories play automatically as you walk — no reading required",
-      "Curated and narrated by real personas",
+      "Stories play automatically as you walk, no reading required",
+      "Written and voiced by distinct narrator characters",
       "Works fully offline, no ads or pop-ups",
     ],
     alt: ["Static lists you have to read before or during your trip", "Generic, SEO-written filler", "Needs signal, cluttered with ads"],
@@ -150,7 +150,7 @@ const TESTIMONIALS = [
     name: "James",
     location: "London, UK",
     quote:
-      "Downloaded the Varanasi tour before I lost signal and it just worked — no app has made an unfamiliar city feel that easy to explore alone.",
+      "Downloaded the Varanasi tour before I lost signal and it just worked, no app has made an unfamiliar city feel that easy to explore alone.",
   },
   {
     name: "Aisha",
@@ -163,7 +163,7 @@ const TESTIMONIALS = [
 const FAQS = [
   {
     q: "How much does Gamana cost?",
-    a: "Gamana is free to download. Some Tours and Combos unlock with Gamana Coins, which you can buy in the app, and a selection of stories are always free to try — no subscription required.",
+    a: "Gamana is free to download. Some Tours and Combos unlock with Gamana Coins, which you can buy in the app, and a selection of stories are always free to try, no subscription required.",
   },
   {
     q: "Does Gamana work without internet?",
@@ -171,11 +171,11 @@ const FAQS = [
   },
   {
     q: "Which cities does Gamana cover?",
-    a: "Gamana currently covers 50+ cities, with deep coverage across India — Delhi, Agra, Varanasi, Bengaluru, Goa, and more — plus destinations like Singapore, Dubai, and New York. New cities are added regularly.",
+    a: "Gamana currently covers 50+ cities, with deep coverage across India, Delhi, Agra, Varanasi, Bengaluru, Goa, and more, plus destinations like Singapore, Dubai, and New York. New cities are added regularly.",
   },
   {
     q: "What languages are available?",
-    a: "English, Hindi, Kannada, Tamil, Russian, French, and more — with additional languages being added over time.",
+    a: "English, Hindi, Kannada, Tamil, Russian, French, and more, with additional languages being added over time.",
   },
   {
     q: "What devices does Gamana support?",
@@ -249,7 +249,7 @@ export default function LandingContent() {
               Every Street Has a Story. Let Gamana Tell It.
             </h1>
             <p className="mt-5 text-base sm:text-lg text-white/85 max-w-lg">
-              GPS-triggered audio tours that turn any walk into a journey — no guide, no wifi, no
+              GPS-triggered audio tours that turn any walk into a journey, no guide, no wifi, no
               planning required.
             </p>
 
@@ -317,7 +317,7 @@ export default function LandingContent() {
             </div>
             <h3 className="font-semibold text-gray-900 mb-2">The Travel Problem</h3>
             <p className="text-sm text-gray-500">
-              You land in a new city with a map full of pins and zero context — no idea why that
+              You land in a new city with a map full of pins and zero context, no idea why that
               temple matters, which street has the best food, or where locals actually go.
             </p>
           </div>
@@ -328,7 +328,7 @@ export default function LandingContent() {
             <h3 className="font-semibold text-gray-900 mb-2">Why Existing Solutions Fall Short</h3>
             <p className="text-sm text-gray-500">
               Guided tours are expensive and run on someone else's schedule. Blogs go stale and don't
-              fit your pace. Maps get you there — but never tell you why it matters.
+              fit your pace. Maps get you there, but never tell you why it matters.
             </p>
           </div>
           <div className="rounded-2xl border border-[#57C5B6]/30 bg-[#F0FBFA] p-6">
@@ -337,7 +337,7 @@ export default function LandingContent() {
             </div>
             <h3 className="font-semibold text-gray-900 mb-2">How Gamana Solves It</h3>
             <p className="text-sm text-gray-600">
-              Gamana plays the right story, at the right place, the moment you arrive — hands-free,
+              Gamana plays the right story, at the right place, the moment you arrive, hands-free,
               offline-ready, and entirely on your own schedule.
             </p>
           </div>
@@ -351,7 +351,7 @@ export default function LandingContent() {
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">What is Gamana?</h2>
             <p className="mt-3 text-gray-500">
               Gamana is a GPS-enabled audio storytelling app that turns any city into a walking
-              tour — no guide, no earpiece rental, no fixed schedule. Just open the app, start
+              tour, no guide, no earpiece rental, no fixed schedule. Just open the app, start
               walking, and let the stories find you.
             </p>
           </div>
@@ -368,7 +368,7 @@ export default function LandingContent() {
               <MapPin className="h-6 w-6 text-[#159895] mb-3" />
               <h3 className="font-semibold text-gray-900 mb-1">GPS-Based Storytelling</h3>
               <p className="text-sm text-gray-500">
-                Stories trigger automatically as you approach each spot — no tapping, no searching,
+                Stories trigger automatically as you approach each spot, no tapping, no searching,
                 no losing your place.
               </p>
             </div>
@@ -376,7 +376,7 @@ export default function LandingContent() {
               <Users className="h-6 w-6 text-[#159895] mb-3" />
               <h3 className="font-semibold text-gray-900 mb-1">Who It's For</h3>
               <p className="text-sm text-gray-500">
-                Solo explorers, curious families, heritage lovers — anyone who'd rather look up at a
+                Solo explorers, curious families, heritage lovers, anyone who'd rather look up at a
                 monument than down at a screen.
               </p>
             </div>
@@ -392,7 +392,7 @@ export default function LandingContent() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             { icon: Download, step: "1", title: "Download the App", desc: "Grab Gamana free from the App Store or Google Play." },
-            { icon: MapPin, step: "2", title: "Choose a Destination", desc: "Pick a city and browse curated walking tours." },
+            { icon: MapPin, step: "2", title: "Choose a Destination", desc: "Pick a city and browse walking tours." },
             { icon: Footprints, step: "3", title: "Start Walking", desc: "No syncing, no fumbling with a map. Just start moving." },
             { icon: Volume2, step: "4", title: "Listen to Stories", desc: "Stories play automatically as you reach each spot." },
           ].map((s) => (
@@ -460,7 +460,7 @@ export default function LandingContent() {
           {POPULAR_TOURS.map((t) => (
             <Link
               key={t.title}
-              href="/marketplace"
+              href="/explore"
               className="group rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow"
             >
               <div className="relative h-40">
@@ -519,7 +519,7 @@ export default function LandingContent() {
             </div>
           </div>
           <p className="text-center text-xs text-gray-400 mt-2">
-            Demo video placeholder — swap in the real product video before launch.
+            Demo video placeholder, swap in the real product video before launch.
           </p>
 
           <div className="grid sm:grid-cols-2 gap-4 mt-12 max-w-3xl mx-auto">
@@ -531,7 +531,7 @@ export default function LandingContent() {
             </div>
           </div>
           <p className="text-center text-sm text-gray-500 mt-4">
-            Swipe through tours, save favorites, and download for offline — all from one clean
+            Swipe through tours, save favorites, and download for offline, all from one clean
             interface.
           </p>
         </div>

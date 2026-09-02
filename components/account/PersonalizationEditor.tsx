@@ -405,7 +405,7 @@ export function PersonalizationEditor() {
                     const subs = subInterestOptions[catId] || [];
                     return (
                       <div key={catId} className="space-y-1.5">
-                        <p className="text-xs font-semibold text-gray-500">{cat?.label} — fine-tune (optional)</p>
+                        <p className="text-xs font-semibold text-gray-500">{cat?.label}, fine-tune (optional)</p>
                         <div className="flex flex-wrap gap-1.5">
                           {subs.map((s) => (
                             <Chip
@@ -521,7 +521,7 @@ export function PersonalizationEditor() {
         <Label htmlFor="pz-notes">Anything else you&apos;d like to tell us? (optional)</Label>
         <Textarea
           id="pz-notes"
-          placeholder="Share as much as you'd like — mobility needs, a place you're avoiding, an occasion you're celebrating..."
+          placeholder="Share as much as you'd like, mobility needs, a place you're avoiding, an occasion you're celebrating..."
           value={draft.additionalNotes}
           onChange={(e) => update("additionalNotes", e.target.value)}
           rows={4}

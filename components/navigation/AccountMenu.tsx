@@ -52,7 +52,7 @@ export function AccountMenu() {
         <PopoverContent align="end" className="w-72 space-y-3">
           <div className="text-center space-y-1">
             <p className="text-sm font-semibold text-gray-900">Log in to Gamana</p>
-            <p className="text-xs text-gray-500">Same account as the app — your bookings and preferences carry over.</p>
+            <p className="text-xs text-gray-500">Same account as the app, your bookings and preferences carry over.</p>
           </div>
 
           {!showEmailForm ? (

@@ -98,7 +98,7 @@ export default function ContactPage() {
       <main className="min-h-screen">
         <section className="relative h-[62vh] sm:h-[68vh] flex items-center justify-center overflow-hidden">
           {/* Photo behind the brand gradient, matching /marketplace-redesign, /cities,
-              /ecosystem, and /about — a flat gradient here was the odd one out. */}
+              /ecosystem, and /about, a flat gradient here was the odd one out. */}
           <div className="absolute inset-0">
             <HeroSlideshow
               images={[

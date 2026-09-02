@@ -19,7 +19,7 @@ import { HeroSlideshow } from "@/components/HeroSlideshow";
 
 export const metadata: Metadata = {
   title: "Features",
-  description: "Discover Gamana's core features: exquisite storytelling, hands-free immersive audio, expert narrator guides, Gamana Coins rewards, user-generated tours, and multi-language support for heritage travel experiences.",
+  description: "Discover Gamana's core features: story-rich audio, hands-free walking tours, narrator guides, Gamana Coins, user-generated tours, and multi-language support.",
   alternates: {
     canonical: 'https://www.gamana.app/features',
   },
@@ -31,7 +31,7 @@ export default function FeaturesPage() {
       id: "exquisite-storytelling",
       icon: BookOpen,
       title: "Exquisite Storytelling",
-      description: "Inspiring, insightful and shocking facts",
+      description: "History, culture, and the details most guides skip",
       details: [
         "Professionally researched and written narratives",
         "Historical facts blended with local legends",
@@ -75,7 +75,7 @@ export default function FeaturesPage() {
         "Earn coins for tours, reviews, and engagement",
         "Securely tracked in your wallet",
         "Redeem for discounts and upgrades",
-        "Unlock exclusive premium content",
+        "Unlock premium tours",
       ],
       gradient: "from-[#159895] to-[#0B6E4F]",
     },
@@ -96,7 +96,7 @@ export default function FeaturesPage() {
       id: "local-languages",
       icon: Globe,
       title: "Local Languages",
-      description: "Authentic local experiences",
+      description: "Stories in local languages",
       details: [
         "Native speaker narration",
         "Cultural context in local language",
@@ -155,7 +155,7 @@ export default function FeaturesPage() {
                 <div className="h-2 bg-white/60 rounded-full opacity-0 animate-fade-in" style={{ animationDelay: "150ms" }}></div>
               </div>
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/95 leading-relaxed opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
-                Discover how Gamana transforms your travels with expertly narrated audio tours
+                See what Gamana does: audio tours you take on foot, at your pace
               </p>
             </div>
           </div>
@@ -249,7 +249,7 @@ export default function FeaturesPage() {
                 Ready to Experience These Features?
               </h2>
               <p className="text-base sm:text-lg md:text-xl text-white">
-                Download Gamana and start exploring with expertly narrated audio tours
+                Download Gamana and start exploring with narrated audio tours
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <a href="https://play.google.com/store/apps/details?id=com.agent.gamana.ai" target="_blank" rel="noopener noreferrer">

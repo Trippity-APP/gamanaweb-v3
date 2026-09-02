@@ -170,7 +170,7 @@ const BlogExplorer = ({ posts: initialPosts = [], highlightSlug }: Props) => {
     <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-[#E0F7F4]">
       <section className="relative h-[62vh] sm:h-[68vh] flex items-center justify-center text-white overflow-hidden">
         {/* Same amber-into-brand-teal family as Partner with Gamana (not the plum-rose
-            attempt, which didn't land) — warm gold lean, lower opacity so the photo reads
+            attempt, which didn't land), warm gold lean, lower opacity so the photo reads
             clearly. Photo swapped to one that actually shows a traveler in the scene
             (golden-hour Mehrangarh Fort), fitting for a page about a travel blog rather
             than a monument-only shot. */}
@@ -220,7 +220,7 @@ const BlogExplorer = ({ posts: initialPosts = [], highlightSlug }: Props) => {
 
       {/* Search + filters, floated up over the hero photo as one unified card, matching the
           overlapping-panel pattern used across /marketplace-redesign, /cities, /ecosystem,
-          and /contact — previously these floated as two separate white elements. */}
+          and /contact, previously these floated as two separate white elements. */}
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 -mt-14 sm:-mt-16 relative z-10 pb-10">
         <div className="max-w-4xl mx-auto rounded-2xl border border-gray-100 bg-white shadow-lg p-4 sm:p-5">
           <div className="flex flex-col md:flex-row gap-4">

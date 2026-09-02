@@ -40,19 +40,19 @@ export default function EcosystemPageContent() {
       icon: Globe,
       title: "Community-Based Tourism",
       description: "Local community experiences emphasizing sustainability and responsibility",
-      market: "Authentic cultural encounters",
+      market: "Local community experiences",
     },
     {
       icon: Store,
       title: "Local Artisans & Producers",
-      description: "Traditional craftspeople, local markets, and authentic product makers",
+      description: "Traditional craftspeople, local markets, and local product makers",
       market: "Supporting local economies",
     },
     {
       icon: Hotel,
       title: "Cultural Accommodations",
-      description: "Heritage hotels, traditional stays, and culturally immersive lodging",
-      market: "Enhanced authentic experiences",
+      description: "Heritage hotels, traditional stays, and heritage stays and homestays",
+      market: "Better guest experiences",
     },
   ];
 
@@ -92,7 +92,7 @@ export default function EcosystemPageContent() {
   const partnerSnapshot = [
     { icon: Handshake, title: "6 Partner Segments", description: "Heritage to hyperlocal artisans, all in one network" },
     { icon: MapPinned, title: "India-First Reach", description: "Deep coverage across Indian cities and growing" },
-    { icon: Sparkles, title: "Curated Discovery", description: "Featured in personalized recommendations, not buried in search" },
+    { icon: Sparkles, title: "Featured in the app", description: "Featured in personalized recommendations, not buried in search" },
     { icon: TrendingUp, title: "Built for Growth", description: "Support and insights as your partnership scales" },
   ];
 
@@ -105,17 +105,17 @@ export default function EcosystemPageContent() {
     {
       step: "2",
       title: "Set Up Offers",
-      description: "Configure exclusive discounts and promotions for Gamana travelers",
+      description: "Configure member discounts and promotions for Gamana travelers",
     },
     {
       step: "3",
       title: "Get Discovered",
-      description: "Appear in traveler searches, recommendations, and curated tours",
+      description: "Appear in traveler searches, recommendations, and featured tours",
     },
     {
       step: "4",
       title: "Welcome Travelers",
-      description: "Serve Gamana users and grow your business with our ecosystem",
+      description: "Serve Gamana users and grow your business on Gamana",
     },
   ];
 
@@ -123,10 +123,10 @@ export default function EcosystemPageContent() {
     <main className="min-h-screen">
       <section className="relative h-[62vh] sm:h-[68vh] flex items-center justify-center overflow-hidden">
         {/*
-          Audience for this page is Indian experience operators, not travellers — so the
+          Audience for this page is Indian experience operators, not travellers, so the
           carousel is cast to answer "what kind of customer would Gamana send me?"
 
-          Every frame is bright, uncluttered and premium — and, critically, every visitor
+          Every frame is bright, uncluttered and premium, and, critically, every visitor
           is visibly *listening*: earphones at the Jama Masjid courtyard, headphones at
           Gokak Falls, an earbud on the cobbled street. Gamana is an audio product, so a
           hero full of people simply looking at scenery sells the wrong thing; a partner
@@ -135,7 +135,7 @@ export default function EcosystemPageContent() {
           exactly that reason, as were the earlier Fort Kochi fish market and Bangkok night
           market, which read as crowded and low-margin.
 
-          Half the rotation sits outside India (London, Italy) — the catalogue isn't
+          Half the rotation sits outside India (London, Italy), the catalogue isn't
           India-only, and for this audience an international frame doubles as evidence that
           Gamana's travellers are the well-travelled, higher-spend kind.
         */}
@@ -175,7 +175,7 @@ export default function EcosystemPageContent() {
                 <div className="h-2 bg-white/60 rounded-full opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}></div>
               </div>
               <p className="text-xl md:text-2xl text-white/95 leading-relaxed max-w-3xl mx-auto opacity-0 animate-fade-in" style={{ animationDelay: "450ms" }}>
-                Be part of the growing market for authentic local experiences — powered by India's first AI-powered heritage travel platform
+                Reach travellers already exploring cities with Gamana audio tours
               </p>
             </div>
 
@@ -269,7 +269,7 @@ export default function EcosystemPageContent() {
               Partner Benefits
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Everything you need to succeed in the travel ecosystem
+              Everything you need to succeed as a Gamana partner
             </p>
           </div>
 

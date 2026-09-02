@@ -39,7 +39,7 @@ const trustPoints = [
   { icon: CloudDownload, title: 'Works offline', description: 'Download once, listen with no signal' },
   // No narrator count here on purpose: the roster varies by city and language, so a fixed
   // number would be wrong somewhere. The point is that the traveller chooses.
-  { icon: Users2, title: 'Your pick of narrator', description: 'Scholarly, devotional, comic, local — choose the voice that suits you' },
+  { icon: Users2, title: 'Your pick of narrator', description: 'Scholarly, devotional, comic, local, choose the voice that suits you' },
   { icon: Compass, title: 'India-first', description: 'Deep India coverage, extended worldwide' },
 ];
 
@@ -146,7 +146,7 @@ export function MarketplaceBrowser({
 
   /*
     Unlocking spends Coins irreversibly against the traveller's balance with no undo and
-    no cart step to pause at, so it gets an explicit confirmation — the one-click version
+    no cart step to pause at, so it gets an explicit confirmation, the one-click version
     made it far too easy to burn Coins on a mis-tap. The insufficient-balance check runs
     before the prompt so someone who can't afford it is sent straight to the bundle
     picker instead of being asked to confirm something that would fail.
@@ -196,7 +196,7 @@ export function MarketplaceBrowser({
     addItem({
       id: bundle.id,
       kind: 'coins',
-      title: `${bundle.name} — ${totalCoins.toLocaleString()} Coins`,
+      title: `${bundle.name}, ${totalCoins.toLocaleString()} Coins`,
       image: '/gamana-logo.png',
       price: bundle.price,
       coinsGranted: totalCoins,
@@ -269,7 +269,7 @@ export function MarketplaceBrowser({
     so each cause gets its own message:
       1. The tier/category filter zeroed an otherwise-populated result set.
       2. This tab has nothing for the city, but the other tab does.
-      3. Neither tab has anything — the only case that is genuinely "not covered yet",
+      3. Neither tab has anything, the only case that is genuinely "not covered yet",
          and the only one that shows the demand-capture card.
     These counts deliberately ignore the tier/category filters so cause 1 can't be
     mistaken for cause 3.
@@ -423,7 +423,7 @@ export function MarketplaceBrowser({
         */}
         <div className="relative z-10 -mt-14 sm:-mt-16 rounded-2xl border border-gray-100 bg-white p-5 shadow-lg sm:p-6">
           {/* The Tours search box itself moved up into the hero (MarketplaceHeroSearch) so
-              it sits right under the headline instead of a scroll-step away — this card
+              it sits right under the headline instead of a scroll-step away, this card
               now just reflects the resulting city filter, plus trust points and the app
               notice. searchQuery/experienceSearch stay in sync with the URL via the
               cityFromUrl effect above. */}
@@ -462,7 +462,7 @@ export function MarketplaceBrowser({
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-gray-50 px-4 py-3 border-t-0">
             <p className="flex items-center gap-2 text-xs text-gray-500">
               <Smartphone className="h-3.5 w-3.5 text-[#159895] shrink-0" />
-              Everything you unlock or book here plays in the Gamana app — sign in with the same account.
+              Everything you unlock or book here plays in the Gamana app, sign in with the same account.
             </p>
             <a
               href={storeUrl}
@@ -528,7 +528,7 @@ export function MarketplaceBrowser({
                 </div>
               ) : (
                 <div className="text-center py-12 space-y-3">
-                  <p className="text-gray-500">No personalized matches yet — browse the full catalog.</p>
+                  <p className="text-gray-500">No personalized matches yet, browse the full catalog.</p>
                   <Button variant="outline" onClick={() => setActiveTab('tours')}>
                     Browse all tours
                   </Button>
@@ -632,7 +632,7 @@ export function MarketplaceBrowser({
           <TabsContent value="deals" className="space-y-10">
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Limited time offers</h2>
-              <p className="text-sm text-gray-500">Exclusive deals and promotions</p>
+              <p className="text-sm text-gray-500">Member deals and promotions</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -742,7 +742,7 @@ export function MarketplaceBrowser({
           </div>
           {pendingUnlock && (
             <p className="text-sm text-gray-600">
-              {pendingUnlock.title} costs {pendingUnlock.priceCoins} Coins — you have {coinBalance}.
+              {pendingUnlock.title} costs {pendingUnlock.priceCoins} Coins, you have {coinBalance}.
             </p>
           )}
           <Button
@@ -767,7 +767,7 @@ export function MarketplaceBrowser({
             <DialogTitle>Buy Gamana Coins</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-500 -mt-2">
-            Coins unlock Tours, Topics, and Combos. This is the only place to buy them — with real
+            Coins unlock Tours, Topics, and Combos. This is the only place to buy them, with real
             currency, through your cart.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -848,7 +848,7 @@ export function MarketplaceBrowser({
             <CheckIcon className="h-4 w-4" />
           </span>
           <span className="truncate">
-            <span className="font-semibold">{appSyncToast}</span> is now in your Gamana app — open the app to start listening.
+            <span className="font-semibold">{appSyncToast}</span> is now in your Gamana app, open the app to start listening.
           </span>
         </div>
       )}

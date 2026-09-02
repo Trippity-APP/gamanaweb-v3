@@ -120,15 +120,15 @@ export const depthOptions: { id: NonNullable<Depth>; label: string; description:
   },
   {
     id: "deep-dive",
-    label: "Immerse me fully",
-    description: "Long, layered, multi-stop stories — take your time",
+    label: "Give me the long version",
+    description: "Long, layered, multi-stop stories, take your time",
   },
 ];
 
 export const depthLabels: Record<string, string> = {
   highlights: "Just the essentials",
   balanced: "A balanced mix",
-  "deep-dive": "Immerse me fully",
+  "deep-dive": "Give me the long version",
 };
 
 export const walkingToleranceOptions = [

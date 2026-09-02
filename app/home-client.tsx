@@ -52,27 +52,27 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
   const appScreens = [
     {
       image: "/demo02.png",
-      label: "Immersive Audio Stories",
+      label: "Audio Stories",
       title: "Experience Engaging Storytelling Wherever You Go",
-      subtitle: "Immerse yourself in rich storytelling experiences — from India's storied streets to cities across the globe — turning every journey into a story filled with captivating narration and authentic local perspectives.",
+      subtitle: "Listen to stories that play as you walk, from Old Delhi lanes to cities around the world, told by narrators who sound like locals, not textbooks.",
       bg: "from-[#F4A100] via-[#E85D04] to-[#7A1F1F]",
-      imageAlt: "Experience engaging storytelling with the Gamana app – travel with guide-like insights and captivating narration for every journey",
+      imageAlt: "Experience engaging storytelling with the Gamana app – travel with guide-like insights and narration that plays as you walk",
       imageTitle: "Gamana – Travel with Guide-Like Insights and Engaging Storytelling"
     },
     {
       image: "/demo03.png",
       label: "Explore with Confidence",
       title: "Travel with Confidence",
-      subtitle: "From local customs and etiquette to practical, city-specific safety tips, Gamana keeps you prepared for whatever the road brings — so you can explore with the confidence of a local.",
+      subtitle: "From local customs and etiquette to practical, city-specific safety tips, Gamana keeps you prepared for whatever the road brings, so you can explore with the confidence of a local.",
       bg: "from-[#0F6E5C] via-[#0B5563] to-[#1B2A6B]",
-      imageAlt: "Gamana tour guide app featuring expert narrators sharing immersive stories and local insights for travelers",
-      imageTitle: "Gamana – Expert Tour Guide App for Immersive Audio Experiences"
+      imageAlt: "Gamana tour guide app featuring expert narrators sharing audio stories and local insights for travelers",
+      imageTitle: "Gamana – Expert Tour Guide App for Audio Walking Tours"
     },
     {
       image: "/demo05.png",
       label: "Build Your Storylist",
       title: "Save Your Fave Sites Forever, Share With Loved Ones",
-      subtitle: "Curate and save your personal storylist of your favorite places, then share them with friends and family — never forget what touched you most.",
+      subtitle: "Save your personal storylist of favorite places, then share them with friends and family so you never forget what touched you most.",
       bg: "from-[#D98E04] via-[#B23A48] to-[#6B1E3C]",
       imageAlt: "Build and share personalized audio tour lists with the Gamana heritage travel app – discover unique journeys and story playlists",
       imageTitle: "Gamana – Personalize and Share Your Audio Tour Lists"
@@ -80,11 +80,11 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
     {
       image: "/demo04.png",
       label: "Related Topics",
-      title: "Be It Heritage or Culture — Find Your Lane",
-      subtitle: "Whether you seek heritage, culture, religion or relaxation, find the narrator and stories that move you the most. The learning doesn't stop there — explore with Related Topics.",
+      title: "Be It Heritage or Culture, Find Your Lane",
+      subtitle: "Whether you seek heritage, culture, religion or relaxation, find the narrator and stories that move you the most. The learning doesn't stop there, explore with Related Topics.",
       bg: "from-[#9D174D] via-[#701A75] to-[#312E81]",
-      imageAlt: "Explore curated travel topics and personalized stories with the Gamana travel guide app",
-      imageTitle: "Gamana – Expand Your Exploration with Curated Topics"
+      imageAlt: "Explore travel topics and personalized stories with the Gamana travel guide app",
+      imageTitle: "Gamana – Expand Your Exploration with Travel Topics"
     },
   ];
 
@@ -92,7 +92,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
     {
       icon: BookOpen,
       title: "Exquisite Storytelling",
-      description: "Inspiring, insightful and shocking facts",
+      description: "History, culture, and the details most guides skip",
       slug: "exquisite-storytelling",
     },
     {
@@ -104,7 +104,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
     {
       icon: User,
       title: "Virtual Travel Guides",
-      description: "Knowledgeable narrator companions",
+      description: "Narrator voices you can pick for each walk",
       slug: "virtual-travel-guides",
     },
     {
@@ -122,7 +122,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
     {
       icon: Globe,
       title: "Local Languages",
-      description: "Authentic local experiences",
+      description: "Stories in local languages",
       slug: "local-languages",
     },
   ];
@@ -171,7 +171,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
             "url": "https://www.gamana.app",
             "applicationCategory": "TravelApplication",
             "operatingSystem": "iOS, Android",
-            "description": "Gamana is India's first heritage travel app, offering personalized audio tours and smart travel guides to explore destinations effortlessly.",
+            "description": "Gamana is India's first heritage travel app, offering audio tours that match your interests and smart travel guides to explore destinations effortlessly.",
             "offers": {
               "@type": "Offer",
               "price": "0.00",
@@ -393,7 +393,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
                 Everything You Need to <span className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] bg-clip-text text-transparent">Explore Like a Local</span>
               </h2>
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium">
-                6 powerful features in this heritage travel platform that transform how you explore the world
+                Six features that change how you walk through a city
               </p>
             </div>
 
@@ -544,7 +544,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
                 Explore Our <span className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] bg-clip-text text-transparent">Virtual Travel Guides</span>
               </h2>
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium">
-                Personalize your journey with a narrator whose voice and personality match your style. From insightful historians to adventurous locals, find the perfect companion to bring every story to life.
+                Personalize your journey with a narrator whose voice and personality match your style. From insightful historians to adventurous locals, pick a narrator whose voice you'd actually want in your ear for an hour.
               </p>
             </div>
 
@@ -617,7 +617,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
                 Representative <span className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] bg-clip-text text-transparent">Tours & Offers</span>
               </h2>
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium">
-                Curated audio experiences from expert narrators acting as your personal tourist guide. Free tours, premium deep-dives, and exclusive bundles await.
+                Audio tours from narrators who know the city. Free walks, longer routes, and bundles to save Coins.
               </p>
             </div>
 
@@ -716,7 +716,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
                     South Goa - Taxi Tour
                   </h3>
                   <p className="text-gray-600 text-sm mb-4">
-                    Enjoy the sun-soaked syncretic culture of South Goa with our comprehensive tour of South Goa&apos;s tourist hotspots including Goa&apos;s UNESCO Heritage Site - the Basilica of Bom Jesus.
+                    Enjoy the sun-soaked syncretic culture of South Goa with a full-day audio route through churches, beaches, and Goa&apos;s UNESCO Heritage Site, the Basilica of Bom Jesus.
                   </p>
                   <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
                     <MapPin className="h-4 w-4" />
@@ -798,7 +798,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
                 Latest Stories <span className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] bg-clip-text text-transparent">From Us</span>
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Product notes, narration experiments, and community diaries that inspire our next wave of immersive tours.
+                Product notes, narration experiments, and community diaries that inspire the tours we're building next.
               </p>
             </div>
             <div
@@ -897,7 +897,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
               </h2>
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-8 opacity-90 leading-relaxed font-medium">
                 Discover our growing network of partners, content creators, and travel enthusiasts.
-                Together, we&apos;re reimagining how people experience the world through immersive audio storytelling.
+                We&apos;re building audio tours with partners and creators who know their cities.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/ecosystem">
@@ -931,7 +931,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
                 Ready to <span className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] bg-clip-text text-transparent">Explore?</span>
               </h2>
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium">
-                Join our travellers community discovering authentic local experiences with Gamana
+                Join travellers who explore cities with Gamana in their ears
               </p>
             </div>
             <div className="flex gap-4 justify-center">
@@ -1063,7 +1063,7 @@ export default function HomeClient({ latestStories }: HomeClientProps) {
                   >
                     <div className="px-6 md:px-8 pb-6 md:pb-8">
                       <p className="text-lg text-gray-600 leading-relaxed">
-                        Gamana lets you choose from different narrators who have unique personalities and interests—like history, architecture, art, etc. Over time, we'll recommend content and voices based on your preferences and listening habits.
+                        Gamana lets you choose from different narrators who have unique personalities and interests, like history, architecture, art, etc. Over time, we'll recommend content and voices based on your preferences and listening habits.
                       </p>
                     </div>
                   </div>

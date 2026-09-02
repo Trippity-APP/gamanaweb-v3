@@ -179,7 +179,7 @@ export function Cart() {
                   <span className="font-semibold text-gray-900">${subtotal.toFixed(2)}</span>
                 </div>
                 <p className="text-[11px] text-gray-400">
-                  Paid in real currency. Coin bundles credit your balance instantly on checkout —
+                  Paid in real currency. Coin bundles credit your balance instantly on checkout.
                   Tours, Topics, and Combos unlock directly from the catalog, no cart needed.
                 </p>
                 <Button
@@ -261,14 +261,14 @@ export function Cart() {
                   <UpiIcon className="h-5 w-5 text-orange-500" />
                   <div>
                     <p className="text-sm font-semibold text-gray-900">RazorPay</p>
-                    <p className="text-xs text-gray-500">UPI, cards & netbanking — for travelers in India</p>
+                    <p className="text-xs text-gray-500">UPI, cards & netbanking, for travelers in India</p>
                   </div>
                 </button>
               </div>
               <p className="text-[11px] text-gray-400 flex items-start gap-1">
                 <MapPin className="h-3 w-3 mt-0.5 shrink-0" />
                 Payment method is picked based on where you&apos;re traveling from. Looking to
-                unlock a Tour or Topic instead? Those use your Coins balance directly — no
+                unlock a Tour or Topic instead? Those use your Coins balance directly, no
                 payment screen needed.
               </p>
 
@@ -301,7 +301,7 @@ export function Cart() {
               {coinsCredited > 0 && (
                 <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm text-amber-800 flex items-center gap-2 justify-center">
                   <CoinsIcon className="h-4 w-4 text-amber-500" />
-                  {coinsCredited} Coins added — already live in your Gamana app account, ready to unlock Tours and Combos.
+                  {coinsCredited} Coins added, already live in your Gamana app account, ready to unlock Tours and Combos.
                 </div>
               )}
               {hasExperienceItems && (

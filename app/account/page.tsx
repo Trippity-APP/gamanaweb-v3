@@ -146,7 +146,7 @@ export default function AccountPage() {
           </h2>
           <div className="rounded-2xl border border-gray-200 divide-y divide-gray-100">
             {orders.length === 0 ? (
-              <p className="p-5 text-sm text-gray-500">No bookings yet — your Tours, Combos, and Experiences will show up here.</p>
+              <p className="p-5 text-sm text-gray-500">No bookings yet, your Tours, Combos, and Experiences will show up here.</p>
             ) : (
               orders.map((order) => {
                 const meta = orderMeta[order.kind] ?? orderMeta.mixed;
@@ -188,7 +188,7 @@ export default function AccountPage() {
               <p className="text-sm font-bold text-amber-800">{coinBalance.toLocaleString()} Coins</p>
             </div>
             <p className="text-xs text-gray-500">
-              Buy more Coins from the marketplace — that&apos;s the only way real currency
+              Buy more Coins from the marketplace, that&apos;s the only way real currency
               converts into Coins. Spending Coins to unlock a Tour or Combo happens instantly
               from the catalog, no separate checkout.
             </p>
