@@ -20,5 +20,9 @@ export function getCatalogFetchInit(): RequestInit {
   if (typeof window !== "undefined") {
     return { cache: "no-store" };
   }
+  // next dev Data Cache can omit newly published CMS entries from generateStaticParams.
+  if (process.env.NODE_ENV === "development") {
+    return { cache: "no-store" };
+  }
   return { cache: "force-cache" };
 }

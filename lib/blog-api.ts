@@ -1,3 +1,5 @@
+import { getCatalogFetchInit, getMarketplaceApiBaseUrl } from "@/lib/api-base-url";
+
 export type ApiBlogPost = {
   id: string;
   title: string;
@@ -30,22 +32,12 @@ type ApiPostResponse = {
   post: ApiBlogPost;
 };
 
-const DEFAULT_BLOG_API_URL = "http://localhost:8000/api/v1";
-
 export function getBlogApiBaseUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_MARKETPLACE_API_URL ||
-    process.env.NEXT_PUBLIC_BLOG_API_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    process.env.BLOG_API_URL ||
-    DEFAULT_BLOG_API_URL
-  ).replace(/\/$/, "");
+  return getMarketplaceApiBaseUrl();
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url, {
-    cache: "force-cache",
-  });
+  const response = await fetch(url, getCatalogFetchInit());
 
   if (!response.ok) {
     throw new Error(`Blog API ${url} failed (${response.status})`);
