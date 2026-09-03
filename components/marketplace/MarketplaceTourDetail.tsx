@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
+import { getExploreBackHref } from "@/lib/explore-search";
 import {
   ArrowLeft,
   Check as CheckIcon,
@@ -44,6 +46,8 @@ export function MarketplaceTourDetail({
   relatedTours: initialRelatedTours = [],
 }: MarketplaceTourDetailProps) {
   const { url: storeUrl, platform } = useStoreUrl();
+  const pathname = usePathname();
+  const backHref = getExploreBackHref(pathname);
   const [tour, setTour] = useState<Tour | null>(initialTour);
   const [relatedTours, setRelatedTours] = useState<Tour[]>(initialRelatedTours);
   const [loading, setLoading] = useState(paramTourId === "[id]" && !initialTour);
@@ -118,7 +122,7 @@ export function MarketplaceTourDetail({
             Try again
           </Button>
           <Button asChild variant="outline">
-            <Link href="/explore">Back to explore</Link>
+            <Link href={backHref}>Back to explore</Link>
           </Button>
         </div>
       </div>
@@ -129,7 +133,7 @@ export function MarketplaceTourDetail({
     <div className="max-w-5xl mx-auto px-4 pb-16">
       <div className="pt-6">
         <Link
-          href="/explore"
+          href={backHref}
           className="inline-flex items-center gap-2 text-sm font-medium text-[#159895] hover:text-[#128a86]"
         >
           <ArrowLeft className="h-4 w-4" />

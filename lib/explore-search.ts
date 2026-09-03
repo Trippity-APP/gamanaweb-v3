@@ -104,3 +104,24 @@ export function findBestTourMatch(query: string, catalog: Tour[]): Tour | null {
 
   return candidates[0] ?? null;
 }
+
+export type ExploreCatalogTab = "stories" | "walks" | "recommended";
+
+export function getExploreCatalogPath(tab: ExploreCatalogTab): string {
+  if (tab === "walks") return "/explore/tours";
+  if (tab === "stories") return "/explore/story";
+  return "/explore";
+}
+
+export function getExploreTabFromPathname(pathname: string): ExploreCatalogTab | null {
+  const path = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  if (path === "/explore/tours") return "walks";
+  if (path === "/explore/story") return "stories";
+  return null;
+}
+
+export function getExploreBackHref(pathname: string): string {
+  if (pathname.includes("/explore/tours")) return "/explore/tours";
+  if (pathname.includes("/explore/story")) return "/explore/story";
+  return "/explore";
+}

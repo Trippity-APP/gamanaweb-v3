@@ -27,7 +27,7 @@ import {
   isWalkCatalogVisible,
   tourMatchesSearch,
 } from '@/lib/marketplace-api';
-import { countSearchResults } from '@/lib/explore-search';
+import { countSearchResults, getExploreCatalogPath, getExploreTabFromPathname } from '@/lib/explore-search';
 import { useCart } from '@/lib/cart-context';
 import { useAccount } from '@/lib/account-context';
 import {
@@ -252,26 +252,50 @@ export function MarketplaceBrowser({
     [tours, searchFromUrl],
   );
 
-  const [activeTab, setActiveTab] = useState('stories');
+  const [activeTab, setActiveTab] = useState(
+    () => getExploreTabFromPathname(pathname) ?? 'stories',
+  );
   const prevSearchRef = useRef('');
+
+  const catalogHref = (tab: 'stories' | 'walks' | 'recommended') => {
+    const qs = urlSearchParams.toString();
+    const path = getExploreCatalogPath(tab);
+    return qs ? `${path}?${qs}` : path;
+  };
+
+  const selectCatalogTab = (tab: string) => {
+    if (tab === 'walks' || tab === 'stories' || tab === 'recommended') {
+      router.push(catalogHref(tab));
+    }
+  };
+
+  useEffect(() => {
+    const fromPath = getExploreTabFromPathname(pathname);
+    if (fromPath) {
+      setActiveTab(fromPath);
+      return;
+    }
+    if (pathname === '/explore') {
+      setActiveTab(hasRecommendations ? 'recommended' : 'stories');
+    }
+  }, [pathname, hasRecommendations]);
 
   // When search changes, open the tab with more matching results (stories wins ties).
   useEffect(() => {
+    if (!searchFromUrl.trim()) {
+      prevSearchRef.current = searchFromUrl;
+      return;
+    }
+    if (toursLoading) return;
     if (prevSearchRef.current === searchFromUrl) return;
     prevSearchRef.current = searchFromUrl;
 
-    if (!searchFromUrl.trim()) return;
-    if (toursLoading) return;
-
     const preferredTab = walkSearchCount > storySearchCount ? 'walks' : 'stories';
-    setActiveTab(preferredTab);
-  }, [searchFromUrl, toursLoading, storySearchCount, walkSearchCount]);
-
-  useEffect(() => {
-    if (!searchFromUrl && hasRecommendations && (activeTab === 'stories' || activeTab === 'walks') && !toursLoading) {
-      setActiveTab('recommended');
+    const currentTab = getExploreTabFromPathname(pathname);
+    if (currentTab !== preferredTab) {
+      router.push(catalogHref(preferredTab));
     }
-  }, [searchFromUrl, hasRecommendations, activeTab, toursLoading]);
+  }, [searchFromUrl, toursLoading, storySearchCount, walkSearchCount, pathname, router]);
 
   useEffect(() => {
     setVisibleTourCount(TOURS_INITIAL_VISIBLE);
@@ -467,6 +491,9 @@ export function MarketplaceBrowser({
             <div className="flex items-center gap-1.5">
               <GamanaCoinIcon className="h-3.5 w-3.5" aria-hidden />
               <p className="text-base font-bold text-gray-900">{tour.price}</p>
+              <span className="text-sm font-normal text-gray-500">
+                {tour.price === 1 ? 'coin' : 'coins'}
+              </span>
               {tour.originalPrice && <p className="text-xs text-gray-400 line-through">{tour.originalPrice}</p>}
             </div>
           )}
@@ -543,7 +570,7 @@ export function MarketplaceBrowser({
         <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:items-start lg:gap-6">
           <div className="min-w-0">
             <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-lg sm:p-5">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <Tabs value={activeTab} onValueChange={selectCatalogTab} className="w-full">
                 <div className="mb-4 flex flex-wrap items-center gap-3">
                   <TabsList className={`grid ${hasRecommendations ? 'grid-cols-3' : 'grid-cols-2'}`}>
                     {hasRecommendations && (
@@ -619,7 +646,7 @@ export function MarketplaceBrowser({
               ) : (
                 <div className="text-center py-12 space-y-3">
                   <p className="text-gray-500">No personalized matches yet, browse the full catalog.</p>
-                  <Button variant="outline" onClick={() => setActiveTab('stories')}>
+                  <Button variant="outline" onClick={() => selectCatalogTab('stories')}>
                     Browse audio stories
                   </Button>
                 </div>

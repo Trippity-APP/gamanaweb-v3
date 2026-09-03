@@ -9,6 +9,7 @@ import {
   fetchPublicTourById,
   fetchPublicWalkDetailById,
   fetchPublicWalksCatalog,
+  fetchPublicWalkStaticIds,
   fetchPublicStoryDetailById,
   getTourHref,
   tourMatchesCity,
@@ -18,9 +19,9 @@ import type { Tour } from '@/lib/marketplace-data';
 export async function generateStaticParams() {
   try {
     clearMarketplaceCache();
-    const walks = await fetchPublicWalksCatalog();
-    if (walks.length > 0) {
-      return walks.map((tour) => ({ id: tour.id }));
+    const walkIds = await fetchPublicWalkStaticIds();
+    if (walkIds.length > 0) {
+      return walkIds.map((id) => ({ id }));
     }
   } catch {
     // Build-time API may be unavailable.

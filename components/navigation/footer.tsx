@@ -138,6 +138,11 @@ export default function Footer() {
                   About Us
                 </Link>
               </li>
+              <li>
+                <Link href="/pricing" className="hover:text-[#57C5B6] transition-colors text-sm">
+                  Pricing
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -170,6 +175,11 @@ export default function Footer() {
               <li>
                 <Link href="/cookie-policy" className="hover:text-[#57C5B6] transition-colors text-sm">
                   Cookie Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing" className="hover:text-[#57C5B6] transition-colors text-sm">
+                  Pricing
                 </Link>
               </li>
               <li>

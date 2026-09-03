@@ -35,5 +35,6 @@ export const footerCompanyLinks = [
   { name: "Blog", href: "/blog" },
   { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },
+  { name: "Pricing", href: "/pricing" },
   { name: "FAQ", href: "/faq" },
 ] as const;

@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ExploreDetailBreadcrumb } from '@/components/marketplace/ExploreDetailBreadcrumb';
+import { getExploreBackHref } from '@/lib/explore-search';
 import {
   AudioWalkHero,
 } from '@/components/marketplace/walk-detail/AudioWalkHero';
@@ -26,6 +28,10 @@ function resolveTourId(paramId: string): string {
   return match?.[1] ?? paramId;
 }
 
+function isObjectId(id: string): boolean {
+  return /^[a-f0-9]{24}$/i.test(id);
+}
+
 function getDaysLeft(unlockedAt: string): number {
   const expiry = new Date(unlockedAt);
   expiry.setDate(expiry.getDate() + ACCESS_WINDOW_DAYS);
@@ -40,10 +46,18 @@ type AudioWalkDetailProps = {
 
 export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: AudioWalkDetailProps) {
   const { isUnlocked, unlockedItems } = useAccount();
+  const pathname = usePathname();
+  const backHref = getExploreBackHref(pathname);
   const [walk, setWalk] = useState<WalkDetail | null>(initialWalk);
-  const [loading, setLoading] = useState(paramTourId === '[id]' && !initialWalk);
+  const [loading, setLoading] = useState(
+    !initialWalk && (paramTourId === '[id]' || isObjectId(paramTourId)),
+  );
   const [error, setError] = useState<string | null>(
-    initialWalk ? null : paramTourId === '[id]' ? null : 'This walk is not available.'
+    initialWalk
+      ? null
+      : paramTourId === '[id]' || isObjectId(paramTourId)
+        ? null
+        : 'This walk is not available.',
   );
 
   const loadWalkById = async (id: string) => {
@@ -66,9 +80,10 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
   };
 
   useEffect(() => {
-    if (initialWalk || paramTourId !== '[id]') return;
+    if (initialWalk) return;
     const resolved = resolveTourId(paramTourId);
     if (resolved === '[id]') return;
+    if (paramTourId !== '[id]' && !isObjectId(resolved)) return;
     void loadWalkById(resolved);
   }, [paramTourId, initialWalk]);
 
@@ -111,7 +126,7 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
             Try again
           </Button>
           <Button asChild variant="outline">
-            <Link href="/explore">Back to explore</Link>
+            <Link href={backHref}>Back to explore</Link>
           </Button>
         </div>
       </div>

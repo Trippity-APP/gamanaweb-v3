@@ -175,14 +175,20 @@ function sortedStartingPoints(storylist: ApiStorylist): ApiStartingPoint[] {
   );
 }
 
-/** Audio walk cover: first story/stop only — never cover_image or a later stop. */
 export function extractFirstStopImageUrl(storylist: ApiStorylist): string | undefined {
   const firstStop = sortedStartingPoints(storylist)[0];
   return firstStop?.place?.images?.find((url) => url?.trim());
 }
 
-function extractFirstStopImage(storylist: ApiStorylist): string {
-  return extractFirstStopImageUrl(storylist) ?? DEFAULT_TOUR_IMAGE;
+/** Walk cover: first stop → later stops → cover_image. */
+export function extractWalkCoverImageUrl(storylist: ApiStorylist): string | undefined {
+  const points = sortedStartingPoints(storylist);
+  for (const point of points) {
+    const image = point.place?.images?.find((url) => url?.trim());
+    if (image) return image;
+  }
+  const cover = storylist.cover_image?.trim();
+  return cover || undefined;
 }
 
 function extractImage(storylist: ApiStorylist): string {
@@ -346,7 +352,7 @@ export function mapStorylistToTour(storylist: ApiStorylist): Tour | null {
     category: mapCategory(storylist),
     image:
       contentKind === 'walk'
-        ? extractFirstStopImageUrl(storylist) ?? DEFAULT_TOUR_IMAGE
+        ? extractWalkCoverImageUrl(storylist) ?? DEFAULT_TOUR_IMAGE
         : extractImage(storylist),
     highlights: extractHighlights(storylist),
     narrator: storylist.creator_name?.trim() || "Gamana narrator",
@@ -410,17 +416,22 @@ async function enrichWalkDetailWithPlaceAudio(walk: WalkDetail): Promise<WalkDet
 
   if (placeIds.length === 0) return walk;
 
-  const lookup = await buildPlaceAudioDurationLookup();
-  const stops = walk.stops.map((stop) => {
-    const seconds = lookup.get(stop.id);
-    if (!seconds) return stop;
-    return { ...stop, audioDurationSeconds: seconds };
-  });
+  try {
+    const lookup = await buildPlaceAudioDurationLookup();
+    const stops = walk.stops.map((stop) => {
+      const seconds = lookup.get(stop.id);
+      if (!seconds) return stop;
+      return { ...stop, audioDurationSeconds: seconds };
+    });
 
-  return {
-    ...walk,
-    stops,
-  };
+    return {
+      ...walk,
+      stops,
+    };
+  } catch (error) {
+    console.error("Failed to enrich walk with place audio", error);
+    return walk;
+  }
 }
 
 export function mapStorylistToWalkDetail(storylist: ApiStorylist): WalkDetail | null {
@@ -431,7 +442,7 @@ export function mapStorylistToWalkDetail(storylist: ApiStorylist): WalkDetail | 
   const stops = mapStorylistStops(storylist);
   const stopsCount = storylist.stops_count ?? stops.length;
   const totalDurationMinutes = resolveWalkAudioDurationMinutes(storylist);
-  const firstStopImage = stops[0]?.image ?? extractFirstStopImageUrl(storylist);
+  const coverImage = extractWalkCoverImageUrl(storylist);
   const totalAudioDurationSeconds =
     storylist.total_audio_duration && storylist.total_audio_duration > 0
       ? storylist.total_audio_duration
@@ -440,7 +451,7 @@ export function mapStorylistToWalkDetail(storylist: ApiStorylist): WalkDetail | 
   return {
     ...base,
     contentKind: "walk",
-    image: firstStopImage ?? extractFirstStopImageUrl(storylist) ?? base.image,
+    image: coverImage ?? base.image,
     stops,
     stopsCount,
     totalDurationMinutes,
@@ -688,6 +699,17 @@ export async function fetchPublicWalksCatalog(): Promise<Tour[]> {
     .filter((tour): tour is Tour => Boolean(tour))
     .filter(isWalkCatalogVisible)
     .filter((tour) => (tour.contentKind ?? "walk") === "walk");
+}
+
+/** All public walk storylist IDs (including non-recommended) for static export params. */
+export async function fetchPublicWalkStaticIds(): Promise<string[]> {
+  const storylists = await fetchAllPublicStorylists();
+  const ids = storylists
+    .map(mapStorylistToTour)
+    .filter((tour): tour is Tour => tour != null && (tour.contentKind ?? "walk") === "walk")
+    .map((tour) => tour.id)
+    .filter(Boolean);
+  return Array.from(new Set(ids));
 }
 
 export async function fetchPublicTours(): Promise<Tour[]> {

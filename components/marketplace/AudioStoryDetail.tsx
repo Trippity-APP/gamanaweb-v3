@@ -16,6 +16,8 @@ import { AudioStoryNoticeList } from '@/components/marketplace/story-detail/Audi
 import { AudioStorySources } from '@/components/marketplace/story-detail/AudioStorySources';
 import { DownloadAppDialog } from '@/components/DownloadAppDialog';
 import { useAccount } from '@/lib/account-context';
+import { getExploreBackHref } from '@/lib/explore-search';
+import { usePathname } from 'next/navigation';
 import {
   clearMarketplaceCache,
   fetchPublicStoryDetailById,
@@ -48,6 +50,8 @@ export function AudioStoryDetail({
   story: initialStory,
 }: AudioStoryDetailProps) {
   const { isUnlocked, unlockedItems } = useAccount();
+  const pathname = usePathname();
+  const backHref = getExploreBackHref(pathname);
   const [story, setStory] = useState<StoryDetail | null>(initialStory);
   const [loading, setLoading] = useState(paramTourId === '[id]' && !initialStory);
   const [error, setError] = useState<string | null>(
@@ -120,7 +124,7 @@ export function AudioStoryDetail({
             Try again
           </Button>
           <Button asChild variant="outline">
-            <Link href="/explore">Back to explore</Link>
+            <Link href={backHref}>Back to explore</Link>
           </Button>
         </div>
       </div>
