@@ -28,30 +28,41 @@ export function BlogPostDetailClient({
   const [loading, setLoading] = useState(!initialPost);
   const [error, setError] = useState<string | null>(null);
 
-  const loadPost = async (slug: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      clearBlogCache();
-      const next = await getPostBySlug(slug);
-      setPost(next);
-    } catch {
-      setPost(null);
-      setError('This story is not available.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (initialPost) return;
     const resolved = resolveBlogSlug(paramSlug);
     if (!resolved || resolved === '[slug]') {
-      setLoading(false);
-      setError('This story is not available.');
+      if (!initialPost) {
+        setLoading(false);
+        setError('This story is not available.');
+      }
       return;
     }
-    void loadPost(resolved);
+
+    let cancelled = false;
+
+    void (async () => {
+      // Keep baked HTML visible while refreshing so CMS edits show up after deploy.
+      if (!initialPost) setLoading(true);
+      setError(null);
+      try {
+        clearBlogCache();
+        const next = await getPostBySlug(resolved);
+        if (!cancelled) setPost(next);
+      } catch {
+        if (!cancelled) {
+          if (!initialPost) {
+            setPost(null);
+            setError('This story is not available.');
+          }
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [paramSlug, initialPost]);
 
   if (loading) {
