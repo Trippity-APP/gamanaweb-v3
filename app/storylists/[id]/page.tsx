@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import StorylistRedirectPageClient from "../../storylist/[id]/StorylistRedirectPageClient";
+import { STATIC_SPA_PARAM, isStaticSpaParam } from "@/lib/static-spa";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -45,5 +46,5 @@ export default async function Page({ params }: PageProps) {
 }
 
 export async function generateStaticParams() {
-  return [{ id: "[id]" }];
+  return [{ id: STATIC_SPA_PARAM }];
 }

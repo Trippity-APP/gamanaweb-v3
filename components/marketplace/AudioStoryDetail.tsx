@@ -23,11 +23,12 @@ import {
   fetchPublicStoryDetailById,
 } from '@/lib/marketplace-api';
 import type { StoryDetail } from '@/lib/marketplace-data';
+import { isStaticSpaParam } from '@/lib/static-spa';
 
 const ACCESS_WINDOW_DAYS = 30;
 
 function resolveStoryId(paramId: string): string {
-  if (paramId !== '[id]') return paramId;
+  if (!isStaticSpaParam(paramId)) return paramId;
   if (typeof window === 'undefined') return paramId;
   const match = window.location.pathname.match(/\/explore\/story\/([^/]+)/);
   return match?.[1] ?? paramId;
@@ -53,9 +54,9 @@ export function AudioStoryDetail({
   const pathname = usePathname();
   const backHref = getExploreBackHref(pathname);
   const [story, setStory] = useState<StoryDetail | null>(initialStory);
-  const [loading, setLoading] = useState(paramTourId === '[id]' && !initialStory);
+  const [loading, setLoading] = useState(isStaticSpaParam(paramTourId) && !initialStory);
   const [error, setError] = useState<string | null>(
-    initialStory ? null : paramTourId === '[id]' ? null : 'This story is not available.',
+    initialStory ? null : isStaticSpaParam(paramTourId) ? null : 'This story is not available.',
   );
   const [downloadOpen, setDownloadOpen] = useState(false);
 
@@ -79,9 +80,9 @@ export function AudioStoryDetail({
   };
 
   useEffect(() => {
-    if (initialStory || paramTourId !== '[id]') return;
+    if (initialStory || !isStaticSpaParam(paramTourId)) return;
     const resolved = resolveStoryId(paramTourId);
-    if (resolved === '[id]') return;
+    if (isStaticSpaParam(resolved)) return;
     void loadStoryById(resolved);
   }, [paramTourId, initialStory]);
 
@@ -102,7 +103,7 @@ export function AudioStoryDetail({
   const retry = () => {
     clearMarketplaceCache();
     const resolved = resolveStoryId(paramTourId);
-    if (resolved === '[id]') return;
+    if (isStaticSpaParam(resolved)) return;
     void loadStoryById(resolved);
   };
 

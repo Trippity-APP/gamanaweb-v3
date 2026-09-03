@@ -7,9 +7,10 @@ import {
   fetchPublicStoryDetailById,
 } from '@/lib/marketplace-api';
 import type { StoryDetail } from '@/lib/marketplace-data';
+import { isStaticSpaParam } from '@/lib/static-spa';
 
 function resolveStoryId(paramId: string): string {
-  if (paramId !== '[id]') return paramId;
+  if (!isStaticSpaParam(paramId)) return paramId;
   if (typeof window === 'undefined') return paramId;
   const match = window.location.pathname.match(/\/explore\/story\/([^/]+)/);
   return match?.[1] ?? paramId;
@@ -25,13 +26,13 @@ export function ExploreStoryDetailClient({
   story: initialStory,
 }: ExploreStoryDetailClientProps) {
   const [story, setStory] = useState<StoryDetail | null>(initialStory);
-  const [resolving, setResolving] = useState(storyId === '[id]' && !initialStory);
+  const [resolving, setResolving] = useState(isStaticSpaParam(storyId) && !initialStory);
 
   useEffect(() => {
-    if (storyId !== '[id]' || initialStory) return;
+    if (!isStaticSpaParam(storyId) || initialStory) return;
 
     const resolved = resolveStoryId(storyId);
-    if (resolved === '[id]') return;
+    if (isStaticSpaParam(resolved)) return;
 
     let cancelled = false;
 

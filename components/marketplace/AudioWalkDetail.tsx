@@ -18,11 +18,12 @@ import {
   fetchPublicWalkDetailById,
 } from '@/lib/marketplace-api';
 import type { WalkDetail } from '@/lib/marketplace-data';
+import { isStaticSpaParam } from '@/lib/static-spa';
 
 const ACCESS_WINDOW_DAYS = 30;
 
 function resolveTourId(paramId: string): string {
-  if (paramId !== '[id]') return paramId;
+  if (!isStaticSpaParam(paramId)) return paramId;
   if (typeof window === 'undefined') return paramId;
   const match = window.location.pathname.match(/\/(?:explore|marketplace)\/tours\/([^/]+)/);
   return match?.[1] ?? paramId;
@@ -50,12 +51,12 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
   const backHref = getExploreBackHref(pathname);
   const [walk, setWalk] = useState<WalkDetail | null>(initialWalk);
   const [loading, setLoading] = useState(
-    !initialWalk && (paramTourId === '[id]' || isObjectId(paramTourId)),
+    !initialWalk && (isStaticSpaParam(paramTourId) || isObjectId(paramTourId)),
   );
   const [error, setError] = useState<string | null>(
     initialWalk
       ? null
-      : paramTourId === '[id]' || isObjectId(paramTourId)
+      : isStaticSpaParam(paramTourId) || isObjectId(paramTourId)
         ? null
         : 'This walk is not available.',
   );
@@ -82,8 +83,8 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
   useEffect(() => {
     if (initialWalk) return;
     const resolved = resolveTourId(paramTourId);
-    if (resolved === '[id]') return;
-    if (paramTourId !== '[id]' && !isObjectId(resolved)) return;
+    if (isStaticSpaParam(resolved)) return;
+    if (!isStaticSpaParam(paramTourId) && !isObjectId(resolved)) return;
     void loadWalkById(resolved);
   }, [paramTourId, initialWalk]);
 
@@ -104,7 +105,7 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
   const retry = () => {
     clearMarketplaceCache();
     const resolved = resolveTourId(paramTourId);
-    if (resolved === '[id]') return;
+    if (isStaticSpaParam(resolved)) return;
     void loadWalkById(resolved);
   };
 

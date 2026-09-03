@@ -8,9 +8,10 @@ import {
   fetchPublicTourById,
   fetchPublicWalkDetailById,
 } from '@/lib/marketplace-api';
+import { isStaticSpaParam } from '@/lib/static-spa';
 
 function resolveTourId(paramId: string): string {
-  if (paramId !== '[id]') return paramId;
+  if (!isStaticSpaParam(paramId)) return paramId;
   if (typeof window === 'undefined') return paramId;
   const match = window.location.pathname.match(/\/(?:explore|marketplace)\/tours\/([^/]+)/);
   return match?.[1] ?? paramId;
@@ -33,14 +34,14 @@ export function ExploreTourDetailClient({
   const [tour, setTour] = useState(initialTour);
   const [relatedTours, setRelatedTours] = useState(initialRelatedTours);
   const [resolving, setResolving] = useState(
-    tourId === '[id]' && !initialWalk && !initialTour,
+    isStaticSpaParam(tourId) && !initialWalk && !initialTour,
   );
 
   useEffect(() => {
-    if (tourId !== '[id]' || initialWalk || initialTour) return;
+    if (!isStaticSpaParam(tourId) || initialWalk || initialTour) return;
 
     const resolved = resolveTourId(tourId);
-    if (resolved === '[id]') return;
+    if (isStaticSpaParam(resolved)) return;
 
     let cancelled = false;
 

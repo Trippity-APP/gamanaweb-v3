@@ -665,6 +665,7 @@ export async function fetchAllPublicStorylists(): Promise<ApiStorylist[]> {
 
   cachePromise = (async () => {
     const storylists: ApiStorylist[] = [];
+    const seenIds = new Set<string>();
     let skip = 0;
     const limit = 100;
     let total = Number.POSITIVE_INFINITY;
@@ -672,10 +673,19 @@ export async function fetchAllPublicStorylists(): Promise<ApiStorylist[]> {
     while (skip < total) {
       const page = await fetchToursPage(skip, limit);
       const batch = page.data ?? [];
-      storylists.push(...batch);
+      let added = 0;
 
-      total = page.pagination?.total ?? batch.length;
-      if (batch.length === 0) break;
+      for (const item of batch) {
+        const id = storylistId(item);
+        // Marketplace pagination can overlap pages; keep the first occurrence only.
+        if (id && seenIds.has(id)) continue;
+        if (id) seenIds.add(id);
+        storylists.push(item);
+        added += 1;
+      }
+
+      total = page.pagination?.total ?? skip + batch.length;
+      if (batch.length === 0 || added === 0) break;
       skip += batch.length;
     }
 
@@ -691,14 +701,25 @@ export async function fetchAllPublicStorylists(): Promise<ApiStorylist[]> {
   }
 }
 
+function dedupeToursById(tours: Tour[]): Tour[] {
+  const seen = new Set<string>();
+  return tours.filter((tour) => {
+    if (!tour.id || seen.has(tour.id)) return false;
+    seen.add(tour.id);
+    return true;
+  });
+}
+
 export async function fetchPublicWalksCatalog(): Promise<Tour[]> {
   const storylists = await fetchAllPublicStorylists();
   const enriched = await Promise.all(storylists.map(enrichCatalogStorylist));
-  return enriched
-    .map(mapStorylistToTour)
-    .filter((tour): tour is Tour => Boolean(tour))
-    .filter(isWalkCatalogVisible)
-    .filter((tour) => (tour.contentKind ?? "walk") === "walk");
+  return dedupeToursById(
+    enriched
+      .map(mapStorylistToTour)
+      .filter((tour): tour is Tour => Boolean(tour))
+      .filter(isWalkCatalogVisible)
+      .filter((tour) => (tour.contentKind ?? "walk") === "walk"),
+  );
 }
 
 /** All public walk storylist IDs (including non-recommended) for static export params. */
@@ -721,7 +742,7 @@ export async function fetchPublicTours(): Promise<Tour[]> {
   const stories = storiesResult.status === "fulfilled" ? storiesResult.value : [];
   const walks = walksResult.status === "fulfilled" ? walksResult.value : [];
 
-  return assignTourSlugs([...stories, ...walks]);
+  return assignTourSlugs(dedupeToursById([...stories, ...walks]));
 }
 
 export async function fetchPublicTourById(id: string): Promise<Tour | null> {

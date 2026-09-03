@@ -15,19 +15,20 @@ import {
   tourMatchesCity,
 } from '@/lib/marketplace-api';
 import type { Tour } from '@/lib/marketplace-data';
+import { STATIC_SPA_PARAM, isStaticSpaParam } from '@/lib/static-spa';
 
 export async function generateStaticParams() {
   try {
     clearMarketplaceCache();
     const walkIds = await fetchPublicWalkStaticIds();
     if (walkIds.length > 0) {
-      return walkIds.map((id) => ({ id }));
+      return [...walkIds.map((id) => ({ id })), { id: STATIC_SPA_PARAM }];
     }
   } catch {
     // Build-time API may be unavailable.
   }
 
-  return [{ id: '[id]' }];
+  return [{ id: STATIC_SPA_PARAM }];
 }
 
 export async function generateMetadata({
@@ -36,7 +37,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  if (id === '[id]') {
+  if (isStaticSpaParam(id)) {
     return {
       title: 'Audio Walk | Gamana',
       description: 'Explore this audio walking tour with Gamana.',
@@ -69,7 +70,7 @@ export default async function MarketplaceTourPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const tourId = id === '[id]' ? null : id;
+  const tourId = isStaticSpaParam(id) ? null : id;
 
   const walk = tourId ? await fetchPublicWalkDetailById(tourId) : null;
 

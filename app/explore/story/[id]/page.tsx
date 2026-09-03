@@ -8,19 +8,20 @@ import {
   fetchPublicStoryDetailById,
 } from '@/lib/marketplace-api';
 import { fetchPublicStoriesCatalog } from '@/lib/places-api';
+import { STATIC_SPA_PARAM, isStaticSpaParam } from '@/lib/static-spa';
 
 export async function generateStaticParams() {
   try {
     clearMarketplaceCache();
     const stories = await fetchPublicStoriesCatalog();
     if (stories.length > 0) {
-      return stories.map((story) => ({ id: story.id }));
+      return [...stories.map((story) => ({ id: story.id })), { id: STATIC_SPA_PARAM }];
     }
   } catch {
     // Build-time API may be unavailable.
   }
 
-  return [{ id: '[id]' }];
+  return [{ id: STATIC_SPA_PARAM }];
 }
 
 export async function generateMetadata({
@@ -29,7 +30,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  if (id === '[id]') {
+  if (isStaticSpaParam(id)) {
     return {
       title: 'Audio Story | Gamana',
       description: 'Explore this audio story with Gamana.',
@@ -61,7 +62,7 @@ export default async function ExploreStoryPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const storyId = id === '[id]' ? null : id;
+  const storyId = isStaticSpaParam(id) ? null : id;
 
   const story = storyId ? await fetchPublicStoryDetailById(storyId) : null;
 

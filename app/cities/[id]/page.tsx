@@ -9,18 +9,19 @@ import {
 } from "@/lib/services/cityService";
 import type { Tour } from "@/lib/marketplace-data";
 import { fetchPublicTours, tourMatchesCity } from "@/lib/marketplace-api";
+import { STATIC_SPA_PARAM, isStaticSpaParam } from "@/lib/static-spa";
 
 export async function generateStaticParams() {
     try {
         const cities = await fetchAllActiveCities();
         if (cities.length > 0) {
-            return cities.map((city) => ({ id: city.id }));
+            return [...cities.map((city) => ({ id: city.id })), { id: STATIC_SPA_PARAM }];
         }
     } catch {
         // Build-time API may be unavailable.
     }
 
-    return [{ id: "[id]" }];
+    return [{ id: STATIC_SPA_PARAM }];
 }
 
 export async function generateMetadata({
@@ -29,7 +30,7 @@ export async function generateMetadata({
     params: Promise<{ id: string }>;
 }): Promise<Metadata> {
     const { id } = await params;
-    if (id === "[id]") {
+    if (isStaticSpaParam(id)) {
         return { title: "City | Gamana" };
     }
 
@@ -74,7 +75,7 @@ export default async function CityPage({
     params: Promise<{ id: string }>;
 }) {
     const { id } = await params;
-    const cityId = id === "[id]" ? null : id;
+    const cityId = isStaticSpaParam(id) ? null : id;
     const city = cityId ? await fetchCityById(cityId) : null;
 
     let tours: Tour[] = [];

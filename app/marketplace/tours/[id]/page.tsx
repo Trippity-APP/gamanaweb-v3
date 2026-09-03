@@ -4,6 +4,7 @@ import {
   clearMarketplaceCache,
   fetchPublicTours,
 } from "@/lib/marketplace-api";
+import { STATIC_SPA_PARAM } from "@/lib/static-spa";
 
 type Params = Promise<{ id: string }>;
 
@@ -12,13 +13,13 @@ export async function generateStaticParams() {
     clearMarketplaceCache();
     const tours = await fetchPublicTours();
     if (tours.length > 0) {
-      return tours.map((tour) => ({ id: tour.id }));
+      return [...tours.map((tour) => ({ id: tour.id })), { id: STATIC_SPA_PARAM }];
     }
   } catch {
     // Build-time API may be unavailable.
   }
 
-  return [{ id: "[id]" }];
+  return [{ id: STATIC_SPA_PARAM }];
 }
 
 export default async function MarketplaceTourRedirect({ params }: { params: Params }) {

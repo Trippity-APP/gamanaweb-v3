@@ -1,5 +1,7 @@
 {
   "cleanUrls": true,
+  "trailingSlash": true,
+  "directoryListing": false,
   "headers": [
     {
       "source": "/.well-known/apple-app-site-association",
@@ -40,48 +42,48 @@
   "redirects": [
     {
       "source": "/landing",
-      "destination": "/download-app",
+      "destination": "/download-app/",
       "permanent": true
     },
     {
       "source": "/marketplace",
-      "destination": "/explore",
+      "destination": "/explore/",
       "permanent": true
     },
     {
       "source": "/marketplace/tours/:id",
-      "destination": "/explore/tours/:id",
+      "destination": "/explore/tours/:id/",
       "permanent": true
     }
   ],
   "rewrites": [
     {
-      "source": "/api/v1/:path*",
-      "destination": "https://apidev.gamana.app/api/v1/:path*"
-    },
-    {
       "source": "/blog/:slug",
-      "destination": "/blog/[slug]/index.html"
+      "destination": "/blog/__spa__/index.html"
     },
     {
       "source": "/cities/:id",
-      "destination": "/cities/[id]/index.html"
+      "destination": "/cities/__spa__/index.html"
     },
     {
       "source": "/explore/tours/:id",
-      "destination": "/explore/tours/[id]/index.html"
+      "destination": "/explore/tours/__spa__/index.html"
+    },
+    {
+      "source": "/explore/story/:id",
+      "destination": "/explore/story/__spa__/index.html"
     },
     {
       "source": "/marketplace/tours/:id",
-      "destination": "/explore/tours/[id]/index.html"
+      "destination": "/explore/tours/__spa__/index.html"
     },
     {
       "source": "/storylist/:id",
-      "destination": "/storylist/[id]/index.html"
+      "destination": "/storylist/__spa__/index.html"
     },
     {
       "source": "/storylists/:id",
-      "destination": "/storylists/[id]/index.html"
+      "destination": "/storylists/__spa__/index.html"
     }
   ]
 }

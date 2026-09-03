@@ -6,13 +6,14 @@ import { Button } from '@/components/ui/button';
 import Footer from '@/components/navigation/footer';
 import { BlogPostView } from '@/components/blog/blog-post-view';
 import { clearBlogCache, getPostBySlug, type BlogPost } from '@/lib/blog';
+import { isStaticSpaParam } from '@/lib/static-spa';
 
 function resolveBlogSlug(paramSlug: string): string {
-  if (paramSlug !== '[slug]') return paramSlug;
+  if (!isStaticSpaParam(paramSlug)) return paramSlug;
   if (typeof window === 'undefined') return paramSlug;
   const match = window.location.pathname.match(/\/blog\/([^/]+)/);
   const slug = match?.[1] ? decodeURIComponent(match[1]) : paramSlug;
-  return slug === '[slug]' ? paramSlug : slug;
+  return isStaticSpaParam(slug) ? paramSlug : slug;
 }
 
 type BlogPostDetailClientProps = {
@@ -30,7 +31,7 @@ export function BlogPostDetailClient({
 
   useEffect(() => {
     const resolved = resolveBlogSlug(paramSlug);
-    if (!resolved || resolved === '[slug]') {
+    if (!resolved || isStaticSpaParam(resolved)) {
       if (!initialPost) {
         setLoading(false);
         setError('This story is not available.');
@@ -41,7 +42,6 @@ export function BlogPostDetailClient({
     let cancelled = false;
 
     void (async () => {
-      // Keep baked HTML visible while refreshing so CMS edits show up after deploy.
       if (!initialPost) setLoading(true);
       setError(null);
       try {

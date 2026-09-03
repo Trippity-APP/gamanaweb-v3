@@ -12,6 +12,9 @@ const nextConfig = {
     root: __dirname,
   },
   output: 'export',
+  // Required for Railway/`serve`: without this, Next emits both `page.html` and an
+  // empty `page/` directory, and `serve` prefers the directory → 404 on blog/tour URLs.
+  trailingSlash: true,
   images: {
     unoptimized: true,
     remotePatterns: [
