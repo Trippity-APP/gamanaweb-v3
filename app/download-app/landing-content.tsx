@@ -24,11 +24,14 @@ import {
   Youtube,
   Twitter,
   Music2,
-  Frown,
-  XCircle,
+  ArrowRight,
+  User,
+  Home,
+  Landmark,
 } from "lucide-react";
 import { useStoreUrl } from "@/hooks/use-store-url";
 import { trackStoreClick } from "@/lib/analytics";
+import { DownloadAppDialog } from "@/components/DownloadAppDialog";
 
 /**
  * Sample landing page built to the social/digital marketing team's provided structure —
@@ -88,12 +91,14 @@ const FEATURES = [
   },
 ];
 
+const FEATURE_HIGHLIGHTS = FEATURES.slice(0, 2);
+const FEATURE_COMPACT = FEATURES.slice(2);
+
 const FEATURED_CITIES = [
   { name: "Delhi", img: "/chandni-chowk-golden-hour-street-view-old-delhi-walking-tour.png" },
   { name: "Agra", img: "/taj-mahal-sunrise-reflection-central-pool-agra.jpg" },
   { name: "Varanasi", img: "/varanasi ghats golden hour river boats temple spires panoramic view.jpg" },
-  { name: "Jaipur", img: "/jaipur travel guide explore top places in the pink city with an audio guide app.jpg" },
-  { name: "Goa", img: "/anjuna-beach-self-guided-tour-best-way-to-explore-north-goa.jpg" },
+  { name: "Jaipur", img: "/jantar mantar samrat yantra jaipur astronomical observatory.jpg" },
   { name: "Mumbai", img: "/mumbai-marine-drive-dusk-queens-necklace-arabian-sea.jpg" },
 ];
 
@@ -143,21 +148,49 @@ const TESTIMONIALS = [
   {
     name: "Priya",
     location: "Bengaluru, India",
+    initialBg: "bg-[#0B6E4F]",
     quote:
       "I've walked past Chandni Chowk a dozen times and never knew half of what Gamana told me. Felt like I had a witty local friend narrating in my ear.",
   },
   {
     name: "James",
     location: "London, UK",
+    initialBg: "bg-[#159895]",
     quote:
       "Downloaded the Varanasi tour before I lost signal and it just worked, no app has made an unfamiliar city feel that easy to explore alone.",
   },
   {
     name: "Aisha",
     location: "Dubai, UAE",
+    initialBg: "bg-[#1A5F7A]",
     quote:
       "My kids actually put their phones away and listened. The narrator voices are genuinely funny, not just informative.",
   },
+];
+
+const PERSONAS = [
+  {
+    icon: User,
+    title: "Solo travelers",
+    desc: "Explore at your own pace with a witty local voice in your ear.",
+  },
+  {
+    icon: Home,
+    title: "Families & groups",
+    desc: "Stories that keep kids listening and adults looking up, not down.",
+  },
+  {
+    icon: Landmark,
+    title: "Culture seekers",
+    desc: "Heritage walks that explain why a place matters, not just where it is.",
+  },
+];
+
+const NARRATOR_THUMBS = [
+  "/narrator1.png",
+  "/narrator2.png",
+  "/narrator3.png",
+  "/narrator4.png",
 ];
 
 const FAQS = [
@@ -199,12 +232,58 @@ const SOCIAL_LINKS = [
   { icon: Youtube, href: "https://www.youtube.com/@gamanaapp", label: "YouTube" },
 ];
 
+function WhyIconProblem({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" className={className} aria-hidden>
+      <circle cx="20" cy="20" r="16" fill="#FEE2E2" />
+      <path
+        d="M14 16c1.2-1.5 2.8-2.2 4.5-2.2 2.4 0 4 1.6 4 3.6 0 2.4-2.2 3.2-3.4 4-.7.5-1.1 1-1.1 1.9"
+        stroke="#EF4444"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <circle cx="18.5" cy="28" r="1.4" fill="#EF4444" />
+    </svg>
+  );
+}
+
+function WhyIconShortfall({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" className={className} aria-hidden>
+      <circle cx="20" cy="20" r="16" fill="#FEF3C7" />
+      <path d="M13 13l14 14M27 13L13 27" stroke="#F59E0B" strokeWidth="2.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function WhyIconSolution({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" className={className} aria-hidden>
+      <circle cx="20" cy="20" r="16" fill="#CCFBF1" />
+      <path
+        d="M12.5 20.5l5 5 10-11"
+        stroke="#0B6E4F"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function LandingContent() {
   const { url: storeUrl, platform } = useStoreUrl();
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
+  const [downloadDialogOpen, setDownloadDialogOpen] = useState(false);
+  const [downloadDialogSource, setDownloadDialogSource] = useState("landing-header");
 
   const handleDownloadClick = (source: string) => {
     trackStoreClick(platform === "ios" ? "apple" : "play", source);
+  };
+
+  const openDownloadDialog = (source: string) => {
+    setDownloadDialogSource(source);
+    setDownloadDialogOpen(true);
   };
 
   const scrollTo = (id: string) => {
@@ -218,21 +297,25 @@ export default function LandingContent() {
           marketing team's structure intentionally omits a header/nav section. */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/download-app" className="flex items-center gap-2" aria-label="Gamana download page">
             <img src="/gamana-logo.svg" alt="Gamana" className="h-8 w-auto" />
           </Link>
-          <a
-            href={storeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => handleDownloadClick("landing-header")}
+          <button
+            type="button"
+            onClick={() => openDownloadDialog("landing-header")}
             className="inline-flex items-center gap-2 bg-gradient-to-r from-[#159895] to-[#1A5F7A] hover:from-[#128a86] hover:to-[#164e63] text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors shadow-sm"
           >
             <Download className="h-4 w-4" />
             Download Free
-          </a>
+          </button>
         </div>
       </header>
+
+      <DownloadAppDialog
+        open={downloadDialogOpen}
+        onOpenChange={setDownloadDialogOpen}
+        source={downloadDialogSource}
+      />
 
       {/* HERO — screenshot-forward, not the sitewide photo-hero pattern. On-brand teal
           gradient + decorative blobs, but the visitor sees the actual product on load. */}
@@ -254,15 +337,13 @@ export default function LandingContent() {
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
-              <a
-                href={storeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => handleDownloadClick("landing-hero")}
+              <button
+                type="button"
+                onClick={() => openDownloadDialog("landing-hero")}
                 className="inline-flex items-center justify-center gap-2 bg-white text-[#0B6E4F] font-semibold px-6 py-3.5 rounded-full hover:bg-white/90 transition-colors"
               >
                 <Download className="h-5 w-5" /> Download Free
-              </a>
+              </button>
               <button
                 type="button"
                 onClick={() => scrollTo("experience")}
@@ -284,17 +365,49 @@ export default function LandingContent() {
           </div>
 
           <div className="relative flex justify-center lg:justify-end">
-            <div className="relative w-64 sm:w-72">
-              <div className="rounded-[2.5rem] border-8 border-gray-900 bg-gray-900 shadow-2xl overflow-hidden">
-                <img src="/demo02.png" alt="Gamana app screen" className="w-full h-auto" />
+            <div className="relative w-[280px] sm:w-[340px] h-[380px] sm:h-[440px]">
+              {/* Left phone */}
+              <div className="absolute left-0 top-10 w-[42%] rotate-[-8deg] z-0 opacity-95">
+                <div className="rounded-[1.75rem] border-[6px] border-gray-900 bg-gray-900 shadow-xl overflow-hidden">
+                  <img src="/demo01.png" alt="Gamana tour list screen" className="w-full h-auto" />
+                </div>
               </div>
-              <div className="absolute -left-10 top-10 bg-white rounded-xl shadow-lg px-4 py-3 hidden sm:block">
-                <p className="text-xs text-gray-400">Now Playing</p>
-                <p className="text-sm font-semibold text-gray-900">Chandni Chowk Story</p>
+              {/* Right phone */}
+              <div className="absolute right-0 top-16 w-[42%] rotate-[8deg] z-0 opacity-95">
+                <div className="rounded-[1.75rem] border-[6px] border-gray-900 bg-gray-900 shadow-xl overflow-hidden">
+                  <img src="/demo03.png" alt="Gamana story playback screen" className="w-full h-auto" />
+                </div>
               </div>
-              <div className="absolute -right-6 bottom-16 bg-white rounded-xl shadow-lg px-4 py-3 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[#159895]" />
-                <p className="text-xs font-semibold text-gray-900">16 Narrator Voices</p>
+              {/* Center phone */}
+              <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[52%] z-10">
+                <div className="rounded-[2.25rem] border-8 border-gray-900 bg-gray-900 shadow-2xl overflow-hidden">
+                  <img src="/demo02.png" alt="Gamana app home screen" className="w-full h-auto" />
+                </div>
+              </div>
+
+              <div className="absolute -left-2 sm:-left-6 top-6 bg-white rounded-xl shadow-lg px-3 py-2.5 hidden sm:block z-20">
+                <p className="text-[10px] text-gray-400">Now Playing</p>
+                <p className="text-xs font-semibold text-gray-900">Chandni Chowk Story</p>
+              </div>
+
+              <div className="absolute right-0 sm:-right-2 bottom-8 bg-white rounded-xl shadow-lg px-3 py-2.5 z-20 max-w-[180px]">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-3.5 w-3.5 text-[#159895] shrink-0" />
+                  <p className="text-xs font-semibold text-gray-900">16 Narrator Voices</p>
+                </div>
+                <div className="flex -space-x-2">
+                  {NARRATOR_THUMBS.map((src) => (
+                    <img
+                      key={src}
+                      src={src}
+                      alt=""
+                      className="h-7 w-7 rounded-full border-2 border-white object-cover"
+                    />
+                  ))}
+                  <span className="h-7 w-7 rounded-full border-2 border-white bg-[#F0FBFA] text-[9px] font-bold text-[#0B6E4F] flex items-center justify-center">
+                    +12
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -311,32 +424,26 @@ export default function LandingContent() {
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-6">
-          <div className="rounded-2xl border border-gray-100 p-6">
-            <div className="h-11 w-11 rounded-xl bg-red-50 flex items-center justify-center mb-4">
-              <Frown className="h-5 w-5 text-red-500" />
-            </div>
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 transition-colors hover:bg-[#F0FBFA]">
+            <WhyIconProblem className="h-10 w-10 mb-4" />
             <h3 className="font-semibold text-gray-900 mb-2">The Travel Problem</h3>
             <p className="text-sm text-gray-500">
               You land in a new city with a map full of pins and zero context, no idea why that
               temple matters, which street has the best food, or where locals actually go.
             </p>
           </div>
-          <div className="rounded-2xl border border-gray-100 p-6">
-            <div className="h-11 w-11 rounded-xl bg-amber-50 flex items-center justify-center mb-4">
-              <XCircle className="h-5 w-5 text-amber-500" />
-            </div>
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 transition-colors hover:bg-[#F0FBFA]">
+            <WhyIconShortfall className="h-10 w-10 mb-4" />
             <h3 className="font-semibold text-gray-900 mb-2">Why Existing Solutions Fall Short</h3>
             <p className="text-sm text-gray-500">
               Guided tours are expensive and run on someone else's schedule. Blogs go stale and don't
               fit your pace. Maps get you there, but never tell you why it matters.
             </p>
           </div>
-          <div className="rounded-2xl border border-[#57C5B6]/30 bg-[#F0FBFA] p-6">
-            <div className="h-11 w-11 rounded-xl bg-white flex items-center justify-center mb-4">
-              <Sparkles className="h-5 w-5 text-[#159895]" />
-            </div>
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 transition-colors hover:bg-[#F0FBFA]">
+            <WhyIconSolution className="h-10 w-10 mb-4" />
             <h3 className="font-semibold text-gray-900 mb-2">How Gamana Solves It</h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-500">
               Gamana plays the right story, at the right place, the moment you arrive, hands-free,
               offline-ready, and entirely on your own schedule.
             </p>
@@ -344,41 +451,68 @@ export default function LandingContent() {
         </div>
       </section>
 
-      {/* WHAT IS GAMANA? */}
-      <section id="what-is-gamana" className="bg-gray-50">
+      {/* WHAT IS GAMANA? — banded split layout, distinct from Why's equal cards */}
+      <section id="what-is-gamana" className="bg-gradient-to-br from-[#F0FBFA] via-white to-[#E8F6F4]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">What is Gamana?</h2>
-            <p className="mt-3 text-gray-500">
-              Gamana is a GPS-enabled audio storytelling app that turns any city into a walking
-              tour, no guide, no earpiece rental, no fixed schedule. Just open the app, start
-              walking, and let the stories find you.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <Volume2 className="h-6 w-6 text-[#159895] mb-3" />
-              <h3 className="font-semibold text-gray-900 mb-1">Audio Tour Guide</h3>
-              <p className="text-sm text-gray-500">
-                Hands-free narration timed to your steps, not a script you have to keep pausing to
-                read.
+          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-start">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#159895] mb-3">
+                The product
               </p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">What is Gamana?</h2>
+              <p className="mt-4 text-gray-600 leading-relaxed">
+                Gamana is a GPS-enabled audio storytelling app that turns any city into a walking
+                tour, no guide, no earpiece rental, no fixed schedule. Just open the app, start
+                walking, and let the stories find you.
+              </p>
+              <div className="mt-8 space-y-5">
+                <div className="flex gap-4">
+                  <div className="h-10 w-10 shrink-0 rounded-full bg-[#0B6E4F] flex items-center justify-center">
+                    <Volume2 className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Audio Tour Guide</h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Hands-free narration timed to your steps, not a script you have to keep pausing
+                      to read.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="h-10 w-10 shrink-0 rounded-full bg-[#159895] flex items-center justify-center">
+                    <MapPin className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">GPS-Based Storytelling</h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Stories trigger automatically as you approach each spot, no tapping, no
+                      searching, no losing your place.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <MapPin className="h-6 w-6 text-[#159895] mb-3" />
-              <h3 className="font-semibold text-gray-900 mb-1">GPS-Based Storytelling</h3>
-              <p className="text-sm text-gray-500">
-                Stories trigger automatically as you approach each spot, no tapping, no searching,
-                no losing your place.
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#159895] mb-3">
+                Who it&apos;s for
               </p>
-            </div>
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <Users className="h-6 w-6 text-[#159895] mb-3" />
-              <h3 className="font-semibold text-gray-900 mb-1">Who It's For</h3>
-              <p className="text-sm text-gray-500">
-                Solo explorers, curious families, heritage lovers, anyone who'd rather look up at a
-                monument than down at a screen.
-              </p>
+              <div className="space-y-3">
+                {PERSONAS.map((p) => (
+                  <div
+                    key={p.title}
+                    className="rounded-2xl bg-white border border-[#57C5B6]/25 p-5 flex gap-4 shadow-sm"
+                  >
+                    <div className="h-11 w-11 shrink-0 rounded-xl bg-[#F0FBFA] flex items-center justify-center">
+                      <p.icon className="h-5 w-5 text-[#0B6E4F]" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{p.title}</h3>
+                      <p className="text-sm text-gray-500 mt-0.5">{p.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -410,20 +544,40 @@ export default function LandingContent() {
         </div>
       </section>
 
-      {/* KEY FEATURES */}
+      {/* KEY FEATURES — bento: 2 highlights + 4 compact tiles */}
       <section id="features" className="bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Key Features</h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="bg-white rounded-2xl p-6 shadow-sm">
-                <div className="h-10 w-10 rounded-xl bg-[#F0FBFA] flex items-center justify-center mb-3">
-                  <f.icon className="h-5 w-5 text-[#159895]" />
+
+          <div className="space-y-4 mb-4">
+            {FEATURE_HIGHLIGHTS.map((f, i) => (
+              <div
+                key={f.title}
+                className={`rounded-2xl bg-white border border-gray-100 p-6 sm:p-8 flex flex-col sm:flex-row gap-5 sm:items-center ${
+                  i % 2 === 1 ? "sm:flex-row-reverse" : ""
+                }`}
+              >
+                <div className="h-14 w-14 shrink-0 rounded-2xl bg-gradient-to-br from-[#159895] to-[#1A5F7A] flex items-center justify-center">
+                  <f.icon className="h-7 w-7 text-white" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">{f.title}</h3>
-                <p className="text-sm text-gray-500">{f.desc}</p>
+                <div className={i % 2 === 1 ? "sm:text-right sm:flex-1" : "sm:flex-1"}>
+                  <h3 className="text-lg font-semibold text-gray-900">{f.title}</h3>
+                  <p className="mt-1 text-sm text-gray-500 max-w-xl">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {FEATURE_COMPACT.map((f) => (
+              <div key={f.title} className="bg-white rounded-2xl p-5 border border-gray-100">
+                <div className="h-9 w-9 rounded-lg bg-[#F0FBFA] flex items-center justify-center mb-3">
+                  <f.icon className="h-4 w-4 text-[#159895]" />
+                </div>
+                <h3 className="font-semibold text-gray-900 text-sm mb-1">{f.title}</h3>
+                <p className="text-xs text-gray-500 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -453,6 +607,16 @@ export default function LandingContent() {
               <p className="absolute bottom-3 left-3 text-white font-semibold text-sm">{c.name}</p>
             </Link>
           ))}
+          <Link
+            href="/cities"
+            className="group relative rounded-xl overflow-hidden aspect-[3/4] bg-gradient-to-br from-[#0B6E4F] to-[#1A5F7A] flex flex-col items-start justify-end p-4"
+          >
+            <p className="text-white font-semibold text-sm leading-snug">View all destinations</p>
+            <p className="text-white/75 text-xs mt-1">50+ cities to explore</p>
+            <span className="mt-3 inline-flex items-center gap-1 text-white text-xs font-semibold group-hover:gap-2 transition-all">
+              Browse <ArrowRight className="h-3.5 w-3.5" />
+            </span>
+          </Link>
         </div>
 
         <h3 className="text-lg font-semibold text-gray-900 mb-5">Popular Walking Tours</h3>
@@ -491,20 +655,12 @@ export default function LandingContent() {
         </div>
       </section>
 
-      {/* EXPERIENCE GAMANA */}
+      {/* EXPERIENCE GAMANA — video placeholder only */}
       <section id="experience" className="bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Experience Gamana</h2>
-            <p className="mt-3 text-gray-500">A closer look at what's inside the app.</p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-12">
-            {["/demo01.png", "/demo02.png", "/demo03.png", "/demo04.png", "/demo05.png"].map((src, i) => (
-              <div key={src} className={`rounded-2xl overflow-hidden border-4 border-gray-900 shadow-lg ${i === 4 ? "hidden sm:block" : ""}`}>
-                <img src={src} alt="Gamana app screenshot" className="w-full h-auto" />
-              </div>
-            ))}
+            <p className="mt-3 text-gray-500">A closer look at what&apos;s inside the app.</p>
           </div>
 
           {/* App Demo Video — placeholder for the marketing team to swap in a real product
@@ -521,23 +677,10 @@ export default function LandingContent() {
           <p className="text-center text-xs text-gray-400 mt-2">
             Demo video placeholder, swap in the real product video before launch.
           </p>
-
-          <div className="grid sm:grid-cols-2 gap-4 mt-12 max-w-3xl mx-auto">
-            <div className="rounded-2xl overflow-hidden border-4 border-gray-900 shadow-lg">
-              <img src="/demo screen 01.png" alt="Gamana interactive UI preview" className="w-full h-auto" />
-            </div>
-            <div className="rounded-2xl overflow-hidden border-4 border-gray-900 shadow-lg">
-              <img src="/demo screen 02.png" alt="Gamana interactive UI preview" className="w-full h-auto" />
-            </div>
-          </div>
-          <p className="text-center text-sm text-gray-500 mt-4">
-            Swipe through tours, save favorites, and download for offline, all from one clean
-            interface.
-          </p>
         </div>
       </section>
 
-      {/* WHY CHOOSE GAMANA? */}
+      {/* WHY CHOOSE GAMANA? — side-by-side columns on md+ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Why Choose Gamana?</h2>
@@ -545,30 +688,41 @@ export default function LandingContent() {
         <div className="grid lg:grid-cols-3 gap-6">
           {COMPARISONS.map((c) => (
             <div key={c.title} className="rounded-2xl border border-gray-100 p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">{c.title}</h3>
-              <div className="space-y-2 mb-4">
-                {c.gamana.map((line) => (
-                  <div key={line} className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-[#159895] mt-0.5 shrink-0" />
-                    <p className="text-sm text-gray-700">{line}</p>
+              <h3 className="font-semibold text-gray-900 mb-5">{c.title}</h3>
+              <div className="grid md:grid-cols-2 gap-5 md:gap-4">
+                <div>
+                  <p className="text-xs font-semibold text-[#0B6E4F] uppercase tracking-wide mb-3">
+                    Gamana
+                  </p>
+                  <div className="space-y-2">
+                    {c.gamana.map((line) => (
+                      <div key={line} className="flex items-start gap-2">
+                        <Check className="h-4 w-4 text-[#159895] mt-0.5 shrink-0" />
+                        <p className="text-sm text-gray-700">{line}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div className="pt-4 border-t border-gray-100 space-y-2">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{c.altLabel}</p>
-                {c.alt.map((line) => (
-                  <div key={line} className="flex items-start gap-2">
-                    <X className="h-4 w-4 text-gray-300 mt-0.5 shrink-0" />
-                    <p className="text-sm text-gray-400">{line}</p>
+                </div>
+                <div className="md:border-l md:border-gray-100 md:pl-4">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                    {c.altLabel}
+                  </p>
+                  <div className="space-y-2">
+                    {c.alt.map((line) => (
+                      <div key={line} className="flex items-start gap-2">
+                        <X className="h-4 w-4 text-gray-300 mt-0.5 shrink-0" />
+                        <p className="text-sm text-gray-400">{line}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* TESTIMONIALS — illustrative sample copy, no aggregate rating claimed */}
+      {/* TESTIMONIALS — illustrative sample copy, initial avatars */}
       <section id="testimonials" className="bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -578,14 +732,23 @@ export default function LandingContent() {
           <div className="grid sm:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t) => (
               <div key={t.name} className="bg-white rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <span
+                    className={`h-11 w-11 rounded-full ${t.initialBg} text-white font-semibold text-lg flex items-center justify-center shrink-0`}
+                  >
+                    {t.name.charAt(0)}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{t.name}</p>
+                    <p className="text-xs text-gray-400">{t.location}</p>
+                  </div>
+                </div>
                 <div className="flex gap-0.5 mb-3">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <p className="text-sm text-gray-600 mb-4">&ldquo;{t.quote}&rdquo;</p>
-                <p className="text-sm font-semibold text-gray-900">{t.name}</p>
-                <p className="text-xs text-gray-400">{t.location}</p>
+                <p className="text-sm text-gray-600">&ldquo;{t.quote}&rdquo;</p>
               </div>
             ))}
           </div>
@@ -667,7 +830,7 @@ export default function LandingContent() {
       <footer className="bg-gray-900 text-gray-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <img src="/gamana-logo.svg" alt="Gamana" className="h-7 w-auto opacity-90" />
+            <img src="/gamana-logo.svg" alt="Gamana" className="h-7 w-auto brightness-0 invert opacity-90" />
 
             <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
               {FOOTER_LINKS.map((l) => (
