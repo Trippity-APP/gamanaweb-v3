@@ -5,13 +5,13 @@ import EnhancedPageLayout from '@/components/enhanced-page-layout';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
   title: 'Local Languages for Cultural Walking Tours',
-  description: 'Experience authentic local narratives in multiple languages during immersive walking tours. Connect deeper with culture and communities through Gamana.',
+  description: 'Hear walking tours in English, Hindi, Kannada, and more. Pick the language that feels most natural to you on Gamana.',
   alternates: {
     canonical: 'https://www.gamana.app/features/local-languages',
   },
   openGraph: {
     title: 'Local Languages for Cultural Walking Tours | Gamana',
-    description: 'Experience authentic local narratives in multiple languages during immersive walking tours. Connect deeper with culture and communities through Gamana.',
+    description: 'Hear walking tours in English, Hindi, Kannada, and more. Pick the language that feels most natural to you on Gamana.',
     url: 'https://www.gamana.app/features/local-languages',
     siteName: 'Gamana',
     type: 'website',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Local Languages for Cultural Walking Tours | Gamana',
-    description: 'Experience authentic local narratives in multiple languages during immersive walking tours. Connect deeper with culture and communities through Gamana.',
+    description: 'Hear walking tours in English, Hindi, Kannada, and more. Pick the language that feels most natural to you on Gamana.',
     images: ['/gamana-logo.svg'],
   },
 };
@@ -60,13 +60,13 @@ export default function LocalLanguagesPage() {
       <EnhancedPageLayout
       icon={Globe}
       title="Local Languages"
-      subtitle="Authentic local experiences through native language narratives and cultural immersion"
+      subtitle="Hear tours in the language that feels most natural to you"
       gradient="from-[#159895] via-[#1A5F7A] to-[#57C5B6]"
       heroImage="/fort-kochi-local-market.jpg"
       introTitle="Connect Through Language"
       introText={[
         'Experience destinations the way locals do with multi-language support. Gamana offers tours and narratives in numerous languages, allowing you to connect more deeply with the culture, history, and community of each place you visit.',
-        'Whether you want to practice a language you are learning, hear stories in your native tongue, or experience the authentic cadence of local narratives, our multi-language support breaks down barriers and enriches your travel experience.',
+        'Whether you are practicing a language, hearing stories in your native tongue, or listening in the local language, you can switch languages as you go.',
       ]}
       benefits={[
         { text: 'Tours available in 7 languages' },
@@ -80,7 +80,7 @@ export default function LocalLanguagesPage() {
         {
           icon: Languages,
           title: 'Extensive Language Support',
-          description: 'Access tours in major world languages plus regional dialects for a truly authentic experience.',
+          description: 'Access tours in major world languages plus regional dialects including regional languages where we have them.',
         },
         {
           icon: Volume2,

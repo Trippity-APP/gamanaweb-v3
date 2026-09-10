@@ -1,4 +1,7 @@
+'use client';
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 
 import { getAllPostSummaries, type BlogSummary } from "@/lib/blog";
@@ -15,19 +18,41 @@ function scoreOverlap(a: string[], b: string[]): number {
   return b.reduce((n, t) => n + (set.has(t.toLowerCase()) ? 1 : 0), 0);
 }
 
-export default async function RelatedPosts({
+export default function RelatedPosts({
   currentSlug,
   currentTags,
   limit = 3,
 }: Props) {
-  const all = await getAllPostSummaries();
-  const scored = all
-    .filter((p) => p.slug !== currentSlug)
-    .map((p) => ({ post: p, score: scoreOverlap(currentTags, p.tags) }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
+  const [related, setRelated] = useState<BlogSummary[]>([]);
 
-  if (scored.length === 0) return null;
+  const tagsKey = currentTags.join("\0");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const all = await getAllPostSummaries();
+        if (cancelled) return;
+        const tags = tagsKey ? tagsKey.split("\0") : [];
+        const scored = all
+          .filter((p) => p.slug !== currentSlug)
+          .map((p) => ({ post: p, score: scoreOverlap(tags, p.tags) }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, limit)
+          .map(({ post }) => post);
+        setRelated(scored);
+      } catch {
+        if (!cancelled) setRelated([]);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentSlug, tagsKey, limit]);
+
+  if (related.length === 0) return null;
 
   return (
     <section className="my-12">
@@ -35,7 +60,7 @@ export default async function RelatedPosts({
         Related stories
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {scored.map(({ post }) => (
+        {related.map((post) => (
           <RelatedCard key={post.slug} post={post} />
         ))}
       </div>

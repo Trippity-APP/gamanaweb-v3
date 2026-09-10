@@ -7,9 +7,10 @@ import { CityDetail } from "@/components/cities/CityDetail";
 import { fetchCityById, type ApiCity } from "@/lib/services/cityService";
 import { fetchPublicTours, tourMatchesCity } from "@/lib/marketplace-api";
 import type { Tour } from "@/lib/marketplace-data";
+import { isStaticSpaParam } from "@/lib/static-spa";
 
 function resolveCityId(paramId: string): string {
-    if (paramId !== "[id]") return paramId;
+    if (!isStaticSpaParam(paramId)) return paramId;
     if (typeof window === "undefined") return paramId;
     const match = window.location.pathname.match(/\/cities\/([^/]+)/);
     return match?.[1] ?? paramId;
@@ -31,16 +32,16 @@ export function CityDetailPageClient({
     const [city, setCity] = useState<ApiCity | null>(initialCity);
     const [tours, setTours] = useState<Tour[]>(initialTours);
     const [relatedCities, setRelatedCities] = useState<ApiCity[]>(initialRelatedCities);
-    const [loading, setLoading] = useState(paramCityId === "[id]" && !initialCity);
+    const [loading, setLoading] = useState(isStaticSpaParam(paramCityId) && !initialCity);
     const [error, setError] = useState<string | null>(
-        initialCity ? null : paramCityId === "[id]" ? null : "This city is not available."
+        initialCity ? null : isStaticSpaParam(paramCityId) ? null : "This city is not available."
     );
 
     useEffect(() => {
-        if (initialCity || paramCityId !== "[id]") return;
+        if (initialCity || !isStaticSpaParam(paramCityId)) return;
 
         const resolved = resolveCityId(paramCityId);
-        if (resolved === "[id]") return;
+        if (isStaticSpaParam(resolved)) return;
 
         void (async () => {
             setLoading(true);

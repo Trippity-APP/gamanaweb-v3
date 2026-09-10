@@ -83,7 +83,7 @@ export function CityNotCovered({ city, source }: { city: string; source: string 
           <Check className="h-7 w-7 text-[#159895]" />
         </div>
         <h3 className="text-lg font-semibold text-gray-900">
-          Noted — {city} is on our list
+          Noted, {city} is on our list
         </h3>
         <p className="mx-auto mt-2 max-w-md text-sm text-gray-600">
           {effectiveEmail
@@ -139,12 +139,12 @@ export function CityNotCovered({ city, source }: { city: string; source: string 
       </div>
       <p className="mt-2 text-xs text-gray-400">
         {!emailLooksValid
-          ? 'That email doesn’t look right — check it, or clear it to request anyway.'
+          ? 'That email doesn’t look right, check it, or clear it to request anyway.'
           : account
             // Signed-in visitors get told which address this will use, rather than having
             // it taken silently just because the input is hidden for them.
             ? `We’ll notify ${account.email}.`
-            : 'Email is optional — the request still counts without it.'}
+            : 'Email is optional, the request still counts without it.'}
       </p>
 
       <div className="mt-6 flex flex-col items-center justify-center gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:gap-6">

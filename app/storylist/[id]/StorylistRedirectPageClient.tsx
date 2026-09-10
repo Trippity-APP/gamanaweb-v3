@@ -206,7 +206,7 @@ export default function StorylistRedirectPageClient({ id }: StorylistRedirectPag
                 Gamana is a <span className="bg-gradient-to-r from-[#57C5B6] to-[#159895] bg-clip-text text-transparent">Mobile-Only Experience</span>
               </h1>
               <p className="text-gray-300 text-base sm:text-lg max-w-xl leading-relaxed font-medium">
-                We design tour-guide storytelling exclusively for your mobile device. Scan the code to instantly download the app and begin exploring audio storylists around you.
+                Gamana is built for your phone. Scan to download and start listening. Scan the code to instantly download the app and begin exploring audio storylists around you.
               </p>
 
               {/* Store links */}

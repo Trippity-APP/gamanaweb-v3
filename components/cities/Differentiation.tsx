@@ -14,7 +14,7 @@ const features = [
     {
         icon: Sparkles,
         title: "Story-rich narration",
-        description: "Engaging narratives tailored to the location.",
+        description: "Stories written for the exact spot you're standing on.",
     },
     {
         icon: MapPin,

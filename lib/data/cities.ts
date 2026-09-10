@@ -24,7 +24,7 @@ export const cities: City[] = [
         image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=2874&auto=format&fit=crop",
         isPopular: true,
         details: {
-            intro: "Goa is more than just beaches. Discover the UNESCO-listed churches of Old Goa, the colorful Latin Quarter of Fontainhas, and the vibrant spice plantations. A blend of Indian and Portuguese cultures awaits.",
+            intro: "Goa is more than just beaches. See the UNESCO-listed churches of Old Goa, the Latin Quarter of Fontainhas, and spice plantations outside the city. Indian and Portuguese histories sit side by side here.",
             highlights: [
                 "Old Goa Churches (Basilica of Bom Jesus)",
                 "Fontainhas Latin Quarter",
@@ -43,7 +43,7 @@ export const cities: City[] = [
         image: "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=2832&auto=format&fit=crop",
         isPopular: true,
         details: {
-            intro: "Experience the tranquility of Kerala. From the historic Fort Kochi with its Chinese fishing nets to the serene backwaters of Alleppey and the tea gardens of Munnar, our guides bring the diverse landscapes to life.",
+            intro: "Experience the tranquility of Kerala. From the historic Fort Kochi with its Chinese fishing nets to the serene backwaters of Alleppey and the tea gardens of Munnar, audio tours across Fort Kochi, the backwaters, and Munnar.",
             highlights: [
                 "Fort Kochi Heritage Walk",
                 "Alleppey Backwaters Tour",
@@ -62,7 +62,7 @@ export const cities: City[] = [
         image: "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=2942&auto=format&fit=crop",
         isNew: true,
         details: {
-            intro: "Known as the Garden City, Bengaluru blends its colonial heritage with a vibrant tech scene. Walk through the lush Cubbon Park, admire the Tudor-style Bangalore Palace, and explore the bustling markets of K.R. Market.",
+            intro: "Known as the Garden City, Bengaluru mixes colonial buildings with a busy tech city. Walk through Cubbon Park, see the Tudor-style Bangalore Palace, and browse the markets at K.R. Market.",
             highlights: [
                 "Bangalore Palace & Grounds",
                 "Cubbon Park Nature Walk",
@@ -85,7 +85,7 @@ export const cities: City[] = [
         id: "nyc",
         name: "New York City",
         country: "United States",
-        description: "The concrete jungle where dreams—and stories—are made.",
+        description: "The concrete jungle where dreams and stories are made.",
         tags: ["Culture", "History", "Walking"],
         image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=2924&auto=format&fit=crop",
         isPopular: true,
@@ -193,7 +193,7 @@ export const cities: City[] = [
         image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=2940&auto=format&fit=crop",
         isPopular: true,
         details: {
-            intro: "Explore London's rich tapestry of history and culture. From the royal palaces to the gritty charm of the East End, Gamana accompanies you with stories of kings, queens, dazzling playwrights, and modern innovations.",
+            intro: "Walk London from palaces to the East End, with stories for each stop. From the royal palaces to the gritty charm of the East End, Gamana accompanies you with stories of kings, queens, dazzling playwrights, and modern innovations.",
             highlights: [
                 "Tower of London & Tower Bridge",
                 "Westminster & Big Ben",
@@ -212,7 +212,7 @@ export const cities: City[] = [
         image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?q=80&w=2832&auto=format&fit=crop",
         isNew: true,
         details: {
-            intro: "Immerse yourself in the architectural wonders of Barcelona. Walk past Gaudí's Sagrada Família and Casa Batlló, explore the Gothic Quarter's medieval streets, and enjoy the vibrant atmosphere of La Rambla.",
+            intro: "Walk past Gaudí's Sagrada Família and Casa Batlló, through the Gothic Quarter's medieval streets, and along La Rambla. Each stop has a story worth hearing.",
             highlights: [
                 "Sagrada Família & Gaudí Architecture",
                 "Gothic Quarter Walking Tour",

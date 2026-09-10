@@ -67,7 +67,7 @@ export function CityDetail({ city, tours, relatedCities = [] }: CityDetailProps)
                         <h2 className="text-lg font-semibold text-gray-900">Explore {city.name} with Gamana</h2>
                         <p className="text-gray-600 leading-relaxed">
                             Walk {city.name} at your own pace with location-aware audio stories. No tour groups,
-                            no rigid schedules — just open the app, arrive at a landmark, and listen.
+                            no rigid schedules, just open the app, arrive at a landmark, and listen.
                         </p>
                     </div>
 
@@ -75,7 +75,7 @@ export function CityDetail({ city, tours, relatedCities = [] }: CityDetailProps)
                         asChild
                         className="w-full sm:w-auto bg-gradient-to-r from-[#1A5F7A] to-[#159895] text-white hover:opacity-90 shadow-md rounded-xl"
                     >
-                        <Link href={`/marketplace?city=${encodeURIComponent(city.name)}`}>
+                        <Link href={`/explore?city=${encodeURIComponent(city.name)}`}>
                             <Play className="mr-2 h-4 w-4 fill-current" />
                             Browse tours in {city.name}
                         </Link>

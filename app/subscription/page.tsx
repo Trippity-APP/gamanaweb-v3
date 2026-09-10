@@ -90,7 +90,7 @@ const plans: Plan[] = [
       { name: 'Unlimited access to ALL tours', included: true },
       { name: 'Ultra HD audio quality', included: true },
       { name: 'Unlimited offline downloads', included: true },
-      { name: 'Exclusive Platinum-only tours', included: true },
+      { name: 'Platinum-only tours', included: true },
       { name: '24/7 premium support', included: true },
       { name: 'Early access to all new content', included: true },
       { name: 'Personalized tour recommendations', included: true },
@@ -133,7 +133,7 @@ export default function SubscriptionPage() {
                   Choose Your Adventure
                 </h1>
                 <p className="text-xl md:text-2xl text-white/95 leading-relaxed max-w-3xl mx-auto">
-                  Select the perfect plan for your journey and unlock immersive audio tours worldwide
+                  Pick a plan and get access to premium audio tours
                 </p>
               </div>
 
@@ -272,7 +272,7 @@ export default function SubscriptionPage() {
                     <TrendingUp className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-bold">Always Growing</h3>
-                  <p className="text-white/80">New tours added weekly, exclusive content for members</p>
+                  <p className="text-white/80">New tours added weekly, new tours for members first</p>
                 </div>
               </div>
             </div>

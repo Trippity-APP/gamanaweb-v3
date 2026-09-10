@@ -1,3 +1,5 @@
+const DEFAULT_API_URL = "https://apidev.gamana.app/api/v1";
+
 export type ApiBlogPost = {
   id: string;
   title: string;
@@ -30,22 +32,31 @@ type ApiPostResponse = {
   post: ApiBlogPost;
 };
 
-const DEFAULT_BLOG_API_URL = "http://localhost:8000/api/v1";
-
+/**
+ * Blog CMS calls use the absolute API URL in both server and browser.
+ * Do not use the `/api/v1` marketplace proxy here — static hosts often omit that
+ * rewrite, which made the blog index fetch fail silently after deploy.
+ */
 export function getBlogApiBaseUrl(): string {
   return (
-    process.env.NEXT_PUBLIC_MARKETPLACE_API_URL ||
     process.env.NEXT_PUBLIC_BLOG_API_URL ||
+    process.env.NEXT_PUBLIC_MARKETPLACE_API_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
     process.env.BLOG_API_URL ||
-    DEFAULT_BLOG_API_URL
+    process.env.GAMANA_API_URL ||
+    DEFAULT_API_URL
   ).replace(/\/$/, "");
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url, {
-    cache: "force-cache",
-  });
+  // Always bypass HTTP/Next caches for CMS reads so new/updated articles appear
+  // without waiting for a rebuild (browser + server during next dev).
+  const init: RequestInit =
+    process.env.NODE_ENV === "development" || typeof window !== "undefined"
+      ? { cache: "no-store" }
+      : { cache: "force-cache" };
+
+  const response = await fetch(url, init);
 
   if (!response.ok) {
     throw new Error(`Blog API ${url} failed (${response.status})`);

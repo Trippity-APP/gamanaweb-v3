@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
+import { getExploreBackHref } from "@/lib/explore-search";
 import {
   ArrowLeft,
   Check as CheckIcon,
-  Coins as CoinsIcon,
   Lock,
   MapPin,
   Smartphone,
   Star,
 } from "lucide-react";
+import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MarketplaceCoverImage } from "@/components/marketplace/marketplace-cover-image";
@@ -24,11 +26,12 @@ import {
   tourMatchesCity,
 } from "@/lib/marketplace-api";
 import { getTierColor, tierLabels, type Tour } from "@/lib/marketplace-data";
+import { isStaticSpaParam } from "@/lib/static-spa";
 
 function resolveTourId(paramId: string): string {
-  if (paramId !== "[id]") return paramId;
+  if (!isStaticSpaParam(paramId)) return paramId;
   if (typeof window === "undefined") return paramId;
-  const match = window.location.pathname.match(/\/marketplace\/tours\/([^/]+)/);
+  const match = window.location.pathname.match(/\/(?:explore|marketplace)\/tours\/([^/]+)/);
   return match?.[1] ?? paramId;
 }
 
@@ -44,11 +47,13 @@ export function MarketplaceTourDetail({
   relatedTours: initialRelatedTours = [],
 }: MarketplaceTourDetailProps) {
   const { url: storeUrl, platform } = useStoreUrl();
+  const pathname = usePathname();
+  const backHref = getExploreBackHref(pathname);
   const [tour, setTour] = useState<Tour | null>(initialTour);
   const [relatedTours, setRelatedTours] = useState<Tour[]>(initialRelatedTours);
-  const [loading, setLoading] = useState(paramTourId === "[id]" && !initialTour);
+  const [loading, setLoading] = useState(isStaticSpaParam(paramTourId) && !initialTour);
   const [error, setError] = useState<string | null>(
-    initialTour ? null : paramTourId === "[id]" ? null : "This tour is not available."
+    initialTour ? null : isStaticSpaParam(paramTourId) ? null : "This tour is not available."
   );
 
   const loadTourById = async (id: string) => {
@@ -84,10 +89,10 @@ export function MarketplaceTourDetail({
   };
 
   useEffect(() => {
-    if (initialTour || paramTourId !== "[id]") return;
+    if (initialTour || !isStaticSpaParam(paramTourId)) return;
 
     const resolved = resolveTourId(paramTourId);
-    if (resolved === "[id]") return;
+    if (isStaticSpaParam(resolved)) return;
 
     void loadTourById(resolved);
   }, [paramTourId, initialTour]);
@@ -95,7 +100,7 @@ export function MarketplaceTourDetail({
   const retry = () => {
     clearMarketplaceCache();
     const resolved = resolveTourId(paramTourId);
-    if (resolved === "[id]") return;
+    if (isStaticSpaParam(resolved)) return;
     void loadTourById(resolved);
   };
 
@@ -118,7 +123,7 @@ export function MarketplaceTourDetail({
             Try again
           </Button>
           <Button asChild variant="outline">
-            <Link href="/marketplace">Back to marketplace</Link>
+            <Link href={backHref}>Back to explore</Link>
           </Button>
         </div>
       </div>
@@ -129,11 +134,11 @@ export function MarketplaceTourDetail({
     <div className="max-w-5xl mx-auto px-4 pb-16">
       <div className="pt-6">
         <Link
-          href="/marketplace"
+          href={backHref}
           className="inline-flex items-center gap-2 text-sm font-medium text-[#159895] hover:text-[#128a86]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to marketplace
+          Back to explore
         </Link>
       </div>
 
@@ -193,7 +198,7 @@ export function MarketplaceTourDetail({
                   <p className="text-xl font-bold text-emerald-700">Free</p>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <CoinsIcon className="h-5 w-5 text-amber-500" />
+                    <GamanaCoinIcon className="h-5 w-5" aria-hidden />
                     <p className="text-xl font-bold text-gray-900">{tour.price} Coins</p>
                   </div>
                 )}

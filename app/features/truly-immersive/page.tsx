@@ -4,14 +4,14 @@ import EnhancedPageLayout from '@/components/enhanced-page-layout';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'Truly Immersive Travel Experiences',
-  description: 'Step into truly immersive travel experiences with rich soundscapes, storytelling, and atmosphere that make every destination feel alive with Gamana.',
+  title: 'Hands-Free Audio Tours',
+  description: 'Hands-free audio tours with GPS-triggered stories and sound that match where you are standing. Walk, listen, and stay present with Gamana.',
   alternates: {
     canonical: 'https://www.gamana.app/features/truly-immersive',
   },
   openGraph: {
-    title: 'Truly Immersive Travel Experiences | Gamana',
-    description: 'Step into truly immersive travel experiences with rich soundscapes, storytelling, and atmosphere that make every destination feel alive with Gamana.',
+    title: 'Hands-Free Audio Tours | Gamana',
+    description: 'Hands-free audio tours with GPS-triggered stories and sound that match where you are standing. Walk, listen, and stay present with Gamana.',
     url: 'https://www.gamana.app/features/truly-immersive',
     siteName: 'Gamana',
     type: 'website',
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Truly Immersive Travel Experiences | Gamana',
-    description: 'Step into truly immersive travel experiences with rich soundscapes, storytelling, and atmosphere that make every destination feel alive with Gamana.',
+    title: 'Hands-Free Audio Tours | Gamana',
+    description: 'Hands-free audio tours with GPS-triggered stories and sound that match where you are standing. Walk, listen, and stay present with Gamana.',
     images: ['/gamana-logo.svg'],
   },
 };
@@ -66,7 +66,7 @@ export default function TrulyImmersivePage() {
       introTitle="Experience Travel the Way It Should Be"
       introText={[
         'Put away your phone and guidebook. With Gamana, you can explore freely with your eyes up and hands free, fully present in the moment. Our GPS-triggered audio narratives play automatically as you walk, eliminating the need to constantly check your device.',
-        'This truly immersive approach lets you absorb the sights, sounds, and atmosphere of your destination while receiving rich, contextual information through your headphones. It is like having a knowledgeable friend walking beside you.',
+        'This hands-free approach lets you absorb the sights, sounds, and atmosphere of your destination while receiving rich, contextual information through your headphones. Stories play when you reach each stop, like walking with someone who knows the place.',
       ]}
       benefits={[
         { text: 'Completely hands-free operation' },

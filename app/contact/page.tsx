@@ -29,10 +29,12 @@ import HeroHeader from "@/components/navigation/hero-header";
 import Footer from "@/components/navigation/footer";
 import { useToast } from "@/hooks/use-toast";
 import { HeroSlideshow } from "@/components/HeroSlideshow";
+import { submitContactForm } from "@/lib/contact-api";
 
 export default function ContactPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -43,24 +45,45 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.inquiryType) {
+      toast({
+        title: "Please select an inquiry type",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const result = await submitContactForm(formData);
 
-    toast({
-      title: "Message sent successfully!",
-      description: "We'll get back to you within 24 hours.",
-    });
+      toast({
+        title: "Message sent successfully!",
+        description: result.message,
+      });
 
-    setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      inquiryType: "",
-      message: "",
-    });
-
-    setIsSubmitting(false);
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        inquiryType: "",
+        message: "",
+      });
+      setIsSubmitted(true);
+    } catch (error) {
+      toast({
+        title: "Could not send message",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Please email support@gamana.app directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -98,7 +121,7 @@ export default function ContactPage() {
       <main className="min-h-screen">
         <section className="relative h-[62vh] sm:h-[68vh] flex items-center justify-center overflow-hidden">
           {/* Photo behind the brand gradient, matching /marketplace-redesign, /cities,
-              /ecosystem, and /about — a flat gradient here was the odd one out. */}
+              /ecosystem, and /about, a flat gradient here was the odd one out. */}
           <div className="absolute inset-0">
             <HeroSlideshow
               images={[
@@ -204,6 +227,30 @@ export default function ContactPage() {
                   <h2 className="text-3xl font-bold mb-6 text-center">
                     Send Us a Message
                   </h2>
+                  {isSubmitted ? (
+                    <div className="text-center space-y-4 py-6">
+                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#159895]/10">
+                        <CheckCircle2 className="h-8 w-8 text-[#159895]" />
+                      </div>
+                      <p className="text-gray-700">
+                        Thanks for reaching out. Our team at{" "}
+                        <a
+                          href="mailto:support@gamana.app"
+                          className="font-medium text-[#159895] hover:underline"
+                        >
+                          support@gamana.app
+                        </a>{" "}
+                        will reply within 24 hours.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsSubmitted(false)}
+                      >
+                        Send another message
+                      </Button>
+                    </div>
+                  ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
@@ -300,6 +347,7 @@ export default function ContactPage() {
                       )}
                     </Button>
                   </form>
+                  )}
                 </CardContent>
               </Card>
             </div>

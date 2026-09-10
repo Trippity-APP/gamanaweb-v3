@@ -10,6 +10,10 @@ Disallow: /api/
 Disallow: /_next/
 Disallow: /admin/
 
+# Auth flows — not ready for indexing yet
+Disallow: /start-your-journey
+Disallow: /account
+
 # Sitemap location
 Sitemap: https://www.gamana.app/sitemap.xml
 

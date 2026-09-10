@@ -3,14 +3,14 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
   title: 'Audio Tours & Travel Experiences Marketplace',
-  description: 'Explore curated audio tours and audio guides, self-guided travel experiences, and storytelling journeys worldwide. Discover immersive stories on Gamana.',
+  description: 'Browse self-guided audio tours and storylists in 50+ cities. Walk, listen, and explore with Gamana.',
   alternates: {
-    canonical: 'https://www.gamana.app/marketplace',
+    canonical: 'https://www.gamana.app/explore',
   },
   openGraph: {
     title: 'Audio Tours & Travel Experiences Marketplace | Gamana',
-    description: 'Explore curated audio tours and audio guides, self-guided travel experiences, and storytelling journeys worldwide. Discover immersive stories on Gamana.',
-    url: 'https://www.gamana.app/marketplace',
+    description: 'Browse self-guided audio tours and storylists in 50+ cities. Walk, listen, and explore with Gamana.',
+    url: 'https://www.gamana.app/explore',
     siteName: 'Gamana',
     type: 'website',
     images: [
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Audio Tours & Travel Experiences Marketplace | Gamana',
-    description: 'Explore curated audio tours and audio guides, self-guided travel experiences, and storytelling journeys worldwide. Discover immersive stories on Gamana.',
+    description: 'Browse self-guided audio tours and storylists in 50+ cities. Walk, listen, and explore with Gamana.',
     images: ['/gamana-logo.svg'],
   },
 };

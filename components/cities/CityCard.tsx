@@ -157,7 +157,7 @@ export const CityCard = ({ city }: CityCardProps) => {
 
 
                             {/* Routes into Explore pre-filtered to this city rather than out
-                                to the app store — MarketplaceBrowser reads ?city= client-side
+                                to the app store, MarketplaceBrowser reads ?city= client-side
                                 and seeds both the Tours and Experiences filters from it. */}
                             {cityHref && (
                                 <Button
@@ -173,7 +173,7 @@ export const CityCard = ({ city }: CityCardProps) => {
                                 asChild
                                 className="w-full bg-gradient-to-r from-[#1A5F7A] to-[#159895] text-white hover:opacity-90 shadow-md rounded-xl"
                             >
-                                <Link href={`/marketplace?city=${encodeURIComponent(cityName)}`}>
+                                <Link href={`/explore?city=${encodeURIComponent(cityName)}`}>
                                     <Play className="mr-2 h-4 w-4 fill-current" />
                                     Explore this City
                                 </Link>
