@@ -15,9 +15,9 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Cart } from '@/components/cart/Cart';
 import { CityNotCovered } from '@/components/marketplace/CityNotCovered';
 import { MarketplaceCoverImage, isPlaceholderTourImage } from '@/components/marketplace/marketplace-cover-image';
+import { DownloadAppDialog } from '@/components/DownloadAppDialog';
 import { TourGridSkeleton } from '@/components/ui/list-skeletons';
 import {
   clearMarketplaceCache,
@@ -120,6 +120,7 @@ export function MarketplaceBrowser({
   const [loginPromptOpen, setLoginPromptOpen] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const [downloadDialogOpen, setDownloadDialogOpen] = useState(false);
 
   const requireLogin = (action: () => void) => {
     if (!account) {
@@ -393,7 +394,7 @@ export function MarketplaceBrowser({
     );
   };
 
-  const catalogActionButton = (tour: Tour) => {
+  const catalogActionButton = (tour: Tour, catalogKind: 'story' | 'walk' = 'story') => {
     const target: UnlockTarget = {
       id: tour.id,
       type: 'tour',
@@ -407,6 +408,20 @@ export function MarketplaceBrowser({
       return (
         <Button asChild variant="outline" size="sm">
           <Link href={getTourHref(tour)}>View</Link>
+        </Button>
+      );
+    }
+
+    // Audio walks unlock in the app — open store picker, never the web login gate.
+    if (catalogKind === 'walk') {
+      return (
+        <Button
+          size="sm"
+          onClick={() => setDownloadDialogOpen(true)}
+          className="bg-gray-900 hover:bg-black text-white"
+        >
+          <Lock className="mr-1.5 h-3.5 w-3.5" />
+          Unlock
         </Button>
       );
     }
@@ -498,7 +513,7 @@ export function MarketplaceBrowser({
             </div>
           )}
         </div>
-        {catalogActionButton(tour)}
+        {catalogActionButton(tour, catalogKind)}
       </CardFooter>
     </Card>
   );
@@ -549,7 +564,11 @@ export function MarketplaceBrowser({
 
   return (
     <>
-      <Cart />
+      <DownloadAppDialog
+        open={downloadDialogOpen}
+        onOpenChange={setDownloadDialogOpen}
+        source="explore-walk-unlock"
+      />
 
       <div className="relative z-10 -mt-10 sm:-mt-12 max-w-7xl mx-auto px-4 pb-10">
         {searchFromUrl && (
