@@ -6,12 +6,12 @@ export const dynamic = 'force-static';
 
 // Sitemap for static export - automatically includes all blog posts
 // Generated at build time
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.gamana.app';
   const currentDate = new Date();
 
   // Get all blog posts dynamically
-  const blogPosts = getAllPosts();
+  const blogPosts = await getAllPosts();
 
   // Define priority and change frequency for different page types
   const staticRoutes = [
@@ -34,7 +34,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/marketplace`,
+      url: `${baseUrl}/explore`,
       lastModified: currentDate,
       changeFrequency: 'weekly' as const,
       priority: 0.9,

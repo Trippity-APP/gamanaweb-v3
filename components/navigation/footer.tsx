@@ -42,7 +42,7 @@ export default function Footer() {
               className="h-8 w-auto brightness-0 invert"
             />
             <p className="text-sm leading-relaxed text-gray-400">
-              Experience truly immersive travel with cutting-edge technology, authentic local experiences, and seamless online-offline integration.
+              Walk with audio tours that work offline, tell you what you're looking at, and don't need you to stare at your phone.
             </p>
             {/* Social Links */}
             <div className="flex space-x-4 pt-2">
@@ -129,11 +129,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/subscription" className="hover:text-[#57C5B6] transition-colors text-sm">
-                  Subscription Plans
-                </Link>
-              </li>
-              <li>
                 <Link href="/ecosystem" className="hover:text-[#57C5B6] transition-colors text-sm">
                   Ecosystem
                 </Link>
@@ -141,6 +136,11 @@ export default function Footer() {
               <li>
                 <Link href="/about" className="hover:text-[#57C5B6] transition-colors text-sm">
                   About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing" className="hover:text-[#57C5B6] transition-colors text-sm">
+                  Pricing
                 </Link>
               </li>
             </ul>
@@ -175,6 +175,11 @@ export default function Footer() {
               <li>
                 <Link href="/cookie-policy" className="hover:text-[#57C5B6] transition-colors text-sm">
                   Cookie Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing" className="hover:text-[#57C5B6] transition-colors text-sm">
+                  Pricing
                 </Link>
               </li>
               <li>

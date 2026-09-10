@@ -30,6 +30,85 @@ export interface Tour {
   narrator: string;
   isPremium: boolean;
   discount?: number;
+  /** Lowercase tokens for city/search matching — populated by lib/marketplace-api.ts */
+  searchTerms?: string[];
+  /** URL slug derived from tour title — populated by lib/marketplace-api.ts */
+  slug?: string;
+  /** Audio Stories (single-stop) vs Audio Walks (multi-stop) — from API storylist type/stops */
+  contentKind?: 'story' | 'walk';
+  /** Curated for catalog — from API is_recommended */
+  isRecommended?: boolean;
+}
+
+export interface TourStop {
+  id: string;
+  position: number;
+  name: string;
+  description?: string;
+  image?: string;
+  audioDurationSeconds?: number;
+}
+
+export interface WalkDetail extends Tour {
+  contentKind: 'walk';
+  stops: TourStop[];
+  stopsCount: number;
+  totalDurationMinutes?: number;
+  totalAudioDurationSeconds?: number;
+}
+
+export interface StorySource {
+  type: 'academic' | 'oral' | 'archival' | 'mixed';
+  title: string;
+  url?: string;
+}
+
+export interface StoryLanguageOption {
+  code: string;
+  label: string;
+  nativeLabel?: string;
+  isActive?: boolean;
+  availableInApp?: boolean;
+}
+
+export interface StoryNarratorLens {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  durationMinutes?: number;
+  isPrimary?: boolean;
+}
+
+export interface StoryVisitTip {
+  type: 'respect' | 'safety' | 'practical';
+  title: string;
+  description: string;
+}
+
+export interface StorySubTopic {
+  id: string;
+  name: string;
+  durationSeconds?: number;
+  durationLabel?: string;
+}
+
+export interface StoryDetail extends Tour {
+  contentKind: 'story';
+  placeName?: string;
+  placeDescription?: string;
+  subtitle?: string;
+  coordinates?: [number, number];
+  audioDurationMinutes?: number;
+  storyTypeLabel?: string;
+  whatToNotice: string[];
+  sources: StorySource[];
+  languages: StoryLanguageOption[];
+  narrators: StoryNarratorLens[];
+  beforeYouVisit: StoryVisitTip[];
+  lensesAvailableCount?: number;
+  /** Audio sub-topics from place audios — shown in Go deeper. */
+  subTopics: StorySubTopic[];
 }
 
 export const tours: Tour[] = [
@@ -70,7 +149,7 @@ export const tours: Tour[] = [
   {
     id: '3',
     title: 'Tokyo Street Food Journey',
-    description: 'Experience authentic Tokyo through its incredible street food culture',
+    description: "A walking tour of Tokyo's best street food neighbourhoods",
     location: 'Tokyo, Japan',
     duration: '2 hours',
     price: 0,
@@ -219,7 +298,7 @@ export const experiences: Experience[] = [
   {
     id: 'exp3',
     title: 'Home-Style Rajasthani Cooking Class',
-    description: "Cook a full thali in a family kitchen — dal baati churma, gatte ki sabzi, and the stories behind them.",
+    description: "Cook a full thali in a family kitchen, dal baati churma, gatte ki sabzi, and the stories behind them.",
     location: 'Jaipur, India',
     duration: '3 hours',
     price: 32,
@@ -245,7 +324,7 @@ export const experiences: Experience[] = [
   {
     id: 'exp5',
     title: 'Hampi Sunset Coracle Ride',
-    description: 'Round boat, still water, boulder-strewn hills turning gold — a quiet way to close a day among the ruins.',
+    description: 'Round boat, still water, boulder-strewn hills turning gold, a quiet way to close a day among the ruins.',
     location: 'Hampi, India',
     duration: '1 hour',
     price: 15,
@@ -271,7 +350,7 @@ export const experiences: Experience[] = [
   {
     id: 'exp7',
     title: 'Sunrise Photography Walk at the Taj Mahal',
-    description: 'Beat the crowds and the heat — a guided walk timed to first light, with tips for the shot everyone wants.',
+    description: 'Beat the crowds and the heat, a guided walk timed to first light, with tips for the shot everyone wants.',
     location: 'Agra, India',
     duration: '2 hours',
     price: 28,
@@ -332,7 +411,7 @@ export const coinBundles: CoinBundle[] = [
   {
     id: 'bundle-traveler',
     name: "Traveler's Pack",
-    blurb: 'Best value per Coin — great for a full trip',
+    blurb: 'Best value per Coin, great for a full trip',
     baseCoins: 120,
     bonusCoins: 20,
     price: 19.99,
@@ -366,6 +445,43 @@ export function getTierColor(tier: string) {
     default:
       return 'bg-gray-400 text-white';
   }
+}
+
+export type WalkAccessLabel = 'free' | 'premium';
+
+export function isCatalogFree(tour: Pick<Tour, 'price'>): boolean {
+  return tour.price === 0;
+}
+
+/** Explore catalog badge — matches All/Free/Premium filters (tour.price from coins_price). */
+export function getCatalogAccessLabel(tour: Pick<Tour, 'price'>): WalkAccessLabel {
+  return isCatalogFree(tour) ? 'free' : 'premium';
+}
+
+export function getCatalogAccessBadgeText(tour: Pick<Tour, 'price'>): string {
+  return isCatalogFree(tour) ? 'Free' : 'Premium';
+}
+
+export function getCatalogAccessBadgeClass(tour: Pick<Tour, 'price'>): string {
+  if (isCatalogFree(tour)) {
+    return 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200';
+  }
+  return 'bg-gradient-to-r from-[#1A5F7A] to-[#159895] text-white shadow-sm';
+}
+
+/** @deprecated Use getCatalogAccessLabel */
+export function getWalkAccessLabel(tour: Pick<Tour, 'price'>): WalkAccessLabel {
+  return getCatalogAccessLabel(tour);
+}
+
+/** @deprecated Use getCatalogAccessBadgeText */
+export function getWalkAccessBadgeText(tour: Pick<Tour, 'price'>): string {
+  return getCatalogAccessBadgeText(tour);
+}
+
+/** @deprecated Use getCatalogAccessBadgeClass */
+export function getWalkAccessBadgeClass(tour: Pick<Tour, 'price'>): string {
+  return getCatalogAccessBadgeClass(tour);
 }
 
 /**

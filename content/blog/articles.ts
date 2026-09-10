@@ -34,6 +34,10 @@ export type ArticleBlock =
     type: "cta";
     heading: string;
     subtitle: string;
+  }
+  | {
+    type: "html";
+    content: string;
   };
 
 export type ArticleRegion = "india" | "europe" | "southeast-asia" | "japan" | "middle-east" | "americas" | "general";

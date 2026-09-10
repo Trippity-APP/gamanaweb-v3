@@ -4,14 +4,14 @@ import EcosystemPageContent from "./page-content";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: "Cultural Tourism Ecosystem for Travel Partners",
-  description: "Join Gamana's cultural tourism ecosystem spanning heritage, creative, festival, and indigenous tourism. Connect with travelers in the $13.25B market growing at 14.57% CAGR.",
+  title: "Partner with Gamana for Travel Partners",
+  description: "Join Gamana's partner network for heritage, creative, festival, and indigenous tourism. Connect with travelers in the $13.25B market growing at 14.57% CAGR.",
   alternates: {
     canonical: 'https://www.gamana.app/ecosystem',
   },
   openGraph: {
-    title: "Cultural Tourism Ecosystem & Travel Network | Gamana",
-    description: "Join Gamana's cultural tourism ecosystem spanning heritage, creative, festival, and indigenous tourism. Connect with travelers in the $13.25B market growing at 14.57% CAGR.",
+    title: "Partner with Gamana & Travel Network | Gamana",
+    description: "Join Gamana's partner network for heritage, creative, festival, and indigenous tourism. Connect with travelers in the $13.25B market growing at 14.57% CAGR.",
     url: 'https://www.gamana.app/ecosystem',
     siteName: 'Gamana',
     type: 'website',
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Cultural Tourism Ecosystem & Travel Network | Gamana",
-    description: "Join Gamana's cultural tourism ecosystem spanning heritage, creative, festival, and indigenous tourism. Connect with travelers in the $13.25B market growing at 14.57% CAGR.",
+    title: "Partner with Gamana & Travel Network | Gamana",
+    description: "Join Gamana's partner network for heritage, creative, festival, and indigenous tourism. Connect with travelers in the $13.25B market growing at 14.57% CAGR.",
     images: ['/gamana-logo.svg'],
   },
 };

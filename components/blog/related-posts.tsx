@@ -1,8 +1,11 @@
-import Image from "next/image";
+'use client';
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 
 import { getAllPostSummaries, type BlogSummary } from "@/lib/blog";
+import { BlogCoverImage } from "@/components/blog/blog-cover-image";
 
 interface Props {
   currentSlug: string;
@@ -20,14 +23,36 @@ export default function RelatedPosts({
   currentTags,
   limit = 3,
 }: Props) {
-  const all = getAllPostSummaries();
-  const scored = all
-    .filter((p) => p.slug !== currentSlug)
-    .map((p) => ({ post: p, score: scoreOverlap(currentTags, p.tags) }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
+  const [related, setRelated] = useState<BlogSummary[]>([]);
 
-  if (scored.length === 0) return null;
+  const tagsKey = currentTags.join("\0");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const all = await getAllPostSummaries();
+        if (cancelled) return;
+        const tags = tagsKey ? tagsKey.split("\0") : [];
+        const scored = all
+          .filter((p) => p.slug !== currentSlug)
+          .map((p) => ({ post: p, score: scoreOverlap(tags, p.tags) }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, limit)
+          .map(({ post }) => post);
+        setRelated(scored);
+      } catch {
+        if (!cancelled) setRelated([]);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentSlug, tagsKey, limit]);
+
+  if (related.length === 0) return null;
 
   return (
     <section className="my-12">
@@ -35,7 +60,7 @@ export default function RelatedPosts({
         Related stories
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {scored.map(({ post }) => (
+        {related.map((post) => (
           <RelatedCard key={post.slug} post={post} />
         ))}
       </div>
@@ -48,8 +73,8 @@ function RelatedCard({ post }: { post: BlogSummary }) {
     <Link href={`/blog/${post.slug}`} className="group block">
       <div className="rounded-xl border border-gray-100 overflow-hidden hover:border-[#159895]/40 transition-all h-full flex flex-col">
         <div className="relative w-full aspect-[16/10]">
-          <Image
-            src={encodeURI(post.coverImage)}
+          <BlogCoverImage
+            src={post.coverImage}
             alt={post.title}
             fill
             className="object-cover"

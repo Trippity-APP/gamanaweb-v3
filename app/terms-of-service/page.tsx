@@ -61,7 +61,7 @@ export default function TermsOfServicePage() {
                     Gamana is an AI-powered audio tour application that provides location-based tourism content through:
                   </p>
                   <ul className="list-disc pl-6 space-y-2">
-                    <li><strong>Interactive Audio Tours:</strong> AI-generated and curated audio content triggered by your geographic location</li>
+                    <li><strong>Interactive Audio Tours:</strong> AI-generated and editor-reviewed audio content triggered by your geographic location</li>
                     <li><strong>Real-time Navigation:</strong> GPS-based mapping and wayfinding for tourist destinations</li>
                     <li><strong>Text-to-Speech Technology:</strong> Conversion of written content into spoken audio</li>
                     <li><strong>Personalized Recommendations:</strong> Location-aware suggestions based on user preferences and behavior</li>

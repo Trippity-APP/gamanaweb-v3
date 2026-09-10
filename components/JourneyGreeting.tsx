@@ -37,7 +37,7 @@ export function JourneyGreeting() {
 
   return (
     <p className="text-sm text-white/85">
-      Welcome back{groupText} — here&apos;s what&apos;s{interestText || " picked for you"}.
+      Welcome back{groupText}, here&apos;s what&apos;s{interestText || " picked for you"}.
     </p>
   );
 }

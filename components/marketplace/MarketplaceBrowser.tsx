@@ -1,16 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import {
-  Search, MapPin, Star, Zap, Heart, Headphones, CloudDownload, Users2, Compass,
-  Briefcase, Check as CheckIcon, Sparkles, Coins as CoinsIcon, Lock, AlertCircle, LogIn,
-  Smartphone,
+  MapPin, Heart,
+  Check as CheckIcon, Sparkles, Lock, AlertCircle, LogIn,
+  Smartphone, Search,
 } from 'lucide-react';
-import { useStoreUrl } from '@/hooks/use-store-url';
-import { trackStoreClick } from '@/lib/analytics';
+import { GamanaCoinIcon } from '@/components/GamanaCoinIcon';
+import { ExploreTrustPanel, ExploreMobileAppNotice } from '@/components/marketplace/ExploreTrustPanel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,25 +17,40 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Cart } from '@/components/cart/Cart';
 import { CityNotCovered } from '@/components/marketplace/CityNotCovered';
+import { MarketplaceCoverImage, isPlaceholderTourImage } from '@/components/marketplace/marketplace-cover-image';
+import { TourGridSkeleton } from '@/components/ui/list-skeletons';
+import {
+  clearMarketplaceCache,
+  fetchPublicTours,
+  getExploreSearchQuery,
+  getTourHref,
+  isWalkCatalogVisible,
+  tourMatchesSearch,
+} from '@/lib/marketplace-api';
+import { countSearchResults, getExploreCatalogPath, getExploreTabFromPathname } from '@/lib/explore-search';
 import { useCart } from '@/lib/cart-context';
 import { useAccount } from '@/lib/account-context';
 import {
-  tours, combos, experiences, experienceCategories, tierLabels, getTierColor, coinBundles,
-  tourCategoryToInterests, experienceCategoryToInterests,
-  type Tour, type Combo, type Experience, type CoinBundle,
+  coinBundles,
+  getCatalogAccessBadgeClass,
+  getCatalogAccessBadgeText,
+  isCatalogFree,
+  tourCategoryToInterests,
+  type Tour, type CoinBundle,
 } from '@/lib/marketplace-data';
 import { interestCategoryOptions } from '@/lib/personalization';
 
-const trustPoints = [
-  { icon: Headphones, title: 'Audio-first', description: 'Hands-free, made for walking and looking up, not down' },
-  { icon: CloudDownload, title: 'Works offline', description: 'Download once, listen with no signal' },
-  // No narrator count here on purpose: the roster varies by city and language, so a fixed
-  // number would be wrong somewhere. The point is that the traveller chooses.
-  { icon: Users2, title: 'Your pick of narrator', description: 'Scholarly, devotional, comic, local — choose the voice that suits you' },
-  { icon: Compass, title: 'India-first', description: 'Deep India coverage, extended worldwide' },
-];
-
 type UnlockTarget = { id: string; type: 'tour' | 'combo'; title: string; priceCoins: number };
+type AccessFilter = 'all' | 'free' | 'premium';
+
+function matchesAccessFilter(tour: Tour, filter: AccessFilter): boolean {
+  // Same rule as Audio Walk badges: price === 0 → Free, price > 0 → Premium.
+  if (filter === 'all') return true;
+  if (filter === 'free') return tour.price === 0;
+  return tour.price > 0;
+}
+
+const TOURS_INITIAL_VISIBLE = 9;
 
 /**
  * The full Tours / Combos / Experiences / Buy Coins / Special Offers browsing surface,
@@ -64,47 +78,35 @@ type UnlockTarget = { id: string; type: 'tour' | 'combo'; title: string; priceCo
 export function MarketplaceBrowser({
   searchQuery: controlledSearchQuery,
   onSearchQueryChange,
+  initialTours = [],
 }: {
   /** Lets the page's hero search box drive the Tours search. Falls back to internal state if omitted. */
   searchQuery?: string;
   onSearchQueryChange?: (value: string) => void;
+  /** Server-prefetched catalog — required for Audio Stories (places API has no browser CORS). */
+  initialTours?: Tour[];
 }) {
-  // City personalization: static export has no server-side searchParams, so the `city`
-  // param — set either by the Home hero search (components/HeroCitySearch.tsx) or by
-  // this page's own hero search (components/marketplace/MarketplaceHeroSearch.tsx) — is
-  // read client-side here and used to seed both the Tours and Experiences filters, same
-  // `location` text match either search box already does, just pre-filled instead of
-  // typed.
+  // Search query from URL (`q` or legacy `city`) — read client-side for static export.
   const urlSearchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const cityFromUrl = urlSearchParams.get('city') ?? '';
+  const searchFromUrl = getExploreSearchQuery(urlSearchParams);
 
-  const [internalSearchQuery, setInternalSearchQuery] = useState(cityFromUrl);
+  const [internalSearchQuery, setInternalSearchQuery] = useState(searchFromUrl);
   const searchQuery = controlledSearchQuery ?? internalSearchQuery;
   const setSearchQuery = onSearchQueryChange ?? setInternalSearchQuery;
-  const [selectedTier, setSelectedTier] = useState('all');
-  const { account, journey, login, coinBalance, unlockItem, isUnlocked, claimWelcomeCoins, welcomeCoinsClaimed } = useAccount();
-  const { url: storeUrl, platform } = useStoreUrl();
+  const [accessFilter, setAccessFilter] = useState<AccessFilter>('all');
+  const { account, journey, login, coinBalance, unlockItem, isUnlocked } = useAccount();
 
-  const clearCityFilter = () => {
+  const clearSearchFilter = () => {
     setSearchQuery('');
-    setExperienceSearch('');
     router.replace(pathname);
   };
 
-  // MarketplaceHeroSearch (in the page's hero, above this component) owns the actual
-  // search input now and commits by updating the `city` URL param. This keeps both
-  // derived filters — and the active tab — in sync whenever that param changes, the same
-  // way the old in-card search box used to do it directly.
+  // MarketplaceHeroSearch commits via `?q=`; keep internal query in sync.
   useEffect(() => {
-    setInternalSearchQuery(cityFromUrl);
-    setExperienceSearch(cityFromUrl);
-    if (cityFromUrl && (!hasRecommendations || activeTab === 'recommended')) {
-      setActiveTab('tours');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cityFromUrl]);
+    setInternalSearchQuery(searchFromUrl);
+  }, [searchFromUrl]);
 
   // --- Unlock flow: Tours/Combos spend Coins directly, no cart ---
   const [justUnlocked, setJustUnlocked] = useState<string | null>(null);
@@ -139,7 +141,7 @@ export function MarketplaceBrowser({
 
   /*
     Unlocking spends Coins irreversibly against the traveller's balance with no undo and
-    no cart step to pause at, so it gets an explicit confirmation — the one-click version
+    no cart step to pause at, so it gets an explicit confirmation, the one-click version
     made it far too easy to burn Coins on a mis-tap. The insufficient-balance check runs
     before the prompt so someone who can't afford it is sent straight to the bundle
     picker instead of being asked to confirm something that would fail.
@@ -174,30 +176,22 @@ export function MarketplaceBrowser({
     }
   };
 
-  // --- Real-money cart: Experiences + Coin bundles ---
+  // --- Real-money cart: Coin bundles ---
   const { addItem, items: cartItems } = useCart();
-  const [justAddedExperience, setJustAddedExperience] = useState<string | null>(null);
   const [justAddedBundle, setJustAddedBundle] = useState<string | null>(null);
   // "Buy Coins" used to be its own tab, duplicating the "Buy more" chip next to the
   // balance — collapsed into one cue: "Buy more" now opens this bundle-picker dialog
   // directly instead of switching tabs.
   const [buyCoinsOpen, setBuyCoinsOpen] = useState(false);
 
-  const isExperienceInCart = (id: string) => cartItems.some((i) => i.id === id && i.kind === 'experience');
   const isBundleInCart = (id: string) => cartItems.some((i) => i.id === id && i.kind === 'coins');
-
-  const handleAddExperience = (exp: Experience) => {
-    addItem({ id: exp.id, kind: 'experience', title: exp.title, image: exp.image, price: exp.price, operator: exp.operator });
-    setJustAddedExperience(exp.id);
-    setTimeout(() => setJustAddedExperience((current) => (current === exp.id ? null : current)), 1500);
-  };
 
   const handleAddBundle = (bundle: CoinBundle) => {
     const totalCoins = bundle.baseCoins + bundle.bonusCoins;
     addItem({
       id: bundle.id,
       kind: 'coins',
-      title: `${bundle.name} — ${totalCoins.toLocaleString()} Coins`,
+      title: `${bundle.name}, ${totalCoins.toLocaleString()} Coins`,
       image: '/gamana-logo.png',
       price: bundle.price,
       coinsGranted: totalCoins,
@@ -206,8 +200,27 @@ export function MarketplaceBrowser({
     setTimeout(() => setJustAddedBundle((current) => (current === bundle.id ? null : current)), 1500);
   };
 
-  const [experienceSearch, setExperienceSearch] = useState(cityFromUrl);
-  const [experienceCategory, setExperienceCategory] = useState('All');
+  const [tours, setTours] = useState<Tour[]>(initialTours);
+  const [toursLoading, setToursLoading] = useState(initialTours.length === 0);
+  const [visibleTourCount, setVisibleTourCount] = useState(TOURS_INITIAL_VISIBLE);
+
+  const loadTours = async () => {
+    setToursLoading(true);
+    try {
+      const nextTours = await fetchPublicTours();
+      setTours(nextTours);
+    } catch (error) {
+      console.error('Failed to load explore catalog', error);
+      setTours([]);
+    } finally {
+      setToursLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (initialTours.length > 0) return;
+    void loadTours();
+  }, [initialTours.length]);
 
   // --- Personalization: score the same catalog against the traveler's saved interests ---
   const interestIds = useMemo(
@@ -220,133 +233,255 @@ export function MarketplaceBrowser({
   const active = !!account && interestIds.length > 0;
 
   const tourMatches = (t: Tour) => (tourCategoryToInterests[t.category] || []).some((id) => interestIds.includes(id));
-  const expMatches = (e: Experience) => (experienceCategoryToInterests[e.category] || []).some((id) => interestIds.includes(id));
 
   const recommendedTours = active ? tours.filter(tourMatches) : [];
-  const recommendedExperiences = active ? experiences.filter(expMatches) : [];
-  const hasRecommendations = active && (recommendedTours.length > 0 || recommendedExperiences.length > 0);
+  const hasRecommendations = active && recommendedTours.length > 0;
 
-  // A city search always wins over the recommended-tab default — the visitor came in
-  // asking for a specific place, not a personalized mix.
-  const [activeTab, setActiveTab] = useState(cityFromUrl ? 'tours' : hasRecommendations ? 'recommended' : 'tours');
+  const filteredRecommendedTours = useMemo(() => {
+    const term = searchFromUrl.trim();
+    if (!term) return recommendedTours;
+    return recommendedTours.filter((tour) => tourMatchesSearch(tour, term));
+  }, [recommendedTours, searchFromUrl]);
 
-  const filteredExperiences = experiences
-    .filter((exp) => {
-      const matchesSearch =
-        exp.title.toLowerCase().includes(experienceSearch.toLowerCase()) ||
-        exp.location.toLowerCase().includes(experienceSearch.toLowerCase());
-      const matchesCategory = experienceCategory === 'All' || exp.category === experienceCategory;
-      return matchesSearch && matchesCategory;
-    })
-    .sort((a, b) => (active ? Number(expMatches(b)) - Number(expMatches(a)) : 0));
+  const storySearchCount = useMemo(
+    () => (searchFromUrl ? countSearchResults(tours, searchFromUrl, 'story') : 0),
+    [tours, searchFromUrl],
+  );
+  const walkSearchCount = useMemo(
+    () => (searchFromUrl ? countSearchResults(tours, searchFromUrl, 'walk') : 0),
+    [tours, searchFromUrl],
+  );
 
-  const filteredTours = tours
-    .filter((tour) => {
-      const matchesSearch = tour.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tour.location.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesTier = selectedTier === 'all' || tour.tier === selectedTier;
-      return matchesSearch && matchesTier;
-    })
-    .sort((a, b) => (active ? Number(tourMatches(b)) - Number(tourMatches(a)) : 0));
+  const [activeTab, setActiveTab] = useState(
+    () => getExploreTabFromPathname(pathname) ?? 'stories',
+  );
+  const prevSearchRef = useRef('');
+
+  const catalogHref = (tab: 'stories' | 'walks' | 'recommended') => {
+    const qs = urlSearchParams.toString();
+    const path = getExploreCatalogPath(tab);
+    return qs ? `${path}?${qs}` : path;
+  };
+
+  const selectCatalogTab = (tab: string) => {
+    if (tab === 'walks' || tab === 'stories' || tab === 'recommended') {
+      router.push(catalogHref(tab));
+    }
+  };
+
+  useEffect(() => {
+    const fromPath = getExploreTabFromPathname(pathname);
+    if (fromPath) {
+      setActiveTab(fromPath);
+      return;
+    }
+    if (pathname === '/explore') {
+      setActiveTab(hasRecommendations ? 'recommended' : 'stories');
+    }
+  }, [pathname, hasRecommendations]);
+
+  // When search changes, open the tab with more matching results (stories wins ties).
+  useEffect(() => {
+    if (!searchFromUrl.trim()) {
+      prevSearchRef.current = searchFromUrl;
+      return;
+    }
+    if (toursLoading) return;
+    if (prevSearchRef.current === searchFromUrl) return;
+    prevSearchRef.current = searchFromUrl;
+
+    const preferredTab = walkSearchCount > storySearchCount ? 'walks' : 'stories';
+    const currentTab = getExploreTabFromPathname(pathname);
+    if (currentTab !== preferredTab) {
+      router.push(catalogHref(preferredTab));
+    }
+  }, [searchFromUrl, toursLoading, storySearchCount, walkSearchCount, pathname, router]);
+
+  useEffect(() => {
+    setVisibleTourCount(TOURS_INITIAL_VISIBLE);
+  }, [searchQuery, accessFilter, searchFromUrl, activeTab]);
+
+  const buildFilteredTours = (kind: 'story' | 'walk') =>
+    tours
+      .filter((tour) => (tour.contentKind ?? 'walk') === kind)
+      .filter((tour) => isWalkCatalogVisible(tour))
+      .filter((tour) => {
+        const matchesSearch = tourMatchesSearch(tour, searchQuery);
+        const matchesAccess = matchesAccessFilter(tour, accessFilter);
+        return matchesSearch && matchesAccess;
+      })
+      .sort((a, b) => (active ? Number(tourMatches(b)) - Number(tourMatches(a)) : 0));
 
   /*
     Coverage detection for the empty states below.
     An empty grid has three very different causes, and telling a traveller "we don't
     cover your city" when we actually do would be a straightforward accuracy failure —
     so each cause gets its own message:
-      1. The tier/category filter zeroed an otherwise-populated result set.
+      1. The access filter zeroed an otherwise-populated result set.
       2. This tab has nothing for the city, but the other tab does.
-      3. Neither tab has anything — the only case that is genuinely "not covered yet",
+      3. Neither tab has anything, the only case that is genuinely "not covered yet",
          and the only one that shows the demand-capture card.
-    These counts deliberately ignore the tier/category filters so cause 1 can't be
+    These counts deliberately ignore the access filters so cause 1 can't be
     mistaken for cause 3.
   */
   const tourSearchTerm = searchQuery.trim();
-  const experienceSearchTerm = experienceSearch.trim();
 
-  const matchesLocation = (haystackTitle: string, haystackLocation: string, term: string) => {
-    const q = term.toLowerCase();
-    return haystackTitle.toLowerCase().includes(q) || haystackLocation.toLowerCase().includes(q);
+  const toursForSearch = (kind: 'story' | 'walk') =>
+    tourSearchTerm
+      ? tours.filter(
+          (t) =>
+            (t.contentKind ?? 'walk') === kind &&
+            isWalkCatalogVisible(t) &&
+            tourMatchesSearch(t, tourSearchTerm),
+        ).length
+      : 0;
+
+  const renderCatalogTab = (kind: 'story' | 'walk', labelPlural: string) => {
+    const filteredTours = buildFilteredTours(kind);
+    const visibleTours = filteredTours.slice(0, visibleTourCount);
+    const hasMoreTours = filteredTours.length > visibleTourCount;
+    const catalogCount = tours.filter(
+      (t) => (t.contentKind ?? 'walk') === kind && isWalkCatalogVisible(t),
+    ).length;
+
+    return (
+      <TabsContent value={kind === 'story' ? 'stories' : 'walks'} className="space-y-6">
+        <div className="flex flex-wrap gap-2">
+          <Button variant={accessFilter === 'all' ? 'default' : 'outline'} onClick={() => setAccessFilter('all')} size="sm">
+            All Tiers
+          </Button>
+          <Button variant={accessFilter === 'free' ? 'default' : 'outline'} onClick={() => setAccessFilter('free')} size="sm">
+            Free
+          </Button>
+          <Button variant={accessFilter === 'premium' ? 'default' : 'outline'} onClick={() => setAccessFilter('premium')} size="sm">
+            Premium
+          </Button>
+        </div>
+
+        {toursLoading ? (
+          <TourGridSkeleton count={TOURS_INITIAL_VISIBLE} />
+        ) : filteredTours.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {visibleTours.map((tour, index) =>
+                tourCard(tour, index, active && tourMatches(tour), kind),
+              )}
+            </div>
+            {hasMoreTours && (
+              <div className="flex justify-center pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setVisibleTourCount((count) => count + TOURS_INITIAL_VISIBLE)}
+                  className="min-w-40"
+                >
+                  View more
+                </Button>
+              </div>
+            )}
+          </>
+        ) : tourSearchTerm && toursForSearch(kind) === 0 ? (
+          <CityNotCovered city={tourSearchTerm} source={kind === 'story' ? 'audio-stories' : 'audio-walks'} />
+        ) : catalogCount === 0 ? (
+          <p className="py-12 text-center text-gray-500">No {labelPlural.toLowerCase()} available yet.</p>
+        ) : (
+          <p className="py-12 text-center text-gray-500">
+            No {labelPlural.toLowerCase()} match this filter
+            {tourSearchTerm ? ` for ${tourSearchTerm}` : ''}.
+          </p>
+        )}
+      </TabsContent>
+    );
   };
 
-  const toursForSearch = tourSearchTerm
-    ? tours.filter((t) => matchesLocation(t.title, t.location, tourSearchTerm)).length
-    : 0;
-  const experiencesForTourSearch = tourSearchTerm
-    ? experiences.filter((e) => matchesLocation(e.title, e.location, tourSearchTerm)).length
-    : 0;
+  const catalogActionButton = (tour: Tour) => {
+    const target: UnlockTarget = {
+      id: tour.id,
+      type: 'tour',
+      title: tour.title,
+      priceCoins: tour.price,
+    };
+    const unlocked = isUnlocked(tour.id, 'tour');
+    const showView = isCatalogFree(tour) || unlocked;
 
-  const toursForExperienceSearch = experienceSearchTerm
-    ? tours.filter((t) => matchesLocation(t.title, t.location, experienceSearchTerm)).length
-    : 0;
-  const experiencesForSearch = experienceSearchTerm
-    ? experiences.filter((e) => matchesLocation(e.title, e.location, experienceSearchTerm)).length
-    : 0;
+    if (showView) {
+      return (
+        <Button asChild variant="outline" size="sm">
+          <Link href={getTourHref(tour)}>View</Link>
+        </Button>
+      );
+    }
 
-  const unlockButton = (target: UnlockTarget) => {
-    const key = `${target.type}-${target.id}`;
-    const unlocked = isUnlocked(target.id, target.type);
-    const showUnlocked = unlocked || justUnlocked === key;
     return (
       <Button
         size="sm"
         onClick={() => attemptUnlock(target)}
-        disabled={unlocked}
-        className={showUnlocked ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-[#159895] hover:bg-[#128a86] text-white'}
+        className="bg-gray-900 hover:bg-black text-white"
       >
-        {showUnlocked ? (
-          <><CheckIcon className="mr-1.5 h-3.5 w-3.5" /> Unlocked</>
-        ) : (
-          <><Lock className="mr-1.5 h-3.5 w-3.5" /> Unlock</>
-        )}
+        <Lock className="mr-1.5 h-3.5 w-3.5" />
+        Unlock
       </Button>
     );
   };
 
-  const tourCard = (tour: Tour, index: number, recommended = false) => (
+  const tourCard = (
+    tour: Tour,
+    index: number,
+    recommended = false,
+    catalogKind: 'story' | 'walk' = 'story',
+  ) => (
     <Card key={tour.id} className="overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow duration-200 bg-white group">
-      <Link href="#" className="block relative h-40 overflow-hidden bg-gray-100">
-        <Image
-          src={tour.image}
-          alt={tour.title}
-          width={400}
-          height={300}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          priority={index < 3}
-        />
-        <span className={`absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded ${getTierColor(tour.tier)}`}>
-          {tierLabels[tour.tier]?.toUpperCase() ?? tour.tier.toUpperCase()}
-        </span>
-        <button
-          type="button"
-          aria-label="Save"
-          className="absolute top-2 right-2 h-7 w-7 rounded-full bg-white/90 flex items-center justify-center text-gray-500 hover:text-red-500"
-        >
-          <Heart className="h-3.5 w-3.5" />
-        </button>
-      </Link>
-
-      <CardHeader className="p-3 pb-0 space-y-1">
-        {recommended && (
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#0B6E4F]">Recommended for you</p>
-        )}
-        {!recommended && tour.discount && (
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-red-600">Special offer</p>
-        )}
-        <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">{tour.title}</h3>
-        <p className="text-xs text-gray-500 flex items-center gap-1">
-          <MapPin className="h-3 w-3" /> {tour.location} · {tour.duration}
-        </p>
-      </CardHeader>
-
-      <CardContent className="p-3 pt-2 space-y-1.5">
-        <div className="flex items-center gap-1 text-xs">
-          <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-          <span className="font-semibold text-gray-900">{tour.rating}</span>
-          <span className="text-gray-500">({tour.reviews.toLocaleString()})</span>
+      <Link href={getTourHref(tour)} className="block">
+        <div className="relative h-40 overflow-hidden bg-gray-100">
+          {catalogKind === 'walk' && isPlaceholderTourImage(tour.image) ? (
+            <div className="absolute inset-0 bg-gradient-to-br from-[#1A5F7A]/15 via-[#159895]/10 to-gray-100" />
+          ) : (
+            <MarketplaceCoverImage
+              src={tour.image}
+              alt={tour.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              priority={index < 3}
+              useDefaultFallback={catalogKind !== 'walk'}
+            />
+          )}
+          <span
+            className={`absolute top-2 left-2 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded ${getCatalogAccessBadgeClass(tour)}`}
+          >
+            {tour.price > 0 && (
+              <GamanaCoinIcon className="h-3 w-3" aria-hidden />
+            )}
+            {getCatalogAccessBadgeText(tour)}
+          </span>
+          <button
+            type="button"
+            aria-label="Save"
+            onClick={(e) => e.preventDefault()}
+            className="absolute top-2 right-2 h-7 w-7 rounded-full bg-white/90 flex items-center justify-center text-gray-500 hover:text-red-500"
+          >
+            <Heart className="h-3.5 w-3.5" />
+          </button>
         </div>
-        <p className="text-xs text-gray-500">Narrated by {tour.narrator}</p>
-      </CardContent>
+
+        <CardHeader className="p-3 pb-0 space-y-1">
+          {recommended && (
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#0B6E4F]">Recommended for you</p>
+          )}
+          {!recommended && tour.discount && (
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-red-600">Special offer</p>
+          )}
+          <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">{tour.title}</h3>
+          <p className="text-xs text-gray-500 flex items-center gap-1">
+            <MapPin className="h-3 w-3" /> {tour.location} · {tour.duration}
+          </p>
+        </CardHeader>
+
+        <CardContent className="p-3 pt-2 space-y-1.5">
+          {catalogKind === 'walk' ? (
+            <p className="text-xs text-gray-500">Organized by: Gamana</p>
+          ) : (
+            <p className="text-xs text-gray-500">Narrated by {tour.narrator}</p>
+          )}
+        </CardContent>
+      </Link>
 
       <CardFooter className="p-3 pt-0 flex items-center justify-between">
         <div>
@@ -354,108 +489,16 @@ export function MarketplaceBrowser({
             <p className="text-base font-bold text-emerald-700">Free</p>
           ) : (
             <div className="flex items-center gap-1.5">
-              <CoinsIcon className="h-3.5 w-3.5 text-amber-500" />
+              <GamanaCoinIcon className="h-3.5 w-3.5" aria-hidden />
               <p className="text-base font-bold text-gray-900">{tour.price}</p>
+              <span className="text-sm font-normal text-gray-500">
+                {tour.price === 1 ? 'coin' : 'coins'}
+              </span>
               {tour.originalPrice && <p className="text-xs text-gray-400 line-through">{tour.originalPrice}</p>}
             </div>
           )}
         </div>
-        {unlockButton({ id: tour.id, type: 'tour', title: tour.title, priceCoins: tour.price })}
-      </CardFooter>
-    </Card>
-  );
-
-  const comboCard = (combo: Combo) => (
-    <Card key={combo.id} className="overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow duration-200">
-      <div className="bg-[#0B6E4F] p-5 text-white">
-        <h3 className="text-lg font-semibold mb-1">{combo.title}</h3>
-        <p className="text-sm text-white/85">{combo.description}</p>
-      </div>
-      <CardContent className="p-4 space-y-3">
-        <div>
-          <p className="text-xs font-semibold text-gray-500 mb-1.5">Includes {combo.tours.length} tours</p>
-          <ul className="space-y-1">
-            {combo.tours.map((tour, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
-                <Zap className="h-3.5 w-3.5 text-[#159895] shrink-0" />
-                <span>{tour}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <p className="text-xs text-gray-500 pt-2 border-t">Valid for {combo.validity}</p>
-      </CardContent>
-      <CardFooter className="p-4 pt-0 flex items-center justify-between border-t">
-        <div>
-          <div className="flex items-center gap-1.5">
-            <CoinsIcon className="h-3.5 w-3.5 text-amber-500" />
-            <p className="text-lg font-bold text-gray-900">{combo.price}</p>
-            <p className="text-sm text-gray-400 line-through">{combo.originalPrice}</p>
-          </div>
-          <p className="text-xs text-emerald-700 font-semibold">
-            Save {combo.originalPrice - combo.price} Coins
-          </p>
-        </div>
-        {unlockButton({ id: combo.id, type: 'combo', title: combo.title, priceCoins: combo.price })}
-      </CardFooter>
-    </Card>
-  );
-
-  const experienceCard = (exp: Experience, index: number, recommended = false) => (
-    <Card key={exp.id} className="overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow duration-200 bg-white group">
-      <div className="relative h-40 overflow-hidden bg-gray-100">
-        <Image
-          src={exp.image}
-          alt={exp.title}
-          width={400}
-          height={300}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          priority={index < 3}
-        />
-        <span className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded bg-white/95 text-gray-700">
-          {exp.category}
-        </span>
-      </div>
-      <CardHeader className="p-3 pb-0 space-y-1">
-        {recommended && (
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-orange-700">Recommended for you</p>
-        )}
-        <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">{exp.title}</h3>
-        <p className="text-xs text-gray-500 flex items-center gap-1">
-          <MapPin className="h-3 w-3" /> {exp.location} · {exp.duration}
-        </p>
-      </CardHeader>
-      <CardContent className="p-3 pt-2 space-y-1.5">
-        <div className="flex items-center gap-1 text-xs">
-          <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-          <span className="font-semibold text-gray-900">{exp.rating}</span>
-          <span className="text-gray-500">({exp.reviews.toLocaleString()})</span>
-        </div>
-        <p className="text-xs text-gray-500 flex items-center gap-1">
-          <Briefcase className="h-3 w-3" /> {exp.operator}
-        </p>
-      </CardContent>
-      <CardFooter className="p-3 pt-0 flex items-center justify-between">
-        <p className="text-base font-bold text-gray-900">${exp.price}</p>
-        <Button
-          size="sm"
-          onClick={() => handleAddExperience(exp)}
-          className={
-            justAddedExperience === exp.id || isExperienceInCart(exp.id)
-              ? 'bg-green-600 hover:bg-green-700 text-white'
-              : 'bg-orange-600 hover:bg-orange-700 text-white'
-          }
-        >
-          {justAddedExperience === exp.id || isExperienceInCart(exp.id) ? (
-            <>
-              <CheckIcon className="mr-1.5 h-3.5 w-3.5" /> Added
-            </>
-          ) : (
-            <>
-              <Briefcase className="mr-1.5 h-3.5 w-3.5" /> Add
-            </>
-          )}
-        </Button>
+        {catalogActionButton(tour)}
       </CardFooter>
     </Card>
   );
@@ -473,7 +516,7 @@ export function MarketplaceBrowser({
             {bundle.popular ? 'Most Popular' : ''}
           </p>
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 mx-auto">
-            <CoinsIcon className="h-6 w-6 text-amber-500" />
+            <GamanaCoinIcon className="h-6 w-6" aria-hidden />
           </div>
           <div>
             <p className="text-2xl font-bold text-gray-900">{totalCoins.toLocaleString()}</p>
@@ -508,104 +551,73 @@ export function MarketplaceBrowser({
     <>
       <Cart />
 
-      <div className="max-w-7xl mx-auto px-4">
-        {/*
-          Search + trust strip live in one card that overlaps the hero photo above it —
-          gives the page a focal point right where the eye lands instead of a search pill
-          floating alone in white space, and ties the "why Gamana" points visually to the
-          hero rather than reading as a separate, easy-to-skim-past section.
-        */}
-        <div className="relative z-10 -mt-14 sm:-mt-16 rounded-2xl border border-gray-100 bg-white p-5 shadow-lg sm:p-6">
-          {/* The Tours search box itself moved up into the hero (MarketplaceHeroSearch) so
-              it sits right under the headline instead of a scroll-step away — this card
-              now just reflects the resulting city filter, plus trust points and the app
-              notice. searchQuery/experienceSearch stay in sync with the URL via the
-              cityFromUrl effect above. */}
-          {cityFromUrl && (
-            <div className="mb-6 flex w-fit shrink-0 items-center gap-2 rounded-full border border-[#159895]/30 bg-[#F0FBFA] px-4 py-2 text-sm font-semibold text-[#0B6E4F]">
-              <MapPin className="h-4 w-4" />
-              Showing {cityFromUrl}
-              <button
-                type="button"
-                onClick={clearCityFilter}
-                aria-label="Clear city filter"
-                className="ml-1 text-[#159895] hover:text-[#128a86]"
-              >
-                ✕
-              </button>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-x-4 gap-y-5 md:grid-cols-4 md:gap-6">
-            {trustPoints.map((p) => (
-              <div key={p.title} className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#159895]/10">
-                  <p.icon className="h-4 w-4 text-[#159895]" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">{p.title}</p>
-                  <p className="text-xs leading-snug text-gray-500">{p.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Browsing and unlocking happens here, but playback only happens in the app —
-              this is the one place on the page that says so up front, before anyone
-              unlocks something and wonders where it went. */}
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-gray-50 px-4 py-3 border-t-0">
-            <p className="flex items-center gap-2 text-xs text-gray-500">
-              <Smartphone className="h-3.5 w-3.5 text-[#159895] shrink-0" />
-              Everything you unlock or book here plays in the Gamana app — sign in with the same account.
-            </p>
-            <a
-              href={storeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackStoreClick(platform === 'ios' ? 'apple' : 'play', 'marketplace-trust-strip')}
-              className="text-xs font-semibold text-[#159895] hover:text-[#128a86] underline underline-offset-2 whitespace-nowrap"
+      <div className="relative z-10 -mt-10 sm:-mt-12 max-w-7xl mx-auto px-4 pb-10">
+        {searchFromUrl && (
+          <div className="mb-4 flex w-fit shrink-0 items-center gap-2 rounded-full border border-[#159895]/30 bg-[#F0FBFA] px-4 py-2 text-sm font-semibold text-[#0B6E4F]">
+            <Search className="h-4 w-4" />
+            Results for {searchFromUrl}
+            <button
+              type="button"
+              onClick={clearSearchFilter}
+              aria-label="Clear search"
+              className="ml-1 text-[#159895] hover:text-[#128a86]"
             >
-              Get the app free
-            </a>
+              ✕
+            </button>
           </div>
-        </div>
+        )}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-10 pb-10">
-          <div className="mb-6 flex flex-wrap items-center gap-3">
-            {/* Combos and Special Offers merged into one "Deals" tab: both answered the
-                same shopper question ("where's the better price?"), and splitting them
-                meant a discounted bundle and a promotional offer lived two clicks apart
-                for no reason the visitor could see. */}
-            <TabsList className={`grid ${hasRecommendations ? 'max-w-2xl grid-cols-4' : 'max-w-xl grid-cols-3'}`}>
-              {hasRecommendations && (
-                <TabsTrigger
-                  value="recommended"
-                  className="gap-1.5 bg-[#159895]/10 text-[#0B6E4F] font-semibold data-[state=active]:bg-[#159895] data-[state=active]:text-white"
-                >
-                  <Sparkles className="h-3.5 w-3.5" /> For You
-                </TabsTrigger>
-              )}
-              <TabsTrigger value="tours">Tours</TabsTrigger>
-              <TabsTrigger value="experiences">Experiences</TabsTrigger>
-              <TabsTrigger value="deals">Deals</TabsTrigger>
-            </TabsList>
+        <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:items-start lg:gap-6">
+          <div className="min-w-0">
+            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-lg sm:p-5">
+              <Tabs value={activeTab} onValueChange={selectCatalogTab} className="w-full">
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <TabsList className={`grid ${hasRecommendations ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                    {hasRecommendations && (
+                      <TabsTrigger
+                        value="recommended"
+                        className="gap-1.5 bg-[#159895]/10 font-semibold text-[#0B6E4F] data-[state=active]:bg-[#159895] data-[state=active]:text-white"
+                      >
+                        <Sparkles className="h-3.5 w-3.5" /> For You
+                      </TabsTrigger>
+                    )}
+                    <TabsTrigger value="stories">
+                      Audio Stories{searchFromUrl ? ` (${storySearchCount})` : ''}
+                    </TabsTrigger>
+                    <TabsTrigger value="walks">
+                      Audio Walks{searchFromUrl ? ` (${walkSearchCount})` : ''}
+                    </TabsTrigger>
+                  </TabsList>
 
-            {/* Single cue for buying Coins now — this chip opens the bundle picker
-                directly (below) instead of duplicating a "Buy Coins" tab. */}
-            {account && (
-              <div className="flex w-fit shrink-0 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700">
-                <CoinsIcon className="h-4 w-4" />
-                {coinBalance.toLocaleString()} Coins
-                <button
-                  type="button"
-                  onClick={() => setBuyCoinsOpen(true)}
-                  className="ml-1 font-semibold text-[#159895] underline underline-offset-2 hover:text-[#128a86]"
-                >
-                  Buy more
-                </button>
-              </div>
-            )}
-          </div>
+                  {account && (
+                    <div className="flex w-fit shrink-0 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700">
+                      <GamanaCoinIcon className="h-4 w-4" aria-hidden />
+                      {coinBalance.toLocaleString()} Coins
+                      <button
+                        type="button"
+                        onClick={() => setBuyCoinsOpen(true)}
+                        className="ml-1 font-semibold text-[#159895] underline underline-offset-2 hover:text-[#128a86]"
+                      >
+                        Buy more
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <ExploreMobileAppNotice />
+
+                <details className="group mb-4 rounded-xl border border-gray-100 bg-gray-50/80 open:bg-white lg:hidden">
+                  <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-gray-900 marker:content-none [&::-webkit-details-marker]:hidden">
+                    <span className="flex items-center justify-between gap-2">
+                      Why Gamana?
+                      <span className="text-xs font-normal text-gray-500 group-open:hidden">Show</span>
+                      <span className="hidden text-xs font-normal text-gray-500 group-open:inline">Hide</span>
+                    </span>
+                  </summary>
+                  <div className="border-t border-gray-100 px-4 pb-4">
+                    <ExploreTrustPanel variant="compact" showAppNotice={false} />
+                  </div>
+                </details>
 
           {hasRecommendations && (
             <TabsContent value="recommended" className="space-y-8">
@@ -613,205 +625,48 @@ export function MarketplaceBrowser({
                 Because you told us you&apos;re into {interestLabels.join(', ')}.
               </p>
 
-              {recommendedTours.length > 0 && (
+              {filteredRecommendedTours.length > 0 ? (
                 <div className="space-y-3">
-                  <h2 className="text-lg font-semibold text-gray-900">Tours for you</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {recommendedTours.map((tour, i) => tourCard(tour, i, true))}
+                  <h2 className="text-lg font-semibold text-gray-900">Picked for you</h2>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {filteredRecommendedTours.map((tour, i) =>
+                      tourCard(
+                        tour,
+                        i,
+                        true,
+                        (tour.contentKind ?? 'walk') === 'walk' ? 'walk' : 'story',
+                      ),
+                    )}
                   </div>
                 </div>
-              )}
-
-              {recommendedExperiences.length > 0 && (
-                <div className="space-y-3">
-                  <h2 className="text-lg font-semibold text-gray-900">Experiences for you</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {recommendedExperiences.map((exp, i) => experienceCard(exp, i, true))}
-                  </div>
+              ) : searchFromUrl ? (
+                <p className="py-12 text-center text-gray-500">
+                  No personalized matches for &ldquo;{searchFromUrl}&rdquo;. Try the Audio Stories or Audio Walks tabs.
+                </p>
+              ) : (
+                <div className="text-center py-12 space-y-3">
+                  <p className="text-gray-500">No personalized matches yet, browse the full catalog.</p>
+                  <Button variant="outline" onClick={() => selectCatalogTab('stories')}>
+                    Browse audio stories
+                  </Button>
                 </div>
               )}
             </TabsContent>
           )}
 
-          <TabsContent value="tours" className="space-y-6">
-            <div className="flex gap-3 flex-wrap items-center justify-between">
-              <div className="flex gap-2 flex-wrap">
-                <Button variant={selectedTier === 'all' ? 'default' : 'outline'} onClick={() => setSelectedTier('all')} size="sm">
-                  All tiers
-                </Button>
-                <Button
-                  variant={selectedTier === 'silver' ? 'default' : 'outline'}
-                  onClick={() => setSelectedTier('silver')}
-                  size="sm"
-                  className={selectedTier === 'silver' ? 'bg-gray-600 hover:bg-gray-700' : ''}
-                >
-                  {tierLabels.silver}
-                </Button>
-                <Button
-                  variant={selectedTier === 'gold' ? 'default' : 'outline'}
-                  onClick={() => setSelectedTier('gold')}
-                  size="sm"
-                  className={selectedTier === 'gold' ? 'bg-amber-600 hover:bg-amber-700' : ''}
-                >
-                  {tierLabels.gold}
-                </Button>
-                <Button
-                  variant={selectedTier === 'platinum' ? 'default' : 'outline'}
-                  onClick={() => setSelectedTier('platinum')}
-                  size="sm"
-                  className={selectedTier === 'platinum' ? 'bg-[#159895] hover:bg-[#128a86]' : ''}
-                >
-                  {tierLabels.platinum}
-                </Button>
-              </div>
-              <p className="text-sm text-gray-500">{filteredTours.length} tours</p>
+          {renderCatalogTab('story', 'Audio Stories')}
+          {renderCatalogTab('walk', 'Audio Walks')}
+              </Tabs>
             </div>
+          </div>
 
-            {filteredTours.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredTours.map((tour, index) => tourCard(tour, index, active && tourMatches(tour)))}
-              </div>
-            ) : tourSearchTerm && toursForSearch === 0 && experiencesForTourSearch === 0 ? (
-              /* Genuinely uncovered — the highest-intent dead end on the page, so capture
-                 the demand instead of showing a blank grid. */
-              <CityNotCovered city={tourSearchTerm} source="tours" />
-            ) : tourSearchTerm && toursForSearch === 0 ? (
-              <div className="text-center py-12 space-y-3">
-                <p className="text-gray-500">
-                  No audio tours for {tourSearchTerm} yet — but there{' '}
-                  {experiencesForTourSearch === 1 ? 'is 1 experience' : `are ${experiencesForTourSearch} experiences`} to book.
-                </p>
-                <Button variant="outline" onClick={() => setActiveTab('experiences')}>
-                  See experiences in {tourSearchTerm}
-                </Button>
-              </div>
-            ) : (
-              <p className="text-center text-gray-500 py-12">
-                No tours match this filter{tourSearchTerm ? ` for ${tourSearchTerm}` : ''}. Try a different tier.
-              </p>
-            )}
-          </TabsContent>
-
-
-          <TabsContent value="experiences" className="space-y-6">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">Real-world experiences</h2>
-              {/* Positioned against the audio tours rather than as a payment footnote —
-                  the Coins/currency distinction is already clear at the point of booking,
-                  and leading with it sold the human side short. */}
-              <p className="text-sm text-gray-600 max-w-2xl">
-                Put away those headphones and mingle with a real local guide. Enjoy
-                authentic experiences with real people.
-              </p>
+          <aside className="hidden lg:block lg:sticky lg:top-20 lg:self-start">
+            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-lg">
+              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">Why Gamana</h2>
+              <ExploreTrustPanel />
             </div>
-
-            <div className="flex gap-2 flex-wrap items-center justify-between">
-              <div className="flex gap-2 flex-wrap items-center">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search experiences or cities..."
-                    value={experienceSearch}
-                    onChange={(e) => setExperienceSearch(e.target.value)}
-                    className="pl-9 w-60"
-                  />
-                </div>
-                {experienceCategories.map((cat) => (
-                  <Button
-                    key={cat}
-                    variant={experienceCategory === cat ? 'default' : 'outline'}
-                    onClick={() => setExperienceCategory(cat)}
-                    size="sm"
-                    className={experienceCategory === cat ? 'bg-orange-600 hover:bg-orange-700' : ''}
-                  >
-                    {cat}
-                  </Button>
-                ))}
-              </div>
-              <p className="text-sm text-gray-500">{filteredExperiences.length} experiences</p>
-            </div>
-
-            {filteredExperiences.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredExperiences.map((exp, index) => experienceCard(exp, index, active && expMatches(exp)))}
-              </div>
-            ) : experienceSearchTerm && experiencesForSearch === 0 && toursForExperienceSearch === 0 ? (
-              <CityNotCovered city={experienceSearchTerm} source="experiences" />
-            ) : experienceSearchTerm && experiencesForSearch === 0 ? (
-              <div className="text-center py-12 space-y-3">
-                <p className="text-gray-500">
-                  No bookable experiences in {experienceSearchTerm} yet — but there{' '}
-                  {toursForExperienceSearch === 1 ? 'is 1 audio tour' : `are ${toursForExperienceSearch} audio tours`} to listen to.
-                </p>
-                <Button variant="outline" onClick={() => setActiveTab('tours')}>
-                  See tours in {experienceSearchTerm}
-                </Button>
-              </div>
-            ) : (
-              <p className="text-center text-gray-500 py-12">
-                No experiences match this filter{experienceSearchTerm ? ` for ${experienceSearchTerm}` : ''}. Try another category.
-              </p>
-            )}
-          </TabsContent>
-
-          <TabsContent value="deals" className="space-y-10">
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Bundle and save</h2>
-                <p className="text-sm text-gray-500">Multiple premium tours at a discounted price</p>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {combos.map((combo) => comboCard(combo))}
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">Limited time offers</h2>
-              <p className="text-sm text-gray-500">Exclusive deals and promotions</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="rounded-xl overflow-hidden bg-[#0B6E4F] text-white border-0">
-                <CardContent className="p-5 space-y-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-white/70">New user</p>
-                  <h3 className="text-lg font-semibold">Claim your free 5 Coins</h3>
-                  <p className="text-sm text-white/85">Unlock 5 premium stories, on us</p>
-                  <p className="text-2xl font-bold pt-2">5 Coins</p>
-                  <p className="text-xs text-white/70">Awarded instantly, once per account</p>
-                </CardContent>
-                <CardFooter className="p-5 pt-0">
-                  <Button
-                    size="sm"
-                    onClick={() => requireLogin(claimWelcomeCoins)}
-                    disabled={welcomeCoinsClaimed}
-                    className="w-full bg-white text-[#0B6E4F] hover:bg-gray-100 disabled:opacity-60"
-                  >
-                    {welcomeCoinsClaimed ? (
-                      <><CheckIcon className="mr-1.5 h-3.5 w-3.5" /> Claimed</>
-                    ) : (
-                      'Claim offer'
-                    )}
-                  </Button>
-                </CardFooter>
-              </Card>
-
-              <Card className="rounded-xl overflow-hidden bg-amber-600 text-white border-0">
-                <CardContent className="p-5 space-y-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-white/70">New user</p>
-                  <h3 className="text-lg font-semibold">Welcome bonus</h3>
-                  <p className="text-sm text-white/85">First tour free for new Gamana members</p>
-                  <p className="text-2xl font-bold pt-2">Sign up today</p>
-                  <p className="text-xs text-white/70">Plus earn 100 referral points</p>
-                </CardContent>
-                <CardFooter className="p-5 pt-0">
-                  <Button size="sm" className="w-full bg-white text-amber-700 hover:bg-gray-100">Get started</Button>
-                </CardFooter>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+          </aside>
+        </div>
       </div>
 
       {/* Spend confirmation — Coins leave the balance immediately and can't be refunded,
@@ -829,7 +684,7 @@ export function MarketplaceBrowser({
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Cost</span>
                   <span className="inline-flex items-center gap-1.5 font-semibold text-gray-900">
-                    <CoinsIcon className="h-4 w-4 text-amber-500" />
+                    <GamanaCoinIcon className="h-4 w-4" aria-hidden />
                     {confirmUnlock.priceCoins} Coins
                   </span>
                 </div>
@@ -879,7 +734,7 @@ export function MarketplaceBrowser({
           </div>
           {pendingUnlock && (
             <p className="text-sm text-gray-600">
-              {pendingUnlock.title} costs {pendingUnlock.priceCoins} Coins — you have {coinBalance}.
+              {pendingUnlock.title} costs {pendingUnlock.priceCoins} Coins, you have {coinBalance}.
             </p>
           )}
           <Button
@@ -904,7 +759,7 @@ export function MarketplaceBrowser({
             <DialogTitle>Buy Gamana Coins</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-500 -mt-2">
-            Coins unlock Tours, Topics, and Combos. This is the only place to buy them — with real
+            Coins unlock Tours, Topics, and Combos. This is the only place to buy them, with real
             currency, through your cart.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -985,7 +840,7 @@ export function MarketplaceBrowser({
             <CheckIcon className="h-4 w-4" />
           </span>
           <span className="truncate">
-            <span className="font-semibold">{appSyncToast}</span> is now in your Gamana app — open the app to start listening.
+            <span className="font-semibold">{appSyncToast}</span> is now in your Gamana app, open the app to start listening.
           </span>
         </div>
       )}

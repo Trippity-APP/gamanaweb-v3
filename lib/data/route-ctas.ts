@@ -31,7 +31,7 @@ export const routeCTAs: RouteCTA[] = [
     region: "southeast-asia",
     heading: "Explore the Southeast Asia Confidence Route",
     description:
-      "Singapore, Vietnam, Cambodia and beyond — navigate Southeast Asia's vibrant street markets, ancient temples, and coastal wonders with Gamana as your guide.",
+      "Singapore, Vietnam, Cambodia and beyond. Walk through markets, temples, and coast with audio in your ears.",
     cities: [
       { name: "Singapore", href: "/all-cities" },
       { name: "Hanoi", href: "/all-cities" },
@@ -48,7 +48,7 @@ export const routeCTAs: RouteCTA[] = [
     region: "japan",
     heading: "Plan your Japan route",
     description:
-      "Tokyo's neon-lit alleyways, Kyoto's serene temples, Osaka's legendary street food — experience Japan at your own pace with AI-narrated walking tours.",
+      "Tokyo's alleyways, Kyoto's temples, Osaka's street food. Hear Japan at your own pace with GPS-triggered audio tours.",
     cities: [
       { name: "Tokyo", href: "/all-cities" },
       { name: "Kyoto", href: "/all-cities" },
@@ -62,7 +62,7 @@ export const routeCTAs: RouteCTA[] = [
     region: "turkey",
     heading: "Explore Turkey with more clarity",
     description:
-      "Istanbul's bazaars, Byzantine architecture, and Bosphorus views — let Gamana's audio guides bring Turkey's layered history to life as you walk.",
+      "Istanbul's bazaars, Byzantine architecture, and Bosphorus views. Hear the city's history as you walk.",
     cities: [
       { name: "Istanbul", href: "/all-cities" },
     ],

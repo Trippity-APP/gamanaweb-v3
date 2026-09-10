@@ -3,13 +3,13 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
   title: 'About',
-  description: "Learn about Gamana, India's first heritage travel app offering immersive, hands-free audio tours that make every journey engaging and memorable.",
+  description: "Learn about Gamana, an audio tour app offering hands-free walking tours you can take at your own pace.",
   alternates: {
     canonical: 'https://www.gamana.app/about',
   },
   openGraph: {
     title: 'About | Gamana',
-    description: "Discover Gamana, India's first heritage travel app offering hands-free audio tours and immersive cultural experiences for every journey.",
+    description: "Discover Gamana, an audio tour app with hands-free walking tours across heritage cities.",
     url: 'https://www.gamana.app/about',
     siteName: 'Gamana',
     type: 'website',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'About | Gamana',
-    description: "Explore Gamana, India's first heritage travel app providing immersive, hands-free audio tours and unforgettable cultural experiences.",
+    description: "Explore Gamana, an audio tour app with hands-free walking tours across India and beyond.",
   },
 };
 

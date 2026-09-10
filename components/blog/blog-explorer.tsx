@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowRight, Filter, Library, Search, MapPin } from "lucide-react";
@@ -21,8 +20,11 @@ import HeroHeader from "@/components/navigation/hero-header";
 import RouteCTAModule from "@/components/blog/route-cta-module";
 import { getRouteCTAsForIndex } from "@/lib/data/route-ctas";
 import { HeroSlideshow } from "@/components/HeroSlideshow";
+import { BlogCoverImage } from "@/components/blog/blog-cover-image";
+import { BlogExplorerSkeleton } from "@/components/ui/list-skeletons";
 
 import type { BlogSummary } from "@/lib/blog";
+import { fetchBlogSummariesFromApi } from "@/lib/blog";
 import type { ArticleRegion } from "@/content/blog/articles";
 
 interface RegionSection {
@@ -43,17 +45,39 @@ const regionSectionDefs: { key: ArticleRegion; title: string; subtitle: string }
 ];
 
 type Props = {
-  posts: BlogSummary[];
+  posts?: BlogSummary[];
   highlightSlug?: string;
 };
 
-const BlogExplorer = ({ posts, highlightSlug }: Props) => {
+const BlogExplorer = ({ posts: initialPosts = [], highlightSlug }: Props) => {
+  const [posts, setPosts] = useState<BlogSummary[]>(initialPosts);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [highlightCleared, setHighlightCleared] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      setLoading(true);
+      try {
+        const summaries = await fetchBlogSummariesFromApi();
+        if (!cancelled) setPosts(summaries);
+      } catch {
+        if (!cancelled) setPosts([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const availableTags = useMemo(() => {
     const set = new Set<string>();
@@ -146,7 +170,7 @@ const BlogExplorer = ({ posts, highlightSlug }: Props) => {
     <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-[#E0F7F4]">
       <section className="relative h-[62vh] sm:h-[68vh] flex items-center justify-center text-white overflow-hidden">
         {/* Same amber-into-brand-teal family as Partner with Gamana (not the plum-rose
-            attempt, which didn't land) — warm gold lean, lower opacity so the photo reads
+            attempt, which didn't land), warm gold lean, lower opacity so the photo reads
             clearly. Photo swapped to one that actually shows a traveler in the scene
             (golden-hour Mehrangarh Fort), fitting for a page about a travel blog rather
             than a monument-only shot. */}
@@ -196,7 +220,7 @@ const BlogExplorer = ({ posts, highlightSlug }: Props) => {
 
       {/* Search + filters, floated up over the hero photo as one unified card, matching the
           overlapping-panel pattern used across /marketplace-redesign, /cities, /ecosystem,
-          and /contact — previously these floated as two separate white elements. */}
+          and /contact, previously these floated as two separate white elements. */}
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 -mt-14 sm:-mt-16 relative z-10 pb-10">
         <div className="max-w-4xl mx-auto rounded-2xl border border-gray-100 bg-white shadow-lg p-4 sm:p-5">
           <div className="flex flex-col md:flex-row gap-4">
@@ -272,7 +296,15 @@ const BlogExplorer = ({ posts, highlightSlug }: Props) => {
         className="container mx-auto px-4 sm:px-6 lg:px-8 pb-24"
       >
         <div className="max-w-6xl mx-auto space-y-10">
-          {featuredPost && (
+          {loading ? (
+            <BlogExplorerSkeleton />
+          ) : posts.length === 0 ? (
+            <div className="text-center py-24 text-muted-foreground">
+              No stories available.
+            </div>
+          ) : null}
+
+          {!loading && featuredPost && (
             <Link href={`/blog/${featuredPost.slug}`}>
               <Card
                 data-post-id={featuredPost.slug}
@@ -280,8 +312,8 @@ const BlogExplorer = ({ posts, highlightSlug }: Props) => {
               >
                 <div className="grid md:grid-cols-2">
                   <div className="relative h-72 md:h-full w-full overflow-hidden">
-                    <Image
-                      src={encodeURI(featuredPost.coverImage)}
+                    <BlogCoverImage
+                      src={featuredPost.coverImage}
                       alt={featuredPost.title}
                       fill
                       className="object-cover"
@@ -335,7 +367,7 @@ const BlogExplorer = ({ posts, highlightSlug }: Props) => {
             </Link>
           )}
 
-          {isFiltering ? (
+          {!loading && posts.length > 0 && (isFiltering ? (
             hasMultiplePosts ? (
               <div
                 className={`grid grid-cols-1 gap-6 ${
@@ -442,7 +474,7 @@ const BlogExplorer = ({ posts, highlightSlug }: Props) => {
                 );
               })}
             </>
-          )}
+          ))}
         </div>
       </section>
     </main>
@@ -457,8 +489,8 @@ function PostCard({ post }: { post: BlogSummary }) {
         className="flex flex-col border border-gray-100 hover:border-[#159895]/40 transition-all cursor-pointer h-full"
       >
         <div className="relative w-full aspect-[16/10]">
-          <Image
-            src={encodeURI(post.coverImage)}
+          <BlogCoverImage
+            src={post.coverImage}
             alt={post.title}
             fill
             className="object-cover rounded-t-2xl"

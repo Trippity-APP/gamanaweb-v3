@@ -9,7 +9,7 @@ export interface ApiCity {
     longitude: string;
     images: string[];
     active: boolean;
-    is_popular?: boolean; // Based on common patterns, adding potential fields
+    is_popular?: boolean;
     is_new?: boolean;
 }
 
@@ -25,6 +25,11 @@ export interface CityResponse {
     };
 }
 
+type CityDetailResponse = {
+    success: boolean;
+    data: ApiCity;
+};
+
 export interface FetchCitiesParams {
     country_code?: string;
     state_code?: string;
@@ -35,11 +40,25 @@ export interface FetchCitiesParams {
     page_size?: number;
 }
 
-const BASE_URL = "https://apidev.gamana.app/api/v1";
+const DEFAULT_API_URL = "https://apidev.gamana.app/api/v1";
+
+export function getCityApiBaseUrl(): string {
+    return (
+        process.env.NEXT_PUBLIC_MARKETPLACE_API_URL ||
+        process.env.NEXT_PUBLIC_BLOG_API_URL ||
+        process.env.NEXT_PUBLIC_API_URL ||
+        process.env.BLOG_API_URL ||
+        DEFAULT_API_URL
+    ).replace(/\/$/, "");
+}
+
+export function getCityHref(city: Pick<ApiCity, "id">): string {
+    return `/cities/${city.id}`;
+}
 
 export const fetchCities = async (params: FetchCitiesParams = {}): Promise<CityResponse> => {
     const queryParams = new URLSearchParams();
-    
+
     if (params.country_code) queryParams.append("country_code", params.country_code);
     if (params.state_code) queryParams.append("state_code", params.state_code);
     if (params.search) queryParams.append("search", params.search);
@@ -48,12 +67,13 @@ export const fetchCities = async (params: FetchCitiesParams = {}): Promise<CityR
     if (params.page) queryParams.append("page", params.page.toString());
     if (params.page_size) queryParams.append("page_size", params.page_size.toString());
 
-    const url = `${BASE_URL}/locations/cities?${queryParams.toString()}`;
-    
+    const url = `${getCityApiBaseUrl()}/locations/cities?${queryParams.toString()}`;
+
     const response = await fetch(url, {
         headers: {
-            "accept": "application/json",
+            accept: "application/json",
         },
+        cache: "force-cache",
     });
 
     if (!response.ok) {
@@ -62,3 +82,37 @@ export const fetchCities = async (params: FetchCitiesParams = {}): Promise<CityR
 
     return response.json();
 };
+
+export async function fetchCityById(id: string): Promise<ApiCity | null> {
+    const baseUrl = getCityApiBaseUrl();
+
+    try {
+        const response = await fetch(`${baseUrl}/locations/cities/${id}`, {
+            headers: { accept: "application/json" },
+            cache: "force-cache",
+        });
+
+        if (!response.ok) return null;
+
+        const payload = (await response.json()) as CityDetailResponse;
+        return payload.success ? payload.data : null;
+    } catch {
+        return null;
+    }
+}
+
+export async function fetchAllActiveCities(): Promise<ApiCity[]> {
+    const cities: ApiCity[] = [];
+    let page = 1;
+    let totalPages = 1;
+
+    do {
+        const response = await fetchCities({ active: true, page, page_size: 200 });
+        if (!response.success) break;
+        cities.push(...response.data.cities);
+        totalPages = response.data.total_pages;
+        page++;
+    } while (page <= totalPages);
+
+    return cities;
+}

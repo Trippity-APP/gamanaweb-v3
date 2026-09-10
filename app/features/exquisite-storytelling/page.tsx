@@ -4,14 +4,14 @@ import EnhancedPageLayout from '@/components/enhanced-page-layout';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'Exquisite Storytelling: Immersive Audio Guides',
-  description: 'Experience exquisite storytelling through immersive audio guides and travel stories. Discover culture, history, and hidden insights with Gamana.',
+  title: 'Story-Rich Audio Guides | Gamana',
+  description: 'Audio guides built around history, culture, and the stories behind each stop and travel stories. Discover culture, history, and hidden insights with Gamana.',
   alternates: {
     canonical: 'https://www.gamana.app/features/exquisite-storytelling',
   },
   openGraph: {
-    title: 'Exquisite Storytelling: Immersive Audio Guides | Gamana',
-    description: 'Experience exquisite storytelling through immersive audio guides and travel stories. Discover culture, history, and hidden insights with Gamana.',
+    title: 'Story-Rich Audio Guides | Gamana | Gamana',
+    description: 'Audio guides built around history, culture, and the stories behind each stop and travel stories. Discover culture, history, and hidden insights with Gamana.',
     url: 'https://www.gamana.app/features/exquisite-storytelling',
     siteName: 'Gamana',
     type: 'website',
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Exquisite Storytelling: Immersive Audio Guides | Gamana',
-    description: 'Experience exquisite storytelling through immersive audio guides and travel stories. Discover culture, history, and hidden insights with Gamana.',
+    title: 'Story-Rich Audio Guides | Gamana | Gamana',
+    description: 'Audio guides built around history, culture, and the stories behind each stop and travel stories. Discover culture, history, and hidden insights with Gamana.',
     images: ['/gamana-logo.svg'],
   },
 };
@@ -60,21 +60,21 @@ export default function ExquisiteStorytellingPage() {
       <EnhancedPageLayout
       icon={BookOpen}
       title="Exquisite Storytelling"
-      subtitle="Transform your travels with inspiring, insightful, and shocking facts delivered through masterfully crafted audio narratives"
+      subtitle="History and culture told like a good podcast: researched, written, and voiced to keep you listening."
       gradient="from-[#159895] via-[#1A5F7A] to-[#57C5B6]"
       heroImage="/varanasi ghats golden hour river boats temple spires panoramic view.jpg"
       introTitle="Every Destination Has a Story Worth Telling"
       introText={[
-        'Our storytelling goes beyond simple facts and dates. We weave together history, culture, and local insights to create rich, immersive narratives that make every location come alive. Each story is carefully researched, expertly written, and designed to captivate your imagination.',
+        'Each tour mixes history, culture, and local detail so a street or monument actually makes sense when you are standing there. Stories are researched, written, and voiced to keep you listening.',
         'Whether you\'re exploring ancient ruins, walking through historic neighborhoods, or visiting world-famous landmarks, our audio narratives reveal the fascinating stories that make each place unique.',
       ]}
       benefits={[
         { text: 'Professionally researched and written narratives' },
         { text: 'Historical facts blended with local legends' },
         { text: 'Surprising discoveries and hidden stories' },
-        { text: 'Engaging narrative arcs that captivate listeners' },
+        { text: 'Stories with a beginning, middle, and end, not a list of dates' },
         { text: 'Cultural context that deepens understanding' },
-        { text: 'Expert curation by local historians and storytellers' },
+        { text: 'Written with input from local historians and storytellers' },
       ]}
       examples={[
         {
@@ -85,7 +85,7 @@ export default function ExquisiteStorytellingPage() {
         {
           icon: Users,
           title: 'Local Legends & Folklore',
-          description: 'Immerse yourself in captivating myths, legends, and folklore that have shaped communities for generations.',
+          description: 'Hear the myths, legends, and folklore that have shaped communities for generations.',
         },
         {
           icon: Sparkles,
