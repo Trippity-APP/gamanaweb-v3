@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LogIn, ShoppingBag, Sparkles, Settings, LogOut, User as UserIcon } from "lucide-react";
+import { LogIn, ShoppingBag, Sparkles, Settings, LogOut, User as UserIcon, Coins } from "lucide-react";
 import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -15,6 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { LoginDialog } from "@/components/auth/LoginDialog";
 import { useAccount } from "@/lib/account-context";
 
 function initialsFor(name: string | undefined, email: string) {
@@ -26,100 +24,30 @@ function initialsFor(name: string | undefined, email: string) {
 }
 
 /**
- * Header account control. Logged-out: a "Log in" trigger with the same mock
- * Google/Apple/email options used at checkout (PersonalizeNudge) — no separate login
- * page exists yet, so this is the one real entry point outside of Start Your Journey.
- * Logged-in: standard account dropdown (profile/settings, bookings, personalization,
- * log out) per the founder's explicit request for "standard menu options for a logged
- * in user."
+ * Header account control. Uses the same Gamana backend auth as the mobile app
+ * (phone OTP or email/password).
  */
 export function AccountMenu() {
-  const { account, orders, coinBalance, login, logout } = useAccount();
-  const [showEmailForm, setShowEmailForm] = useState(false);
-  const [email, setEmail] = useState("");
+  const { account, coinBalance, logout, isAuthenticated } = useAccount();
+  const [loginOpen, setLoginOpen] = useState(false);
 
   const triggerBase =
     "inline-flex items-center gap-2 text-sm font-medium px-2 py-1.5 rounded-md transition-colors text-gray-700 hover:text-[#1A5F7A] hover:bg-[#57C5B6]/10";
 
-  if (!account) {
+  if (!account || !isAuthenticated) {
     return (
-      <Popover onOpenChange={(open) => !open && setShowEmailForm(false)}>
-        <PopoverTrigger asChild>
-          <button type="button" className={triggerBase} aria-label="Log in">
-            <LogIn className="h-4 w-4" />
-            Log in
-          </button>
-        </PopoverTrigger>
-        <PopoverContent align="end" className="w-72 space-y-3">
-          <div className="text-center space-y-1">
-            <p className="text-sm font-semibold text-gray-900">Log in to Gamana</p>
-            <p className="text-xs text-gray-500">Same account as the app, your bookings and preferences carry over.</p>
-          </div>
-
-          {!showEmailForm ? (
-            <div className="grid gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => login("you@gmail.com", "google")}
-                className="justify-start gap-3 h-11"
-              >
-                <span className="w-5 h-5 rounded-full bg-[#4285F4] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
-                  G
-                </span>
-                Continue with Google
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => login("you@icloud.com", "apple")}
-                className="justify-start gap-3 h-11"
-              >
-                <span className="w-5 h-5 rounded-full bg-black text-white text-[11px] font-bold flex items-center justify-center shrink-0">
-                  A
-                </span>
-                Continue with Apple
-              </Button>
-              <button
-                type="button"
-                onClick={() => setShowEmailForm(true)}
-                className="text-sm font-semibold text-[#159895] hover:text-[#128a86] flex items-center gap-1 justify-center pt-1"
-              >
-                <LogIn className="h-4 w-4" /> Continue with email
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-10 text-sm"
-              />
-              <Button
-                type="button"
-                onClick={() => {
-                  if (!email.trim()) return;
-                  login(email.trim(), "email");
-                }}
-                className="bg-[#159895] hover:bg-[#128a86] shrink-0"
-              >
-                Log in
-              </Button>
-            </div>
-          )}
-
-          <div className="pt-1 border-t border-gray-100 text-center">
-            <Link href="/start-your-journey" className="text-xs text-gray-500 hover:text-[#159895]">
-              New here? Start your Gamana journey instead
-            </Link>
-          </div>
-          <p className="text-[11px] text-gray-400 text-center">
-            Prototype note: login here doesn&apos;t create a real account yet.
-          </p>
-        </PopoverContent>
-      </Popover>
+      <>
+        <button
+          type="button"
+          className={triggerBase}
+          aria-label="Log in"
+          onClick={() => setLoginOpen(true)}
+        >
+          <LogIn className="h-4 w-4" />
+          Log in
+        </button>
+        <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      </>
     );
   }
 
@@ -139,7 +67,10 @@ export function AccountMenu() {
           <p className="text-sm font-semibold text-gray-900 truncate">
             {account.fullName?.trim() || "Your Gamana account"}
           </p>
-          <p className="text-xs text-gray-400 font-normal truncate">{account.email}</p>
+          <p className="text-xs text-gray-400 font-normal truncate">
+            {account.email}
+            {account.phone ? ` · ${account.phone}` : ""}
+          </p>
           <p className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-amber-700">
             <GamanaCoinIcon className="h-3 w-3" aria-hidden /> {coinBalance.toLocaleString()} Coins
           </p>
@@ -151,9 +82,15 @@ export function AccountMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/account#bookings" className="flex items-center gap-2 cursor-pointer">
+          <Link href="/account#purchases" className="flex items-center gap-2 cursor-pointer">
             <ShoppingBag className="h-4 w-4 text-gray-400" />
-            My bookings{orders.length > 0 ? ` (${orders.length})` : ""}
+            Content purchases
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/account#coins" className="flex items-center gap-2 cursor-pointer">
+            <Coins className="h-4 w-4 text-gray-400" />
+            Coin purchases
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -167,7 +104,10 @@ export function AccountMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout} className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600">
+        <DropdownMenuItem
+          onClick={logout}
+          className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
+        >
           <LogOut className="h-4 w-4" /> Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

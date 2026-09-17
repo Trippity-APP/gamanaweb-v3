@@ -28,15 +28,13 @@ import {
   tourMatchesSearch,
 } from '@/lib/marketplace-api';
 import { countSearchResults, getExploreCatalogPath, getExploreTabFromPathname } from '@/lib/explore-search';
-import { useCart } from '@/lib/cart-context';
 import { useAccount } from '@/lib/account-context';
 import {
-  coinBundles,
   getCatalogAccessBadgeClass,
   getCatalogAccessBadgeText,
   isCatalogFree,
   tourCategoryToInterests,
-  type Tour, type CoinBundle,
+  type Tour,
 } from '@/lib/marketplace-data';
 import { interestCategoryOptions } from '@/lib/personalization';
 
@@ -53,7 +51,7 @@ function matchesAccessFilter(tour: Tour, filter: AccessFilter): boolean {
 const TOURS_INITIAL_VISIBLE = 9;
 
 /**
- * The full Tours / Combos / Experiences / Buy Coins / Special Offers browsing surface,
+ * The full Tours / Combos / Experiences browsing surface,
  * shared by both the signed-out /marketplace page and the signed-in, personalized
  * /marketplace-redesign page — same catalog, same cart, same checkout either way.
  *
@@ -177,30 +175,7 @@ export function MarketplaceBrowser({
     }
   };
 
-  // --- Real-money cart: Coin bundles ---
-  const { addItem, items: cartItems } = useCart();
-  const [justAddedBundle, setJustAddedBundle] = useState<string | null>(null);
-  // "Buy Coins" used to be its own tab, duplicating the "Buy more" chip next to the
-  // balance — collapsed into one cue: "Buy more" now opens this bundle-picker dialog
-  // directly instead of switching tabs.
-  const [buyCoinsOpen, setBuyCoinsOpen] = useState(false);
-
-  const isBundleInCart = (id: string) => cartItems.some((i) => i.id === id && i.kind === 'coins');
-
-  const handleAddBundle = (bundle: CoinBundle) => {
-    const totalCoins = bundle.baseCoins + bundle.bonusCoins;
-    addItem({
-      id: bundle.id,
-      kind: 'coins',
-      title: `${bundle.name}, ${totalCoins.toLocaleString()} Coins`,
-      image: '/gamana-logo.png',
-      price: bundle.price,
-      coinsGranted: totalCoins,
-    });
-    setJustAddedBundle(bundle.id);
-    setTimeout(() => setJustAddedBundle((current) => (current === bundle.id ? null : current)), 1500);
-  };
-
+  // Coin packs are bought on /pricing (Razorpay). Explore only shows balance + link.
   const [tours, setTours] = useState<Tour[]>(initialTours);
   const [toursLoading, setToursLoading] = useState(initialTours.length === 0);
   const [visibleTourCount, setVisibleTourCount] = useState(TOURS_INITIAL_VISIBLE);
@@ -518,50 +493,6 @@ export function MarketplaceBrowser({
     </Card>
   );
 
-  const coinBundleCard = (bundle: CoinBundle) => {
-    const totalCoins = bundle.baseCoins + bundle.bonusCoins;
-    const inCart = isBundleInCart(bundle.id);
-    return (
-      <Card
-        key={bundle.id}
-        className={`overflow-hidden rounded-xl border ${bundle.popular ? 'border-amber-400 ring-1 ring-amber-400' : 'border-gray-200'} hover:shadow-md transition-shadow duration-200 bg-white`}
-      >
-        <CardContent className="p-5 space-y-3 text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-600 h-3.5">
-            {bundle.popular ? 'Most Popular' : ''}
-          </p>
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 mx-auto">
-            <GamanaCoinIcon className="h-6 w-6" aria-hidden />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-gray-900">{totalCoins.toLocaleString()}</p>
-            <p className="text-xs text-gray-500">
-              Coins{bundle.bonusCoins > 0 ? ` (${bundle.baseCoins} + ${bundle.bonusCoins} bonus)` : ''}
-            </p>
-          </div>
-          <p className="text-sm font-semibold text-gray-900">{bundle.name}</p>
-          <p className="text-xs text-gray-500">{bundle.blurb}</p>
-        </CardContent>
-        <CardFooter className="p-5 pt-0">
-          <Button
-            onClick={() => handleAddBundle(bundle)}
-            className={
-              justAddedBundle === bundle.id || inCart
-                ? 'w-full bg-green-600 hover:bg-green-700 text-white'
-                : 'w-full bg-amber-500 hover:bg-amber-600 text-white'
-            }
-          >
-            {justAddedBundle === bundle.id || inCart ? (
-              <><CheckIcon className="mr-1.5 h-3.5 w-3.5" /> In cart</>
-            ) : (
-              `$${bundle.price}`
-            )}
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  };
-
   return (
     <>
       <DownloadAppDialog
@@ -612,13 +543,12 @@ export function MarketplaceBrowser({
                     <div className="flex w-fit shrink-0 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700">
                       <GamanaCoinIcon className="h-4 w-4" aria-hidden />
                       {coinBalance.toLocaleString()} Coins
-                      <button
-                        type="button"
-                        onClick={() => setBuyCoinsOpen(true)}
+                      <Link
+                        href="/pricing/"
                         className="ml-1 font-semibold text-[#159895] underline underline-offset-2 hover:text-[#128a86]"
                       >
                         Buy more
-                      </button>
+                      </Link>
                     </div>
                   )}
                 </div>
@@ -742,7 +672,7 @@ export function MarketplaceBrowser({
         </DialogContent>
       </Dialog>
 
-      {/* Not enough Coins to unlock — steer straight to the bundle picker instead of a dead end */}
+      {/* Not enough Coins to unlock — send travelers to /pricing */}
       <Dialog open={insufficientOpen} onOpenChange={setInsufficientOpen}>
         <DialogContent className="sm:max-w-sm text-center">
           <DialogHeader>
@@ -757,33 +687,13 @@ export function MarketplaceBrowser({
             </p>
           )}
           <Button
-            onClick={() => {
-              setInsufficientOpen(false);
-              setBuyCoinsOpen(true);
-            }}
+            asChild
             className="w-full bg-gradient-to-r from-[#159895] to-[#1A5F7A] hover:from-[#159895] hover:to-[#1A5F7A]"
           >
-            Get Coins
+            <Link href="/pricing/" onClick={() => setInsufficientOpen(false)}>
+              Get Coins
+            </Link>
           </Button>
-        </DialogContent>
-      </Dialog>
-
-      {/* The one and only "buy Coins" entry point — opened from the "Buy more" chip next
-          to the balance, and from "Get Coins" above when an unlock fails for insufficient
-          balance. Previously this content also lived in its own "Buy Coins" tab, which
-          duplicated the "Buy more" cue right next to it. */}
-      <Dialog open={buyCoinsOpen} onOpenChange={setBuyCoinsOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Buy Gamana Coins</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-gray-500 -mt-2">
-            Coins unlock Tours, Topics, and Combos. This is the only place to buy them, with real
-            currency, through your cart.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {coinBundles.map((bundle) => coinBundleCard(bundle))}
-          </div>
         </DialogContent>
       </Dialog>
 

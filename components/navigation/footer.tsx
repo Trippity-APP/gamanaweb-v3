@@ -143,6 +143,11 @@ export default function Footer() {
                   Pricing
                 </Link>
               </li>
+              <li>
+                <Link href="/contact" className="hover:text-[#57C5B6] transition-colors text-sm">
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -180,6 +185,11 @@ export default function Footer() {
               <li>
                 <Link href="/pricing" className="hover:text-[#57C5B6] transition-colors text-sm">
                   Pricing
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-[#57C5B6] transition-colors text-sm">
+                  Contact
                 </Link>
               </li>
               <li>

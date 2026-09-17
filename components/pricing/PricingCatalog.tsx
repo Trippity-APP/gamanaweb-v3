@@ -1,19 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Building2, Check, Lock, Shield, Wallet } from "lucide-react";
+import { Building2, Check, Loader2, Lock, Shield, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
+import { LoginDialog } from "@/components/auth/LoginDialog";
+import { useAccount } from "@/lib/account-context";
+import { useToast } from "@/hooks/use-toast";
 import {
   coinPacks,
   detectPricingCurrency,
   formatMoney,
   packPrice,
   persistPricingCurrency,
+  type CoinPack,
   type PricingCurrency,
 } from "@/lib/coin-pricing";
+import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/payments-api";
+import { openRazorpayCheckout } from "@/lib/razorpay-checkout";
+import { getStoredAccessToken, getStoredAuthSession } from "@/lib/auth-api";
 
 const steps = [
   {
@@ -31,8 +38,13 @@ const steps = [
 ];
 
 export function PricingCatalog() {
+  const { account, addOrder, setCoinBalanceFromApi, refreshFromApi } = useAccount();
+  const { toast } = useToast();
   const [currency, setCurrency] = useState<PricingCurrency>("USD");
   const [ready, setReady] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [buyingPackId, setBuyingPackId] = useState<string | null>(null);
+  const pendingPackRef = useRef<CoinPack | null>(null);
 
   useEffect(() => {
     setCurrency(detectPricingCurrency());
@@ -42,6 +54,106 @@ export function PricingCatalog() {
   const chooseCurrency = (next: PricingCurrency) => {
     setCurrency(next);
     persistPricingCurrency(next);
+  };
+
+  const startCheckout = async (pack: CoinPack) => {
+    const token = account?.accessToken || getStoredAccessToken();
+    const session = getStoredAuthSession();
+    if (!token) {
+      pendingPackRef.current = pack;
+      setLoginOpen(true);
+      return;
+    }
+
+    setBuyingPackId(pack.id);
+    try {
+      const order = await createRazorpayOrder({
+        fiatAmount: pack.priceInr,
+        fiatCurrency: "INR",
+        accessToken: token,
+      });
+
+      await openRazorpayCheckout({
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Gamana",
+        description: `${pack.coins} Gamana Coins`,
+        order_id: order.orderId,
+        prefill: {
+          name: account?.fullName || session?.fullName || undefined,
+          email:
+            account?.email?.includes("@")
+              ? account.email
+              : session?.email?.includes("@")
+                ? session.email
+                : undefined,
+          contact: account?.phone || session?.phone || undefined,
+        },
+        onSuccess: async (response) => {
+          try {
+            const verified = await verifyRazorpayPayment({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              transactionId: order.transactionId,
+              accessToken: token,
+            });
+
+            const credited =
+              verified.coinsCredited > 0 ? verified.coinsCredited : pack.coins;
+            if (verified.newBalance != null) {
+              setCoinBalanceFromApi(verified.newBalance);
+            }
+            await refreshFromApi();
+            addOrder({
+              id: verified.transactionId || `GMN-${Date.now()}`,
+              kind: "coins-purchase",
+              items: [{ title: `${pack.coins} Gamana Coins`, quantity: 1, price: pack.priceInr }],
+              total: pack.priceInr,
+              currency: "INR",
+              placedAt: new Date().toISOString(),
+            });
+
+            toast({
+              title: "Payment successful",
+              description: `${credited} coins added to your Gamana wallet.`,
+            });
+          } catch (err) {
+            toast({
+              title: "Payment received, verification failed",
+              description:
+                err instanceof Error
+                  ? err.message
+                  : "Email support@gamana.app with your payment ID.",
+              variant: "destructive",
+            });
+          } finally {
+            setBuyingPackId(null);
+            pendingPackRef.current = null;
+          }
+        },
+        onDismiss: () => {
+          setBuyingPackId(null);
+        },
+      });
+    } catch (err) {
+      setBuyingPackId(null);
+      toast({
+        title: "Could not start checkout",
+        description:
+          err instanceof Error ? err.message : "Please try again in a moment.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLoginSuccess = () => {
+    const pack = pendingPackRef.current;
+    if (!pack) return;
+    window.setTimeout(() => {
+      void startCheckout(pack);
+    }, 50);
   };
 
   const faqs = [
@@ -64,6 +176,14 @@ export function PricingCatalog() {
 
   return (
     <>
+      <LoginDialog
+        open={loginOpen}
+        onOpenChange={setLoginOpen}
+        onSuccess={handleLoginSuccess}
+        title="Log in to buy coins"
+        description="Sign in with your Gamana account before checkout. You’ll be charged in INR via Razorpay."
+      />
+
       <section className="bg-gray-50 py-12 sm:py-16">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -71,7 +191,7 @@ export function PricingCatalog() {
               <h2 className="text-2xl font-bold text-gray-900">Choose a pack</h2>
               <p className="mt-1 text-sm text-gray-500">
                 {ready
-                  ? `Showing prices in ${currency}. Switch anytime.`
+                  ? `Showing prices in ${currency}. Checkout is always charged in INR.`
                   : "Loading prices for your location…"}
               </p>
             </div>
@@ -96,7 +216,9 @@ export function PricingCatalog() {
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4 xl:items-stretch">
             {coinPacks.map((pack) => {
               const price = formatMoney(packPrice(pack, currency), currency);
+              const inrPrice = formatMoney(pack.priceInr, "INR");
               const popular = Boolean(pack.popular);
+              const buying = buyingPackId === pack.id;
 
               return (
                 <Card
@@ -122,6 +244,9 @@ export function PricingCatalog() {
                       <p className="mt-1 text-sm text-gray-500">Coins</p>
                     </div>
                     <p className="text-2xl font-semibold text-gray-900">{price}</p>
+                    {currency === "USD" && (
+                      <p className="text-xs text-gray-400">Charged as {inrPrice} at checkout</p>
+                    )}
                     <p className="text-sm leading-relaxed text-gray-500">{pack.blurb}</p>
                   </CardHeader>
                   <CardContent className="flex-1 px-6 pb-2">
@@ -137,17 +262,26 @@ export function PricingCatalog() {
                   <CardFooter className="flex flex-col items-stretch gap-2 p-6 pt-4">
                     <Button
                       type="button"
-                      disabled
-                      aria-disabled="true"
+                      disabled={Boolean(buyingPackId)}
+                      onClick={() => void startCheckout(pack)}
                       className={
                         popular
-                          ? "w-full bg-[#159895] text-white opacity-90 hover:bg-[#159895]"
-                          : "w-full bg-gray-900 text-white opacity-80 hover:bg-gray-900"
+                          ? "w-full bg-[#159895] text-white hover:bg-[#128a86]"
+                          : "w-full bg-gray-900 text-white hover:bg-gray-800"
                       }
                     >
-                      Buy {pack.coins} coins · {price}
+                      {buying ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Opening checkout…
+                        </>
+                      ) : (
+                        `Buy ${pack.coins} coins · ${price}`
+                      )}
                     </Button>
-                    <p className="text-center text-xs text-gray-400">Checkout coming soon</p>
+                    <p className="text-center text-xs text-gray-400">
+                      Secure checkout with Razorpay · Login required
+                    </p>
                   </CardFooter>
                 </Card>
               );
@@ -158,7 +292,7 @@ export function PricingCatalog() {
             <div className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
               <Shield className="mt-0.5 h-4 w-4 shrink-0 text-[#159895]" />
               <p className="text-sm text-gray-600">
-                Secure checkout with Razorpay when payments go live.
+                Secure checkout with Razorpay. Always charged in INR.
               </p>
             </div>
             <div className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">

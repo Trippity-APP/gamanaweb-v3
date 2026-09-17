@@ -1,14 +1,25 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import type { Corridor, Depth, TravelerProfile } from "@/lib/personalization";
+import {
+  clearAuthSession,
+  getStoredAuthSession,
+  persistAuthSession,
+  type AuthSession,
+} from "@/lib/auth-api";
+import { fetchCoinBalance, fetchUserProfile } from "@/lib/profile-api";
 
-export type AuthMethod = "google" | "apple" | "email";
+export type AuthMethod = "google" | "apple" | "email" | "otp" | "password";
 
 export interface Account {
   email: string;
   method: AuthMethod;
   fullName?: string;
+  userId?: string;
+  phone?: string;
+  accessToken?: string;
+  refreshToken?: string;
 }
 
 // Dates are stored as ISO strings (JSON-safe) rather than Date objects — convert to/from
@@ -50,13 +61,16 @@ export interface Order {
   id: string;
   /**
    * "unlock" orders are Coins-denominated (a Tour/Combo unlocked with Coins — see
-   * unlockItem). Every other kind is real-currency (USD), placed through the cart:
+   * unlockItem). Every other kind is real-currency, placed through the cart or
+   * Razorpay pricing checkout:
    * "experience" (real-world bookings), "coins-purchase" (bought a Coin bundle), or
    * "mixed" (a cart checkout with both in it).
    */
   kind: "unlock" | "experience" | "coins-purchase" | "mixed";
   items: OrderLineItem[];
   total: number;
+  /** Fiat currency for real-money orders. Coin purchases via Razorpay are always INR. */
+  currency?: "INR" | "USD";
   placedAt: string;
 }
 
@@ -76,13 +90,21 @@ interface AccountContextValue {
   coinBalance: number;
   unlockedItems: UnlockedItem[];
   welcomeCoinsClaimed: boolean;
+  /** True when the user has a real backend access token (required for Razorpay). */
+  isAuthenticated: boolean;
   login: (email: string, method: AuthMethod, fullName?: string) => void;
+  /** Persist a real Gamana backend session (OTP / email+password). */
+  setAuthSession: (session: AuthSession) => void;
   logout: () => void;
   addOrder: (order: Order) => void;
   updateProfile: (patch: Partial<Pick<Account, "fullName" | "email">>) => void;
   updateJourney: (journey: SavedJourney) => void;
   /** Credits Coins to the balance — the only way Coins enter an account, from a real-money bundle purchase. */
   addCoins: (amount: number) => void;
+  /** Set absolute coin balance (from API). */
+  setCoinBalanceFromApi: (balance: number) => void;
+  /** Refresh profile + wallet balance from the Gamana backend. */
+  refreshFromApi: () => Promise<void>;
   /** Deducts the item's price from the Coins balance and marks it unlocked. Fails (no-op) if the balance is short. */
   unlockItem: (item: { id: string; type: "tour" | "combo"; title: string; priceCoins: number }) => boolean;
   isUnlocked: (id: string, type: "tour" | "combo") => boolean;
@@ -99,10 +121,9 @@ const UNLOCKED_ITEMS_KEY = "gamanaUnlockedItems";
 const WELCOME_COINS_KEY = "gamanaWelcomeCoinsClaimed";
 
 /**
- * Mock session layer for the prototype — no real auth backend exists yet. Reads/writes
- * localStorage so "logged in" state and personalization status persist across pages, and
- * is what /marketplace's checkout nudges check before purchase. Once real accounts exist,
- * this is the seam to swap for a real session.
+ * Account + session layer. Real Gamana auth (OTP / password) stores an access token used
+ * for Razorpay coin purchases. Local preferences (journey, prototype unlocks) remain in
+ * localStorage alongside that session.
  */
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<Account | null>(null);
@@ -112,10 +133,77 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [unlockedItems, setUnlockedItems] = useState<UnlockedItem[]>([]);
   const [welcomeCoinsClaimed, setWelcomeCoinsClaimed] = useState(false);
 
+  const persistBalance = (next: number) => {
+    setCoinBalance(next);
+    try {
+      window.localStorage.setItem(COIN_BALANCE_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  };
+
+  const setCoinBalanceFromApi = (balance: number) => {
+    if (!Number.isFinite(balance) || balance < 0) return;
+    persistBalance(balance);
+  };
+
+  const applyProfileToAccount = (
+    prev: Account | null,
+    profile: Awaited<ReturnType<typeof fetchUserProfile>>,
+    token: string
+  ): Account => {
+    const next: Account = {
+      email: profile.email || prev?.email || profile.phone || "Gamana user",
+      method: prev?.method || "otp",
+      fullName: profile.fullName || prev?.fullName,
+      userId: profile.id || prev?.userId,
+      phone: profile.phone || prev?.phone,
+      accessToken: token,
+      refreshToken: prev?.refreshToken,
+    };
+    try {
+      window.localStorage.setItem(ACCOUNT_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+    return next;
+  };
+
+  const refreshFromApi = useCallback(async () => {
+    const session = getStoredAuthSession();
+    const token = session?.accessToken;
+    if (!token) return;
+
+    try {
+      const [profile, balance] = await Promise.all([
+        fetchUserProfile(token),
+        fetchCoinBalance(token),
+      ]);
+      setAccount((prev) => applyProfileToAccount(prev, profile, token));
+      setCoinBalanceFromApi(balance.availableBalance);
+    } catch (error) {
+      console.error("Failed to refresh account from API", error);
+    }
+  }, []);
+
   useEffect(() => {
     try {
+      const session = getStoredAuthSession();
       const rawAccount = window.localStorage.getItem(ACCOUNT_KEY);
-      if (rawAccount) setAccount(JSON.parse(rawAccount));
+      if (session?.accessToken) {
+        const fromStorage = rawAccount ? (JSON.parse(rawAccount) as Account) : null;
+        setAccount({
+          email: session.email || fromStorage?.email || session.phone || "Gamana user",
+          method: session.method,
+          fullName: session.fullName || fromStorage?.fullName || undefined,
+          userId: session.userId,
+          phone: session.phone || undefined,
+          accessToken: session.accessToken,
+          refreshToken: session.refreshToken,
+        });
+      } else if (rawAccount) {
+        setAccount(JSON.parse(rawAccount));
+      }
       const rawJourney = window.localStorage.getItem(JOURNEY_KEY);
       if (rawJourney) setJourney(JSON.parse(rawJourney));
       const rawOrders = window.localStorage.getItem(ORDERS_KEY);
@@ -179,11 +267,45 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
+  // Sync profile + wallet from backend whenever we have a real access token.
+  useEffect(() => {
+    const token = account?.accessToken;
+    if (!token) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const [profile, balance] = await Promise.all([
+          fetchUserProfile(token),
+          fetchCoinBalance(token),
+        ]);
+        if (cancelled) return;
+        setAccount((prev) => applyProfileToAccount(prev, profile, token));
+        setCoinBalanceFromApi(balance.availableBalance);
+      } catch (error) {
+        console.error("Failed to sync account from API", error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync when token changes
+  }, [account?.accessToken]);
+
   const login = (email: string, method: AuthMethod, fullName?: string) => {
     setAccount((prev) => {
       // Don't clobber a name collected earlier (e.g. at account creation) with a blank
       // one from a later login() call (e.g. checkout's implicit login).
-      const next: Account = { email, method, fullName: fullName || prev?.fullName };
+      const next: Account = {
+        email,
+        method,
+        fullName: fullName || prev?.fullName,
+        userId: prev?.userId,
+        phone: prev?.phone,
+        accessToken: prev?.accessToken,
+        refreshToken: prev?.refreshToken,
+      };
       try {
         window.localStorage.setItem(ACCOUNT_KEY, JSON.stringify(next));
       } catch {
@@ -193,7 +315,40 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const setAuthSession = (session: AuthSession) => {
+    persistAuthSession(session);
+    const next: Account = {
+      email: session.email || session.phone || "Gamana user",
+      method: session.method,
+      fullName: session.fullName || undefined,
+      userId: session.userId,
+      phone: session.phone || undefined,
+      accessToken: session.accessToken,
+      refreshToken: session.refreshToken,
+    };
+    setAccount(next);
+    try {
+      window.localStorage.setItem(ACCOUNT_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+    // Fire-and-forget API sync after login.
+    void (async () => {
+      try {
+        const [profile, balance] = await Promise.all([
+          fetchUserProfile(session.accessToken),
+          fetchCoinBalance(session.accessToken),
+        ]);
+        setAccount((prev) => applyProfileToAccount(prev, profile, session.accessToken));
+        setCoinBalanceFromApi(balance.availableBalance);
+      } catch (error) {
+        console.error("Failed to sync after login", error);
+      }
+    })();
+  };
+
   const logout = () => {
+    clearAuthSession();
     setAccount(null);
     try {
       window.localStorage.removeItem(ACCOUNT_KEY);
@@ -201,6 +356,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       // ignore
     }
   };
+
+  const isAuthenticated = Boolean(account?.accessToken);
 
   const updateProfile = (patch: Partial<Pick<Account, "fullName" | "email">>) => {
     setAccount((prev) => {
@@ -310,12 +467,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         coinBalance,
         unlockedItems,
         welcomeCoinsClaimed,
+        isAuthenticated,
         login,
+        setAuthSession,
         logout,
         addOrder,
         updateProfile,
         updateJourney,
         addCoins,
+        setCoinBalanceFromApi,
+        refreshFromApi,
         unlockItem,
         isUnlocked,
         claimWelcomeCoins,

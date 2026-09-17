@@ -81,13 +81,17 @@ export function clearBlogCache(): void {
 async function loadApiPosts(): Promise<BlogPost[]> {
   if (cachedApiPosts) return cachedApiPosts;
 
-  const apiPosts = await fetchAllPublishedPosts();
-  cachedApiPosts = apiPosts
-    .map(mapApiPostToArticle)
-    .map(enrichArticle)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  return cachedApiPosts;
+  try {
+    const apiPosts = await fetchAllPublishedPosts();
+    cachedApiPosts = apiPosts
+      .map(mapApiPostToArticle)
+      .map(enrichArticle)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return cachedApiPosts;
+  } catch (error) {
+    console.error("Failed to load blog posts from API", error);
+    return [];
+  }
 }
 
 async function loadPosts(): Promise<BlogPost[]> {

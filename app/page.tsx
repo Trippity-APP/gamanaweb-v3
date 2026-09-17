@@ -6,11 +6,19 @@ import HomeClient from "./home-client";
 
 export default async function HomePage() {
   let catalog: Tour[] = [];
+  let latestStories: Awaited<ReturnType<typeof getLatestPostSummaries>> = [];
+
   try {
     catalog = await fetchPublicTours();
   } catch (error) {
     console.error("Failed to prefetch home search catalog", error);
   }
 
-  return <HomeClient latestStories={await getLatestPostSummaries(3)} catalog={catalog} />;
+  try {
+    latestStories = await getLatestPostSummaries(3);
+  } catch (error) {
+    console.error("Failed to prefetch home latest stories", error);
+  }
+
+  return <HomeClient latestStories={latestStories} catalog={catalog} />;
 }

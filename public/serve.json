@@ -54,6 +54,16 @@
       "source": "/marketplace/tours/:id",
       "destination": "/explore/tours/:id/",
       "permanent": true
+    },
+    {
+      "source": "/subscription",
+      "destination": "/pricing/",
+      "permanent": true
+    },
+    {
+      "source": "/subscription/",
+      "destination": "/pricing/",
+      "permanent": true
     }
   ],
   "rewrites": [

@@ -56,7 +56,13 @@ async function fetchJson<T>(url: string): Promise<T> {
       ? { cache: "no-store" }
       : { cache: "force-cache" };
 
-  const response = await fetch(url, init);
+  let response: Response;
+  try {
+    response = await fetch(url, init);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "network error";
+    throw new Error(`Blog API ${url} unreachable (${reason})`);
+  }
 
   if (!response.ok) {
     throw new Error(`Blog API ${url} failed (${response.status})`);

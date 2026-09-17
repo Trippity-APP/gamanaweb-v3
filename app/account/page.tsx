@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ComponentType } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import SiteHeader from "@/components/navigation/site-header";
 import Footer from "@/components/navigation/footer";
@@ -11,35 +11,162 @@ import {
   User,
   Sparkles,
   ShoppingBag,
-  CreditCard,
   LogOut,
-  Headphones,
-  Briefcase,
   Pencil,
+  Wallet,
 } from "lucide-react";
 import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import { useAccount } from "@/lib/account-context";
 import { PersonalizationEditor } from "@/components/account/PersonalizationEditor";
+import { WalletSummary } from "@/components/account/WalletSummary";
+import { PurchaseHistoryList } from "@/components/account/PurchaseHistoryList";
+import { CoinPurchaseHistoryList } from "@/components/account/CoinPurchaseHistoryList";
+import {
+  fetchCoinPurchaseHistory,
+  fetchMyPurchases,
+  updateUserProfile,
+  type CoinPurchaseEntry,
+  type ContentPurchase,
+} from "@/lib/profile-api";
+import { useToast } from "@/hooks/use-toast";
 
 /**
- * Prototype account settings page — profile, saved personalization, order/booking
- * history, and mock payment methods. All state is the same localStorage-backed
- * AccountProvider used across the site; nothing here is a real backend yet.
+ * Account page backed by the same mobile APIs: profile, wallet balance,
+ * content purchases, and coin purchase (passbook) history.
  */
-const orderMeta: Record<string, { icon: ComponentType<{ className?: string }>; label: string; coinsDenominated: boolean }> = {
-  unlock: { icon: Headphones, label: "Audio Tour", coinsDenominated: true },
-  experience: { icon: Briefcase, label: "Experience", coinsDenominated: false },
-  "coins-purchase": { icon: GamanaCoinIcon, label: "Coin Bundle", coinsDenominated: false },
-  mixed: { icon: ShoppingBag, label: "Order", coinsDenominated: false },
-};
-
 export default function AccountPage() {
-  const { account, orders, coinBalance, updateProfile, logout } = useAccount();
-  const [editing, setEditing] = useState(false);
-  const [nameDraft, setNameDraft] = useState(account?.fullName || "");
-  const [emailDraft, setEmailDraft] = useState(account?.email || "");
+  const {
+    account,
+    coinBalance,
+    orders,
+    updateProfile,
+    logout,
+    refreshFromApi,
+    isAuthenticated,
+  } = useAccount();
+  const { toast } = useToast();
 
-  if (!account) {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [nameDraft, setNameDraft] = useState(account?.fullName || "");
+  const [walletLoading, setWalletLoading] = useState(false);
+
+  const [purchases, setPurchases] = useState<ContentPurchase[]>([]);
+  const [purchasesLoading, setPurchasesLoading] = useState(false);
+  const [purchasesError, setPurchasesError] = useState<string | null>(null);
+
+  const [coinPurchases, setCoinPurchases] = useState<CoinPurchaseEntry[]>([]);
+  const [coinPurchasesLoading, setCoinPurchasesLoading] = useState(false);
+  const [coinPurchasesError, setCoinPurchasesError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNameDraft(account?.fullName || "");
+  }, [account?.fullName]);
+
+  useEffect(() => {
+    if (!account?.accessToken || !isAuthenticated) return;
+
+    let cancelled = false;
+
+    (async () => {
+      setWalletLoading(true);
+      setPurchasesLoading(true);
+      setCoinPurchasesLoading(true);
+      setPurchasesError(null);
+      setCoinPurchasesError(null);
+
+      try {
+        await refreshFromApi();
+      } finally {
+        if (!cancelled) setWalletLoading(false);
+      }
+
+      try {
+        const result = await fetchMyPurchases({
+          accessToken: account.accessToken,
+          limit: 50,
+        });
+        if (!cancelled) setPurchases(result.purchases);
+      } catch (err) {
+        if (!cancelled) {
+          setPurchasesError(
+            err instanceof Error ? err.message : "Could not load purchases."
+          );
+        }
+      } finally {
+        if (!cancelled) setPurchasesLoading(false);
+      }
+
+      try {
+        const result = await fetchCoinPurchaseHistory({
+          accessToken: account.accessToken,
+          limit: 50,
+        });
+        if (!cancelled) {
+          if (result.entries.length > 0) {
+            setCoinPurchases(result.entries);
+          } else {
+            // Passbook empty — show recent web Razorpay buys from local cache.
+            const localCoinBuys: CoinPurchaseEntry[] = orders
+              .filter((order) => order.kind === "coins-purchase")
+              .map((order) => ({
+                transactionId: order.id,
+                transactionType: "purchase",
+                status: "completed",
+                coinAmount:
+                  order.items.reduce((sum, item) => {
+                    const match = item.title.match(/(\d+)\s+Gamana Coins/i);
+                    return sum + (match ? Number(match[1]) : 0);
+                  }, 0) || 0,
+                fiatAmount: order.total,
+                fiatCurrency: order.currency ?? "INR",
+                description: order.items.map((i) => i.title).join(", "),
+                timestamp: order.placedAt,
+              }))
+              .filter((entry) => entry.coinAmount > 0);
+            setCoinPurchases(localCoinBuys);
+          }
+        }
+      } catch (err) {
+        if (!cancelled) {
+          const localCoinBuys: CoinPurchaseEntry[] = orders
+            .filter((order) => order.kind === "coins-purchase")
+            .map((order) => ({
+              transactionId: order.id,
+              transactionType: "purchase",
+              status: "completed",
+              coinAmount:
+                order.items.reduce((sum, item) => {
+                  const match = item.title.match(/(\d+)\s+Gamana Coins/i);
+                  return sum + (match ? Number(match[1]) : 0);
+                }, 0) || 0,
+              fiatAmount: order.total,
+              fiatCurrency: order.currency ?? "INR",
+              description: order.items.map((i) => i.title).join(", "),
+              timestamp: order.placedAt,
+            }))
+            .filter((entry) => entry.coinAmount > 0);
+
+          if (localCoinBuys.length > 0) {
+            setCoinPurchases(localCoinBuys);
+            setCoinPurchasesError(null);
+          } else {
+            setCoinPurchasesError(
+              err instanceof Error ? err.message : "Could not load coin purchases."
+            );
+          }
+        }
+      } finally {
+        if (!cancelled) setCoinPurchasesLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [account?.accessToken, isAuthenticated, refreshFromApi, orders]);
+
+  if (!account || !isAuthenticated) {
     return (
       <>
         <SiteHeader variant="solid" />
@@ -47,7 +174,8 @@ export default function AccountPage() {
           <div className="text-center max-w-sm space-y-3">
             <h1 className="text-xl font-semibold text-gray-900">You&apos;re not logged in</h1>
             <p className="text-sm text-gray-500">
-              Log in from the menu in the top right, or start your Gamana journey to create an account.
+              Log in from the menu in the top right to see your profile, wallet, and purchase
+              history.
             </p>
             <Link href="/start-your-journey">
               <Button className="bg-gradient-to-r from-[#159895] to-[#1A5F7A]">
@@ -61,12 +189,33 @@ export default function AccountPage() {
     );
   }
 
-  const saveProfile = () => {
-    updateProfile({
-      fullName: nameDraft.trim() || undefined,
-      email: emailDraft.trim() || account.email,
-    });
-    setEditing(false);
+  const saveProfile = async () => {
+    const trimmed = nameDraft.trim();
+    const parts = trimmed.split(/\s+/).filter(Boolean);
+    const firstName = parts[0] || "";
+    const lastName = parts.slice(1).join(" ") || "";
+
+    setSaving(true);
+    try {
+      const updated = await updateUserProfile(
+        { firstName, lastName },
+        account.accessToken
+      );
+      updateProfile({
+        fullName: updated.fullName || trimmed || undefined,
+        email: updated.email || account.email,
+      });
+      setEditing(false);
+      toast({ title: "Profile updated" });
+    } catch (err) {
+      toast({
+        title: "Could not save profile",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -76,11 +225,10 @@ export default function AccountPage() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Your account</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Manage your profile, personalization, bookings, and payment details.
+            Profile, wallet, and purchase history from your Gamana account.
           </p>
         </div>
 
-        {/* Profile */}
         <section id="settings" className="space-y-4 scroll-mt-24">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -91,7 +239,6 @@ export default function AccountPage() {
                 type="button"
                 onClick={() => {
                   setNameDraft(account.fullName || "");
-                  setEmailDraft(account.email);
                   setEditing(true);
                 }}
                 className="text-sm font-semibold text-[#159895] hover:text-[#128a86] flex items-center gap-1"
@@ -106,98 +253,81 @@ export default function AccountPage() {
               <div className="grid gap-4 max-w-sm">
                 <div className="space-y-2">
                   <Label htmlFor="acct-name">Full name</Label>
-                  <Input id="acct-name" value={nameDraft} onChange={(e) => setNameDraft(e.target.value)} />
+                  <Input
+                    id="acct-name"
+                    value={nameDraft}
+                    onChange={(e) => setNameDraft(e.target.value)}
+                  />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="acct-email">Email</Label>
-                  <Input id="acct-email" type="email" value={emailDraft} onChange={(e) => setEmailDraft(e.target.value)} />
-                </div>
+                <p className="text-xs text-gray-500">
+                  Email and phone are managed through your Gamana login.
+                </p>
                 <div className="flex gap-2">
-                  <Button onClick={saveProfile} className="bg-gradient-to-r from-[#159895] to-[#1A5F7A]">
-                    Save
+                  <Button
+                    onClick={saveProfile}
+                    disabled={saving}
+                    className="bg-gradient-to-r from-[#159895] to-[#1A5F7A]"
+                  >
+                    {saving ? "Saving…" : "Save"}
                   </Button>
-                  <Button variant="outline" onClick={() => setEditing(false)}>
+                  <Button variant="outline" onClick={() => setEditing(false)} disabled={saving}>
                     Cancel
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-gray-900">{account.fullName?.trim() || "No name on file yet"}</p>
-                <p className="text-sm text-gray-500">{account.email}</p>
-                <p className="text-xs text-gray-400 capitalize">Signed in via {account.method}</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {account.fullName?.trim() || "No name on file yet"}
+                </p>
+                {account.email?.includes("@") && (
+                  <p className="text-sm text-gray-500">{account.email}</p>
+                )}
+                {account.phone && (
+                  <p className="text-sm text-gray-500">{account.phone}</p>
+                )}
+                <p className="text-xs text-gray-400 capitalize">
+                  Signed in via {account.method === "otp" ? "phone OTP" : account.method}
+                </p>
               </div>
             )}
           </div>
         </section>
 
-        {/* Personalization */}
+        <section id="wallet" className="space-y-4 scroll-mt-24">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <Wallet className="h-5 w-5 text-[#159895]" /> Wallet
+          </h2>
+          <WalletSummary balance={coinBalance} loading={walletLoading} />
+        </section>
+
+        <section id="purchases" className="space-y-4 scroll-mt-24">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <ShoppingBag className="h-5 w-5 text-[#159895]" /> Content purchases
+          </h2>
+          <PurchaseHistoryList
+            purchases={purchases}
+            loading={purchasesLoading}
+            error={purchasesError}
+          />
+        </section>
+
+        <section id="coins" className="space-y-4 scroll-mt-24">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <GamanaCoinIcon className="h-5 w-5 text-[#159895]" /> Coin purchases
+          </h2>
+          <CoinPurchaseHistoryList
+            entries={coinPurchases}
+            loading={coinPurchasesLoading}
+            error={coinPurchasesError}
+          />
+        </section>
+
         <section id="personalization" className="space-y-4 scroll-mt-24">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-[#159895]" /> Personalization
           </h2>
           <PersonalizationEditor />
-        </section>
-
-        {/* Bookings */}
-        <section id="bookings" className="space-y-4 scroll-mt-24">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5 text-[#159895]" /> My bookings
-          </h2>
-          <div className="rounded-2xl border border-gray-200 divide-y divide-gray-100">
-            {orders.length === 0 ? (
-              <p className="p-5 text-sm text-gray-500">No bookings yet, your Tours, Combos, and Experiences will show up here.</p>
-            ) : (
-              orders.map((order) => {
-                const meta = orderMeta[order.kind] ?? orderMeta.mixed;
-                const Icon = meta.icon;
-                return (
-                  <div key={order.id} className="p-5 flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <Icon className="h-4 w-4 text-[#159895] mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">{order.id}</p>
-                        <p className="text-xs text-gray-500">
-                          {order.items.map((i) => `${i.title}${i.quantity > 1 ? ` ×${i.quantity}` : ""}`).join(", ")}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {new Date(order.placedAt).toLocaleDateString()} · {meta.label}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-sm font-semibold text-gray-900 shrink-0">
-                      {meta.coinsDenominated ? `${order.total} Coins` : `$${order.total.toFixed(2)}`}
-                    </p>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </section>
-
-        {/* Payment methods */}
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-[#159895]" /> Payment methods
-          </h2>
-          <div className="rounded-2xl border border-gray-200 p-5 space-y-3">
-            <div className="flex items-center justify-between rounded-xl bg-amber-50 border border-amber-100 px-4 py-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-amber-800">
-                <GamanaCoinIcon className="h-4 w-4" aria-hidden /> Gamana Coins balance
-              </div>
-              <p className="text-sm font-bold text-amber-800">{coinBalance.toLocaleString()} Coins</p>
-            </div>
-            <p className="text-xs text-gray-500">
-              Buy more Coins from the marketplace, that&apos;s the only way real currency
-              converts into Coins. Spending Coins to unlock a Tour or Combo happens instantly
-              from the catalog, no separate checkout.
-            </p>
-            <p className="text-sm text-gray-500">
-              No card or UPI details are stored here yet. Real payment methods for Experiences
-              (Credit Card / RazorPay) will be manageable from this page once payment
-              processing is wired up.
-            </p>
-          </div>
         </section>
 
         <section className="pt-4 border-t border-gray-100">

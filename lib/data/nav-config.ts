@@ -13,19 +13,16 @@ export const featureItems = [
   { name: "Local Languages", href: "/features/local-languages" },
 ] as const;
 
-// Contact intentionally isn't a top-level tab — it's a transactional, task-focused page
-// (form + support details), not a browsing destination, so it doesn't need the same
-// nav real estate as Cities/Explore/Blog. It's still one click away via the footer
-// (footerCompanyLinks below) and reachable from inline CTAs elsewhere on the site.
 // Order here is the explicit sitewide nav order: Home, Explore, Blog, Partner with
-// Gamana, Cities, [Features dropdown — inserted in site-header.tsx, not part of this
-// array]. About lives in the footer only for now.
+// Gamana, Cities, Pricing, Contact — Features dropdown is inserted in site-header.tsx.
 export const primaryNavItems = [
   { name: "Home", href: "/" },
   { name: "Explore", href: "/explore" },
   { name: "Blog", href: "/blog" },
   { name: "Partner with Gamana", href: "/ecosystem" },
   { name: "Cities", href: "/cities" },
+  { name: "Pricing", href: "/pricing" },
+  { name: "Contact", href: "/contact" },
 ] as const;
 
 export const footerCompanyLinks = [

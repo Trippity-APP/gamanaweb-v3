@@ -68,8 +68,8 @@ export default function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
       isActive(href) && "text-[#159895] font-semibold"
     );
 
-  // primaryNavItems order: Home, Explore, Blog, Partner with Gamana, Cities — Features
-  // dropdown is inserted in site-header.tsx after Cities.
+  // primaryNavItems order: Home, Explore, Blog, Partner with Gamana, Cities, Pricing,
+  // Contact — Features dropdown is inserted in site-header.tsx after Cities.
 
   return (
     <>
@@ -249,8 +249,11 @@ function MobileDrawer({
                 <Link href="/account" onClick={onClose} className={itemClass}>
                   Profile & settings
                 </Link>
-                <Link href="/account#bookings" onClick={onClose} className={itemClass}>
-                  My bookings
+                <Link href="/account#purchases" onClick={onClose} className={itemClass}>
+                  Content purchases
+                </Link>
+                <Link href="/account#coins" onClick={onClose} className={itemClass}>
+                  Coin purchases
                 </Link>
                 <button
                   type="button"

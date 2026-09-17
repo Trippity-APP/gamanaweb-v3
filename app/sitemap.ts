@@ -40,10 +40,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/subscription`,
+      url: `${baseUrl}/pricing`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
-      priority: 0.8,
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/ecosystem`,
