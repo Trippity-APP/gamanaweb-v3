@@ -1,18 +1,16 @@
-import { Metadata } from "next";
-import Footer from "@/components/navigation/footer";
-import EcosystemPageContent from "./page-content";
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: "Cultural Tourism Ecosystem for Travel Partners",
-  description: "Join Gamana's cultural tourism ecosystem spanning heritage, creative, festival, and indigenous tourism. Connect with travelers in the $13.25B market growing at 14.57% CAGR.",
+  title: 'Audio Tours & Travel Experiences Marketplace',
+  description: 'Explore curated audio tours and audio guides, self-guided travel experiences, and storytelling journeys worldwide. Discover immersive stories on Gamana.',
   alternates: {
-    canonical: 'https://www.gamana.app/ecosystem',
+    canonical: 'https://www.gamana.app/marketplace',
   },
   openGraph: {
-    title: "Cultural Tourism Ecosystem & Travel Network | Gamana",
-    description: "Join Gamana's cultural tourism ecosystem spanning heritage, creative, festival, and indigenous tourism. Connect with travelers in the $13.25B market growing at 14.57% CAGR.",
-    url: 'https://www.gamana.app/ecosystem',
+    title: 'Audio Tours & Travel Experiences Marketplace | Gamana',
+    description: 'Explore curated audio tours and audio guides, self-guided travel experiences, and storytelling journeys worldwide. Discover immersive stories on Gamana.',
+    url: 'https://www.gamana.app/marketplace',
     siteName: 'Gamana',
     type: 'website',
     images: [
@@ -26,13 +24,17 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Cultural Tourism Ecosystem & Travel Network | Gamana",
-    description: "Join Gamana's cultural tourism ecosystem spanning heritage, creative, festival, and indigenous tourism. Connect with travelers in the $13.25B market growing at 14.57% CAGR.",
+    title: 'Audio Tours & Travel Experiences Marketplace | Gamana',
+    description: 'Explore curated audio tours and audio guides, self-guided travel experiences, and storytelling journeys worldwide. Discover immersive stories on Gamana.',
     images: ['/gamana-logo.svg'],
   },
 };
 
-export default function EcosystemPage() {
+export default function MarketplaceLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <>
       <script
@@ -57,8 +59,7 @@ export default function EcosystemPage() {
           })
         }}
       />
-      <EcosystemPageContent />
-      <Footer />
+      {children}
     </>
   );
 }

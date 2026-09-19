@@ -5,13 +5,13 @@ import EnhancedPageLayout from '@/components/enhanced-page-layout';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
   title: 'Discounts & Offers on Travel Tours',
-  description: 'Member discounts on audio tours and partner deals at restaurants, shops, and attractions. Save while you explore with Gamana.',
+  description: 'Discover exclusive discounts, offers, and deals on immersive audio travel experiences. Save more while exploring unforgettable destinations with Gamana.',
   alternates: {
     canonical: 'https://www.gamana.app/features/discounts-offers',
   },
   openGraph: {
     title: 'Discounts & Offers on Travel Tours | Gamana',
-    description: 'Member discounts on audio tours and partner deals at restaurants, shops, and attractions. Save while you explore with Gamana.',
+    description: 'Discover exclusive discounts, offers, and deals on immersive audio travel experiences. Save more while exploring unforgettable destinations with Gamana.',
     url: 'https://www.gamana.app/features/discounts-offers',
     siteName: 'Gamana',
     type: 'website',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Discounts & Offers on Travel Tours | Gamana',
-    description: 'Member discounts on audio tours and partner deals at restaurants, shops, and attractions. Save while you explore with Gamana.',
+    description: 'Discover exclusive discounts, offers, and deals on immersive audio travel experiences. Save more while exploring unforgettable destinations with Gamana.',
     images: ['/gamana-logo.svg'],
   },
 };

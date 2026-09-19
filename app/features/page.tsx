@@ -19,7 +19,7 @@ import { HeroSlideshow } from "@/components/HeroSlideshow";
 
 export const metadata: Metadata = {
   title: "Features",
-  description: "Discover Gamana's core features: story-rich audio, hands-free walking tours, narrator guides, Gamana Coins, user-generated tours, and multi-language support.",
+  description: "Discover Gamana's premium features: AI-powered narrators, handcrafted audio stories, location-aware tours, offline access, and expertly researched content for immersive travel experiences.",
   alternates: {
     canonical: 'https://www.gamana.app/features',
   },

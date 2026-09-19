@@ -6,13 +6,13 @@ import { GamanaCoinIcon } from '@/components/GamanaCoinIcon';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
   title: 'Gamana Coins Rewards & Benefits',
-  description: 'Earn and redeem Gamana Coins for discounts, upgrades, and discounts and perks on tours. Get more value from every self-guided audio tour on Gamana.',
+  description: 'Earn and redeem Gamana Coins for discounts, upgrades, and exclusive travel perks. Get more value from every self-guided audio tour on Gamana.',
   alternates: {
     canonical: 'https://www.gamana.app/features/gamana-coins',
   },
   openGraph: {
     title: 'Gamana Coins Rewards & Benefits | Gamana',
-    description: 'Earn and redeem Gamana Coins for discounts, upgrades, and discounts and perks on tours. Get more value from every self-guided audio tour on Gamana.',
+    description: 'Earn and redeem Gamana Coins for discounts, upgrades, and exclusive travel perks. Get more value from every self-guided audio tour on Gamana.',
     url: 'https://www.gamana.app/features/gamana-coins',
     siteName: 'Gamana',
     type: 'website',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Gamana Coins Rewards & Benefits | Gamana',
-    description: 'Earn and redeem Gamana Coins for discounts, upgrades, and discounts and perks on tours. Get more value from every self-guided audio tour on Gamana.',
+    description: 'Earn and redeem Gamana Coins for discounts, upgrades, and exclusive travel perks. Get more value from every self-guided audio tour on Gamana.',
     images: ['/gamana-logo.svg'],
   },
 };

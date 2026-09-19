@@ -4,14 +4,14 @@ import EnhancedPageLayout from '@/components/enhanced-page-layout';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'Hands-Free Audio Tours',
-  description: 'Hands-free audio tours with GPS-triggered stories and sound that match where you are standing. Walk, listen, and stay present with Gamana.',
+  title: 'Truly Immersive Travel Experiences',
+  description: 'Step into truly immersive travel experiences with rich soundscapes, storytelling, and atmosphere that make every destination feel alive with Gamana.',
   alternates: {
     canonical: 'https://www.gamana.app/features/truly-immersive',
   },
   openGraph: {
-    title: 'Hands-Free Audio Tours | Gamana',
-    description: 'Hands-free audio tours with GPS-triggered stories and sound that match where you are standing. Walk, listen, and stay present with Gamana.',
+    title: 'Truly Immersive Travel Experiences | Gamana',
+    description: 'Step into truly immersive travel experiences with rich soundscapes, storytelling, and atmosphere that make every destination feel alive with Gamana.',
     url: 'https://www.gamana.app/features/truly-immersive',
     siteName: 'Gamana',
     type: 'website',
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Hands-Free Audio Tours | Gamana',
-    description: 'Hands-free audio tours with GPS-triggered stories and sound that match where you are standing. Walk, listen, and stay present with Gamana.',
+    title: 'Truly Immersive Travel Experiences | Gamana',
+    description: 'Step into truly immersive travel experiences with rich soundscapes, storytelling, and atmosphere that make every destination feel alive with Gamana.',
     images: ['/gamana-logo.svg'],
   },
 };

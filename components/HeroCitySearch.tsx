@@ -5,7 +5,7 @@ import type { Tour } from "@/lib/marketplace-data";
 
 /**
  * Home page hero search — same unified UI as Explore, but navigates directly to
- * story/walk detail pages (or /explore?q= for city-only searches).
+ * story/walk detail pages (or /marketplace?q= for city-only searches).
  */
 export function HeroCitySearch({ catalog = [] }: { catalog?: Tour[] }) {
   return (

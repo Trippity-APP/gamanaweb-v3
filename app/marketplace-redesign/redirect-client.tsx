@@ -9,7 +9,7 @@ export default function MarketplaceRedesignRedirectPage() {
 
   useEffect(() => {
     const query = searchParams.toString();
-    router.replace(query ? `/explore?${query}` : "/explore");
+    router.replace(query ? `/marketplace?${query}` : "/marketplace");
   }, [router, searchParams]);
 
   return (

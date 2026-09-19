@@ -412,5 +412,5 @@ export function clearPublicPlacesCache(): void {
 }
 
 export function getStoryHref(story: Pick<Tour, "id">): string {
-  return `/explore/story/${story.id}`;
+  return `/marketplace/story/${story.id}`;
 }

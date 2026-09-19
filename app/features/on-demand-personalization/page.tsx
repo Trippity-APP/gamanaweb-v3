@@ -4,14 +4,14 @@ import EnhancedPageLayout from '@/components/enhanced-page-layout';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'On-Demand Personalization for Every Journey',
-  description: 'On-demand personalization tailors stories and experiences to your interests, pace, and style for tours that match how you like to travel.',
+  title: 'On-Demand Personalization with Travel AI',
+  description: 'On-demand personalization powered by Travel AI tailors stories and experiences to your interests, pace, and style for smarter, more meaningful journeys.',
   alternates: {
     canonical: 'https://www.gamana.app/features/on-demand-personalization',
   },
   openGraph: {
-    title: 'On-Demand Personalization for Every Journey | Gamana',
-    description: 'On-demand personalization tailors stories and experiences to your interests, pace, and style for tours that match how you like to travel.',
+    title: 'On-Demand Personalization with Travel AI | Gamana',
+    description: 'On-demand personalization powered by Travel AI tailors stories and experiences to your interests, pace, and style for smarter, more meaningful journeys.',
     url: 'https://www.gamana.app/features/on-demand-personalization',
     siteName: 'Gamana',
     type: 'website',
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'On-Demand Personalization for Every Journey | Gamana',
-    description: 'On-demand personalization tailors stories and experiences to your interests, pace, and style for tours that match how you like to travel.',
+    title: 'On-Demand Personalization with Travel AI | Gamana',
+    description: 'On-demand personalization powered by Travel AI tailors stories and experiences to your interests, pace, and style for smarter, more meaningful journeys.',
     images: ['/gamana-logo.svg'],
   },
 };

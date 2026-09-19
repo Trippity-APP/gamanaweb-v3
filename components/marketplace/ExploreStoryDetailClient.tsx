@@ -12,7 +12,7 @@ import { isStaticSpaParam } from '@/lib/static-spa';
 function resolveStoryId(paramId: string): string {
   if (!isStaticSpaParam(paramId)) return paramId;
   if (typeof window === 'undefined') return paramId;
-  const match = window.location.pathname.match(/\/explore\/story\/([^/]+)/);
+  const match = window.location.pathname.match(/\/(?:explore|marketplace)\/story\/([^/]+)/);
   return match?.[1] ?? paramId;
 }
 
