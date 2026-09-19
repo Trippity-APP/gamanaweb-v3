@@ -195,13 +195,13 @@ export default function HomeClient({ latestStories, catalog = [] }: HomeClientPr
 
             {/* Travel-themed decorative icons */}
             <div className="absolute top-32 left-[15%] opacity-20 animate-float" style={{animationDelay: '0s'}}>
-              <Image src="/Picture9 copy copy.png" alt="" width={80} height={80} className="drop-shadow-lg" />
+              <Image src="/picture-9.png" alt="" width={80} height={80} className="drop-shadow-lg" />
             </div>
             <div className="absolute bottom-32 left-[10%] opacity-20 animate-float" style={{animationDelay: '2s'}}>
-              <Image src="/Picture8 copy copy.png" alt="" width={70} height={70} className="drop-shadow-lg" />
+              <Image src="/picture-8.png" alt="" width={70} height={70} className="drop-shadow-lg" />
             </div>
             <div className="absolute top-40 right-[12%] opacity-20 animate-float" style={{animationDelay: '1s'}}>
-              <Image src="/Picture6 copy.png" alt="" width={60} height={60} className="drop-shadow-lg" />
+              <Image src="/picture-6.png" alt="" width={60} height={60} className="drop-shadow-lg" />
             </div>
             <div className="absolute bottom-40 right-[18%] opacity-20 animate-float" style={{animationDelay: '3s'}}>
               <Image src="/Picture7.png" alt="" width={50} height={50} className="drop-shadow-lg" />
@@ -706,7 +706,7 @@ export default function HomeClient({ latestStories, catalog = [] }: HomeClientPr
               <div className="group relative bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col">
                 <div className="relative h-56 overflow-hidden">
                   <Image
-                    src="/chapora-fort-self-guided-tour-explore-goas-iconic-sunset-fort.jpg"
+                    src="/anjuna-beach-self-guided-tour-best-way-to-explore-north-goa.jpg"
                     alt="South Goa Taxi Tour with Expert Tourist Guide"
                     title="South Goa Taxi Tour – Tourist Guide Experience"
                     width={400}

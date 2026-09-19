@@ -32,7 +32,7 @@ export const Hero = () => {
                 <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-white/50 rounded-full blur-3xl"></div>
             </div>
 
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-24 pb-24 sm:pb-28">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-8 pb-16">
                 <div className="max-w-5xl mx-auto text-center space-y-8">
                     <div className="space-y-4">
                         <div className="animate-fade-in pb-2">

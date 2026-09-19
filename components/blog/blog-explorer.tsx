@@ -168,7 +168,7 @@ const BlogExplorer = ({ posts: initialPosts = [], highlightSlug }: Props) => {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-[#E0F7F4]">
-      <section className="relative h-[62vh] sm:h-[68vh] flex items-center justify-center text-white overflow-hidden">
+      <section className="relative h-[62vh] sm:h-[68vh] flex flex-col text-white overflow-hidden">
         {/* Same amber-into-brand-teal family as Partner with Gamana (not the plum-rose
             attempt, which didn't land), warm gold lean, lower opacity so the photo reads
             clearly. Photo swapped to one that actually shows a traveler in the scene
@@ -194,7 +194,7 @@ const BlogExplorer = ({ posts: initialPosts = [], highlightSlug }: Props) => {
           <div className="absolute bottom-20 right-0 w-[520px] h-[520px] bg-white/70 rounded-full blur-[160px]" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-72 h-72 bg-white/40 rounded-full blur-3xl" />
         </div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-24 pb-24 sm:pb-28">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex-1 flex flex-col justify-start pt-28 pb-16">
           <div className="max-w-5xl mx-auto text-center space-y-10">
             <div className="inline-flex items-center gap-2 bg-white/15 px-5 py-2 rounded-full text-sm font-semibold tracking-widest uppercase opacity-0 animate-fade-in">
               <Library className="h-4 w-4" />

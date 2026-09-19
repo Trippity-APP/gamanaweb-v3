@@ -128,7 +128,7 @@ export default function FeaturesPage() {
   return (
     <>
       <main className="min-h-screen">
-        <section className="relative h-[62vh] sm:h-[68vh] flex items-center overflow-hidden">
+        <section className="relative h-[62vh] sm:h-[68vh] flex flex-col overflow-hidden">
           {/* Photo behind the brand gradient, matching the treatment on /marketplace-redesign,
               /cities, /ecosystem, /about, and /contact. */}
           <div className="absolute inset-0">
@@ -146,7 +146,7 @@ export default function FeaturesPage() {
 
           <HeroHeader transparent={true} />
 
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-24 pb-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex-1 flex flex-col justify-start pt-28 pb-16">
             <div className="max-w-4xl mx-auto text-center space-y-6">
               <div className="inline-block w-fit">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight mb-2 animate-fade-in">

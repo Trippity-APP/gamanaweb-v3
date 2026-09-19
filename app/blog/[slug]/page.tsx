@@ -33,27 +33,36 @@ export async function generateMetadata({ params }: { params: Params }) {
     return {
       title: { absolute: "Story | Gamana Blog" },
       description: "Travel stories and guides from Gamana.",
+      robots: { index: false, follow: true },
     };
   }
 
   try {
     const post = await getPostBySlug(slug);
     const absoluteTitle = `${post.title} | Gamana Blog`;
+    const canonical = `https://www.gamana.app/blog/${slug}`;
+    const coverImage = encodeURI(post.coverImage);
     return {
       title: { absolute: absoluteTitle },
       description: post.excerpt,
       alternates: {
-        canonical: `https://www.gamana.app/blog/${slug}`,
+        canonical,
       },
       openGraph: {
         title: post.title,
         description: post.excerpt,
-        url: `https://www.gamana.app/blog/${slug}`,
+        url: canonical,
         images: [
           {
-            url: encodeURI(post.coverImage),
+            url: coverImage,
           },
         ],
+      },
+      twitter: {
+        card: "summary_large_image" as const,
+        title: post.title,
+        description: post.excerpt,
+        images: [coverImage],
       },
     };
   } catch {
@@ -62,6 +71,7 @@ export async function generateMetadata({ params }: { params: Params }) {
       alternates: {
         canonical: "https://www.gamana.app/blog",
       },
+      robots: { index: false, follow: true },
     };
   }
 }
