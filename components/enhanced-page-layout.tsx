@@ -70,7 +70,7 @@ export default function EnhancedPageLayout({
   return (
     <>
       <main className="min-h-screen">
-        <section className="relative h-[62vh] sm:h-[68vh] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[62vh] sm:h-[68vh] flex flex-col overflow-hidden">
           <div className="absolute inset-0">
             <HeroSlideshow images={photos} />
             <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-25`}></div>
@@ -85,7 +85,7 @@ export default function EnhancedPageLayout({
             <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-white/50 rounded-full blur-3xl"></div>
           </div>
 
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-24 pb-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex-1 flex flex-col justify-start pt-28 pb-16">
             <div className="max-w-5xl mx-auto text-center space-y-8">
               <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-white/20 backdrop-blur-md mb-4 shadow-2xl opacity-0 animate-fade-in">
                 <Icon className="h-12 w-12 text-white" />

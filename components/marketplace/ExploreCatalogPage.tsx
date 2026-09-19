@@ -35,7 +35,7 @@ export async function ExploreCatalogPage() {
           <div className="absolute inset-0 bg-black/20" />
         </div>
         <HeroHeader transparent={true} />
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-24 sm:pt-32 sm:pb-28 flex-1 flex flex-col justify-center">
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 sm:pt-32 sm:pb-20 flex-1 flex flex-col justify-start">
           <div className="max-w-5xl mx-auto text-center space-y-4">
             <div className="animate-fade-in">
               <HeroEyebrow icon={Compass} label="Explore your World" />

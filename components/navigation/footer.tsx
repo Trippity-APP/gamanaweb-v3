@@ -35,12 +35,14 @@ export default function Footer() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           <div className="space-y-4">
-            <img
-              src="/gamana-logo.svg"
-              alt="Gamana Logo"
-              title="Gamana Logo"
-              className="h-8 w-auto brightness-0 invert"
-            />
+            <Link href="/" className="inline-block" aria-label="Gamana home">
+              <img
+                src="/gamana-logo.svg"
+                alt="Gamana Logo"
+                title="Gamana Logo"
+                className="h-8 w-auto brightness-0 invert"
+              />
+            </Link>
             <p className="text-sm leading-relaxed text-gray-400">
               Walk with audio tours that work offline, tell you what you're looking at, and don't need you to stare at your phone.
             </p>

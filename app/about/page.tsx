@@ -72,7 +72,7 @@ export default function AboutPage() {
     <>
       <main>
         {/* Hero Section */}
-        <section className="relative h-[62vh] sm:h-[68vh] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[62vh] sm:h-[68vh] flex flex-col overflow-hidden">
           {/* Founder-team-in-the-field photo behind the brand gradient, matching the treatment
               on /marketplace-redesign, /cities, and /ecosystem, a flat gradient read as
               inconsistent with the rest of the site. */}
@@ -98,7 +98,7 @@ export default function AboutPage() {
             <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-white/50 rounded-full blur-3xl"></div>
           </div>
 
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-24 pb-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex-1 flex flex-col justify-start pt-28 pb-16">
             {/* The name origin now *is* the hero — a generic "About Us" label said nothing
                 a visitor couldn't infer from the nav, whereas the meaning of the name earns
                 the space and sets up everything below it. */}

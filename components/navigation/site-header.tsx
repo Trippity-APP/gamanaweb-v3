@@ -82,15 +82,12 @@ export default function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
         )}
       >
         <div className="container mx-auto flex h-16 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-          {/* Logo intentionally links to Explore, not Home — the "Home" nav item still
-              covers the brand landing page for anyone who wants it. Routed through
-              resolveNavHref so it lands on the same page the "Explore" nav item does
-              (the personalized variant when signed in); otherwise clicking the logo
-              dropped signed-in visitors on the generic page while nav pointed elsewhere. */}
+          {/* Logo links to the marketing homepage. */}
           <Link
-            href={resolveNavHref({ name: "Explore", href: "/marketplace" })}
+            href="/"
             className="shrink-0 flex items-center"
             onClick={closeMenu}
+            aria-label="Gamana home"
           >
             <img
               src="/gamana-logo.svg"
@@ -207,7 +204,9 @@ function MobileDrawer({
       >
         <div className="flex flex-col h-full p-6">
           <div className="flex justify-between items-center mb-6">
-            <img src="/gamana-logo.svg" alt="Gamana" className="h-8" />
+            <Link href="/" onClick={onClose} className="shrink-0" aria-label="Gamana home">
+              <img src="/gamana-logo.svg" alt="Gamana" className="h-8" />
+            </Link>
             <button type="button" onClick={onClose} aria-label="Close menu">
               <X className="h-6 w-6" />
             </button>
