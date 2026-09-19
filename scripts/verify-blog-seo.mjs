@@ -4,8 +4,8 @@
  * correct trailing-slash canonical. Catches SPA-only exports where every
  * /blog/:slug would be rewritten to __spa__ (noindex / wrong meta).
  */
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
 const OUT = path.join(process.cwd(), "out", "blog");
 const SKIP = new Set(["__spa__", "_next"]);
