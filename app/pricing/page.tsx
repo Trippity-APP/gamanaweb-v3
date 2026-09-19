@@ -10,13 +10,13 @@ export const metadata: Metadata = {
   description:
     "Buy Gamana Coins in INR or USD: 2, 10, 15, or 25 coins. Unlock premium audio stories and walks. Larger volumes are Enterprise — contact us.",
   alternates: {
-    canonical: "https://www.gamana.app/pricing",
+    canonical: "https://www.gamana.app/pricing/",
   },
   openGraph: {
     title: "Gamana Coins Pricing | Gamana",
     description:
       "Pay once. Hear the city as you walk. Packs from 2 to 25 coins. India sees INR; everyone else sees USD. Need more than 25? Talk to us about Enterprise.",
-    url: "https://www.gamana.app/pricing",
+    url: "https://www.gamana.app/pricing/",
     siteName: "Gamana",
     type: "website",
     images: [

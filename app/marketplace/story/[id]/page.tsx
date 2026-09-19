@@ -48,9 +48,13 @@ export async function generateMetadata({
   return {
     title: `${story.title} | Gamana`,
     description: story.subtitle ?? story.description,
+    alternates: {
+      canonical: `https://www.gamana.app/marketplace/story/${id}/`,
+    },
     openGraph: {
       title: `${story.title} | Audio Story`,
       description: story.subtitle ?? story.description,
+      url: `https://www.gamana.app/marketplace/story/${id}/`,
       images: story.image ? [{ url: story.image }] : undefined,
     },
   };

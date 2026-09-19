@@ -10,8 +10,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.gamana.app';
   const currentDate = new Date();
 
-  // Get all blog posts dynamically
-  const blogPosts = await getAllPosts();
+  // Get all blog posts dynamically (empty list if CMS unreachable at build)
+  let blogPosts: Awaited<ReturnType<typeof getAllPosts>> = [];
+  try {
+    blogPosts = await getAllPosts();
+  } catch {
+    blogPosts = [];
+  }
 
   // Define priority and change frequency for different page types
   const staticRoutes = [
@@ -22,135 +27,135 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/about`,
+      url: `${baseUrl}/about/`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/contact`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/marketplace`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/pricing`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/subscription`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/ecosystem`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/faq`,
+      url: `${baseUrl}/contact/`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/cities`,
+      url: `${baseUrl}/marketplace/`,
       lastModified: currentDate,
       changeFrequency: 'weekly' as const,
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/all-cities`,
+      url: `${baseUrl}/pricing/`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/subscription/`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/ecosystem/`,
       lastModified: currentDate,
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/blog`,
+      url: `${baseUrl}/faq/`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/cities/`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/all-cities/`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/blog/`,
       lastModified: currentDate,
       changeFrequency: 'weekly' as const,
       priority: 0.9,
     },
     // Features pages
     {
-      url: `${baseUrl}/features`,
+      url: `${baseUrl}/features/`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/features/exquisite-storytelling`,
+      url: `${baseUrl}/features/exquisite-storytelling/`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/features/on-demand-personalization`,
+      url: `${baseUrl}/features/on-demand-personalization/`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/features/truly-immersive`,
+      url: `${baseUrl}/features/truly-immersive/`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/features/virtual-travel-guides`,
+      url: `${baseUrl}/features/virtual-travel-guides/`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/features/gamana-coins`,
+      url: `${baseUrl}/features/gamana-coins/`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/features/discounts-offers`,
+      url: `${baseUrl}/features/discounts-offers/`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/features/user-generated-tours`,
+      url: `${baseUrl}/features/user-generated-tours/`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/features/local-languages`,
+      url: `${baseUrl}/features/local-languages/`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     // Legal pages
     {
-      url: `${baseUrl}/privacy-policy`,
+      url: `${baseUrl}/privacy-policy/`,
       lastModified: currentDate,
       changeFrequency: 'yearly' as const,
       priority: 0.3,
     },
     {
-      url: `${baseUrl}/terms-of-service`,
+      url: `${baseUrl}/terms-of-service/`,
       lastModified: currentDate,
       changeFrequency: 'yearly' as const,
       priority: 0.3,
     },
     {
-      url: `${baseUrl}/cookie-policy`,
+      url: `${baseUrl}/cookie-policy/`,
       lastModified: currentDate,
       changeFrequency: 'yearly' as const,
       priority: 0.3,
@@ -159,7 +164,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Dynamically generate blog post routes
   const blogRoutes = blogPosts.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
+    url: `${baseUrl}/blog/${post.slug}/`,
     lastModified: new Date(post.date),
     changeFrequency: 'monthly' as const,
     priority: 0.7,

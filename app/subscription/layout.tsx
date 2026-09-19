@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'Subscription Plans & Pricing',
   description: 'Choose the Gamana subscription plan that fits your journey and enjoy offline access, premium audio tours, and exclusive travel features.',
   alternates: {
-    canonical: 'https://www.gamana.app/subscription',
+    canonical: 'https://www.gamana.app/subscription/',
   },
   openGraph: {
     title: 'Subscription Plans & Pricing | Gamana',
     description: 'Choose the Gamana subscription plan that fits your journey and enjoy offline access, premium audio tours, and exclusive travel features.',
-    url: 'https://www.gamana.app/subscription',
+    url: 'https://www.gamana.app/subscription/',
     siteName: 'Gamana',
     type: 'website',
   },

@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: 'Exquisite Storytelling: Immersive Audio Guides',
   description: 'Experience exquisite storytelling through immersive audio guides and travel stories. Discover culture, history, and hidden insights with Gamana.',
   alternates: {
-    canonical: 'https://www.gamana.app/features/exquisite-storytelling',
+    canonical: 'https://www.gamana.app/features/exquisite-storytelling/',
   },
   openGraph: {
     title: 'Exquisite Storytelling: Immersive Audio Guides | Gamana',
     description: 'Experience exquisite storytelling through immersive audio guides and travel stories. Discover culture, history, and hidden insights with Gamana.',
-    url: 'https://www.gamana.app/features/exquisite-storytelling',
+    url: 'https://www.gamana.app/features/exquisite-storytelling/',
     siteName: 'Gamana',
     type: 'website',
     images: [

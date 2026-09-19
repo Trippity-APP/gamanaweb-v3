@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'About',
   description: 'Learn about Gamana, the AI-powered travel app offering immersive, hands-free audio tours that make every journey engaging and memorable.',
   alternates: {
-    canonical: 'https://www.gamana.app/about',
+    canonical: 'https://www.gamana.app/about/',
   },
   openGraph: {
     title: 'About | Gamana',
     description: 'Discover Gamana, the AI-driven travel app offering hands-free audio tours and immersive cultural experiences for every journey.',
-    url: 'https://www.gamana.app/about',
+    url: 'https://www.gamana.app/about/',
     siteName: 'Gamana',
     type: 'website',
   },

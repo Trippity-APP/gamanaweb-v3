@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: 'Truly Immersive Travel Experiences',
   description: 'Step into truly immersive travel experiences with rich soundscapes, storytelling, and atmosphere that make every destination feel alive with Gamana.',
   alternates: {
-    canonical: 'https://www.gamana.app/features/truly-immersive',
+    canonical: 'https://www.gamana.app/features/truly-immersive/',
   },
   openGraph: {
     title: 'Truly Immersive Travel Experiences | Gamana',
     description: 'Step into truly immersive travel experiences with rich soundscapes, storytelling, and atmosphere that make every destination feel alive with Gamana.',
-    url: 'https://www.gamana.app/features/truly-immersive',
+    url: 'https://www.gamana.app/features/truly-immersive/',
     siteName: 'Gamana',
     type: 'website',
     images: [

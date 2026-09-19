@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: "Cultural Tourism Ecosystem for Travel Partners",
   description: "Join Gamana's cultural tourism ecosystem spanning heritage, creative, festival, and indigenous tourism. Connect with travelers in the $13.25B market growing at 14.57% CAGR.",
   alternates: {
-    canonical: 'https://www.gamana.app/ecosystem',
+    canonical: 'https://www.gamana.app/ecosystem/',
   },
   openGraph: {
     title: "Cultural Tourism Ecosystem & Travel Network | Gamana",
     description: "Join Gamana's cultural tourism ecosystem spanning heritage, creative, festival, and indigenous tourism. Connect with travelers in the $13.25B market growing at 14.57% CAGR.",
-    url: 'https://www.gamana.app/ecosystem',
+    url: 'https://www.gamana.app/ecosystem/',
     siteName: 'Gamana',
     type: 'website',
     images: [

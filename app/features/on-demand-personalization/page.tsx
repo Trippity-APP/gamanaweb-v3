@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: 'On-Demand Personalization with Travel AI',
   description: 'On-demand personalization powered by Travel AI tailors stories and experiences to your interests, pace, and style for smarter, more meaningful journeys.',
   alternates: {
-    canonical: 'https://www.gamana.app/features/on-demand-personalization',
+    canonical: 'https://www.gamana.app/features/on-demand-personalization/',
   },
   openGraph: {
     title: 'On-Demand Personalization with Travel AI | Gamana',
     description: 'On-demand personalization powered by Travel AI tailors stories and experiences to your interests, pace, and style for smarter, more meaningful journeys.',
-    url: 'https://www.gamana.app/features/on-demand-personalization',
+    url: 'https://www.gamana.app/features/on-demand-personalization/',
     siteName: 'Gamana',
     type: 'website',
     images: [

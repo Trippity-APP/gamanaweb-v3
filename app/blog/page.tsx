@@ -8,13 +8,13 @@ export const metadata: Metadata = {
   description:
     "Explore travel insights, stories, and ideas from Gamana. Discover fresh perspectives on exploring places, user experiences, and the future of smart travel.",
   alternates: {
-    canonical: "https://www.gamana.app/blog",
+    canonical: "https://www.gamana.app/blog/",
   },
   openGraph: {
     title: "Blog | Gamana",
     description:
       "Explore travel insights, stories, and ideas from Gamana. Discover fresh perspectives on exploring places, user experiences, and the future of smart travel.",
-    url: "https://www.gamana.app/blog",
+    url: "https://www.gamana.app/blog/",
     siteName: "Gamana",
     type: "website",
   },

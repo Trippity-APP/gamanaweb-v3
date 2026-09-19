@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'Cities Covered by Gamana – Your AI Audio Travel Guide',
   description: 'Explore cities through immersive, location-aware audio stories. No reading. No planning. Just walk and listen. Check our coverage of 50+ cities and 700+ audio stories worldwide.',
   alternates: {
-    canonical: 'https://www.gamana.app/cities',
+    canonical: 'https://www.gamana.app/cities/',
   },
   openGraph: {
     title: 'Cities Covered by Gamana | AI Audio Travel Guide',
     description: 'Explore cities through immersive, location-aware audio stories. No reading. No planning. Just walk and listen. Check our coverage of 50+ cities and 700+ audio stories worldwide.',
-    url: 'https://www.gamana.app/cities',
+    url: 'https://www.gamana.app/cities/',
     siteName: 'Gamana',
     type: 'website',
   },

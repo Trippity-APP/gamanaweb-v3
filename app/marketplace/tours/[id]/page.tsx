@@ -56,9 +56,13 @@ export async function generateMetadata({
   return {
     title: `${tour.title} | Gamana`,
     description: tour.description,
+    alternates: {
+      canonical: `https://www.gamana.app/marketplace/tours/${id}/`,
+    },
     openGraph: {
       title: tour.title,
       description: tour.description,
+      url: `https://www.gamana.app/marketplace/tours/${id}/`,
       images: tour.image ? [{ url: tour.image }] : undefined,
     },
   };

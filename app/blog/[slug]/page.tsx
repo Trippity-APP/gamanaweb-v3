@@ -34,13 +34,15 @@ export async function generateMetadata({ params }: { params: Params }) {
       title: { absolute: "Story | Gamana Blog" },
       description: "Travel stories and guides from Gamana.",
       robots: { index: false, follow: true },
+      // Prevent inheriting the homepage canonical onto the SPA fallback shell.
+      alternates: { canonical: null },
     };
   }
 
   try {
     const post = await getPostBySlug(slug);
     const absoluteTitle = `${post.title} | Gamana Blog`;
-    const canonical = `https://www.gamana.app/blog/${slug}`;
+    const canonical = `https://www.gamana.app/blog/${slug}/`;
     const coverImage = encodeURI(post.coverImage);
     return {
       title: { absolute: absoluteTitle },
@@ -69,7 +71,7 @@ export async function generateMetadata({ params }: { params: Params }) {
     return {
       title: { absolute: "Story not found | Gamana Blog" },
       alternates: {
-        canonical: "https://www.gamana.app/blog",
+        canonical: "https://www.gamana.app/blog/",
       },
       robots: { index: false, follow: true },
     };

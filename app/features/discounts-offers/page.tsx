@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: 'Discounts & Offers on Travel Tours',
   description: 'Discover exclusive discounts, offers, and deals on immersive audio travel experiences. Save more while exploring unforgettable destinations with Gamana.',
   alternates: {
-    canonical: 'https://www.gamana.app/features/discounts-offers',
+    canonical: 'https://www.gamana.app/features/discounts-offers/',
   },
   openGraph: {
     title: 'Discounts & Offers on Travel Tours | Gamana',
     description: 'Discover exclusive discounts, offers, and deals on immersive audio travel experiences. Save more while exploring unforgettable destinations with Gamana.',
-    url: 'https://www.gamana.app/features/discounts-offers',
+    url: 'https://www.gamana.app/features/discounts-offers/',
     siteName: 'Gamana',
     type: 'website',
     images: [
