@@ -27,9 +27,10 @@ export async function generateStaticParams() {
 
   console.log(`[blog] generateStaticParams: ${params.length} posts`);
 
-  // SPA shell used by scripts/serve-out.mjs when a slug was published after
-  // this build (static HTML missing). Built posts are served as real HTML so
-  // view-source keeps the correct canonical.
+  // SPA shell used when a post is published after this build. scripts/serve-out.mjs
+  // clones it, injects CMS title/description/canonical into the HTML (so
+  // view-source is correct), caches out/blog/{slug}/index.html, then the
+  // client hydrates the full article from the CMS.
   params.push({ slug: STATIC_SPA_PARAM });
   return params;
 }
