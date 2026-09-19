@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: 'Local Languages for Cultural Walking Tours',
   description: 'Experience authentic local narratives in multiple languages during immersive walking tours. Connect deeper with culture and communities through Gamana.',
   alternates: {
-    canonical: 'https://www.gamana.app/features/local-languages',
+    canonical: 'https://www.gamana.app/features/local-languages/',
   },
   openGraph: {
     title: 'Local Languages for Cultural Walking Tours | Gamana',
     description: 'Experience authentic local narratives in multiple languages during immersive walking tours. Connect deeper with culture and communities through Gamana.',
-    url: 'https://www.gamana.app/features/local-languages',
+    url: 'https://www.gamana.app/features/local-languages/',
     siteName: 'Gamana',
     type: 'website',
     images: [

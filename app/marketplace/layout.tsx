@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'Audio Tours & Travel Experiences Marketplace',
   description: 'Explore curated audio tours and audio guides, self-guided travel experiences, and storytelling journeys worldwide. Discover immersive stories on Gamana.',
   alternates: {
-    canonical: 'https://www.gamana.app/marketplace',
+    canonical: 'https://www.gamana.app/marketplace/',
   },
   openGraph: {
     title: 'Audio Tours & Travel Experiences Marketplace | Gamana',
     description: 'Explore curated audio tours and audio guides, self-guided travel experiences, and storytelling journeys worldwide. Discover immersive stories on Gamana.',
-    url: 'https://www.gamana.app/marketplace',
+    url: 'https://www.gamana.app/marketplace/',
     siteName: 'Gamana',
     type: 'website',
     images: [

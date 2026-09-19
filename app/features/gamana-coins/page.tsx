@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   title: 'Gamana Coins Rewards & Benefits',
   description: 'Earn and redeem Gamana Coins for discounts, upgrades, and exclusive travel perks. Get more value from every self-guided audio tour on Gamana.',
   alternates: {
-    canonical: 'https://www.gamana.app/features/gamana-coins',
+    canonical: 'https://www.gamana.app/features/gamana-coins/',
   },
   openGraph: {
     title: 'Gamana Coins Rewards & Benefits | Gamana',
     description: 'Earn and redeem Gamana Coins for discounts, upgrades, and exclusive travel perks. Get more value from every self-guided audio tour on Gamana.',
-    url: 'https://www.gamana.app/features/gamana-coins',
+    url: 'https://www.gamana.app/features/gamana-coins/',
     siteName: 'Gamana',
     type: 'website',
     images: [

@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'Contact Us',
   description: 'Contact Gamana for app support, media or partnership inquiries, and general assistance. We\'ll reply quickly and help with all your travel needs.',
   alternates: {
-    canonical: 'https://www.gamana.app/contact',
+    canonical: 'https://www.gamana.app/contact/',
   },
   openGraph: {
     title: 'Contact Us | Gamana',
     description: 'Contact Gamana for app support, media or partnership inquiries, and general assistance. We\'ll reply quickly and help with all your travel needs.',
-    url: 'https://www.gamana.app/contact',
+    url: 'https://www.gamana.app/contact/',
     siteName: 'Gamana',
     type: 'website',
   },

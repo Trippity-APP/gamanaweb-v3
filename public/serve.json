@@ -84,35 +84,67 @@
   "rewrites": [
     {
       "source": "/blog/:slug",
-      "destination": "/blog/__spa__/index.html"
+      "destination": "/blog/__spa__/"
+    },
+    {
+      "source": "/blog/:slug/",
+      "destination": "/blog/__spa__/"
     },
     {
       "source": "/cities/:id",
-      "destination": "/cities/__spa__/index.html"
+      "destination": "/cities/__spa__/"
+    },
+    {
+      "source": "/cities/:id/",
+      "destination": "/cities/__spa__/"
     },
     {
       "source": "/marketplace/tours/:id",
-      "destination": "/marketplace/tours/__spa__/index.html"
+      "destination": "/marketplace/tours/__spa__/"
+    },
+    {
+      "source": "/marketplace/tours/:id/",
+      "destination": "/marketplace/tours/__spa__/"
     },
     {
       "source": "/marketplace/story/:id",
-      "destination": "/marketplace/story/__spa__/index.html"
+      "destination": "/marketplace/story/__spa__/"
+    },
+    {
+      "source": "/marketplace/story/:id/",
+      "destination": "/marketplace/story/__spa__/"
     },
     {
       "source": "/explore/tours/:id",
-      "destination": "/marketplace/tours/__spa__/index.html"
+      "destination": "/marketplace/tours/__spa__/"
+    },
+    {
+      "source": "/explore/tours/:id/",
+      "destination": "/marketplace/tours/__spa__/"
     },
     {
       "source": "/explore/story/:id",
-      "destination": "/marketplace/story/__spa__/index.html"
+      "destination": "/marketplace/story/__spa__/"
+    },
+    {
+      "source": "/explore/story/:id/",
+      "destination": "/marketplace/story/__spa__/"
     },
     {
       "source": "/storylist/:id",
-      "destination": "/storylist/__spa__/index.html"
+      "destination": "/storylist/__spa__/"
+    },
+    {
+      "source": "/storylist/:id/",
+      "destination": "/storylist/__spa__/"
     },
     {
       "source": "/storylists/:id",
-      "destination": "/storylists/__spa__/index.html"
+      "destination": "/storylists/__spa__/"
+    },
+    {
+      "source": "/storylists/:id/",
+      "destination": "/storylists/__spa__/"
     }
   ]
 }

@@ -21,7 +21,19 @@ export const metadata: Metadata = {
   title: "Features",
   description: "Discover Gamana's premium features: AI-powered narrators, handcrafted audio stories, location-aware tours, offline access, and expertly researched content for immersive travel experiences.",
   alternates: {
-    canonical: 'https://www.gamana.app/features',
+    canonical: 'https://www.gamana.app/features/',
+  },
+  openGraph: {
+    title: 'Features | Gamana',
+    description: "Discover Gamana's premium features: AI-powered narrators, handcrafted audio stories, location-aware tours, offline access, and expertly researched content for immersive travel experiences.",
+    url: 'https://www.gamana.app/features/',
+    siteName: 'Gamana',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Features | Gamana',
+    description: "Discover Gamana's premium features: AI-powered narrators, handcrafted audio stories, location-aware tours, offline access, and expertly researched content for immersive travel experiences.",
   },
 };
 

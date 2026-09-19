@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'Cookie Policy',
   description: 'Read how Gamana uses cookies on our website and app, what data is collected, why it\'s used, and the options available to manage your cookie preferences.',
   alternates: {
-    canonical: 'https://www.gamana.app/cookie-policy',
+    canonical: 'https://www.gamana.app/cookie-policy/',
   },
   openGraph: {
     title: 'Cookie Policy | Gamana',
     description: 'Read how Gamana uses cookies on our website and app, what data is collected, why it\'s used, and the options available to manage your cookie preferences.',
-    url: 'https://www.gamana.app/cookie-policy',
+    url: 'https://www.gamana.app/cookie-policy/',
     siteName: 'Gamana',
     type: 'website',
   },

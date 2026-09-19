@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: 'Virtual Travel Guides for Smart Exploration',
   description: 'Explore destinations from anywhere with virtual travel guides that offer interactive tours, insights, and immersive storytelling. Discover more with Gamana!',
   alternates: {
-    canonical: 'https://www.gamana.app/features/virtual-travel-guides',
+    canonical: 'https://www.gamana.app/features/virtual-travel-guides/',
   },
   openGraph: {
     title: 'Virtual Travel Guides for Smart Exploration | Gamana',
     description: 'Explore destinations from anywhere with virtual travel guides that offer interactive tours, insights, and immersive storytelling. Discover more with Gamana!',
-    url: 'https://www.gamana.app/features/virtual-travel-guides',
+    url: 'https://www.gamana.app/features/virtual-travel-guides/',
     siteName: 'Gamana',
     type: 'website',
     images: [

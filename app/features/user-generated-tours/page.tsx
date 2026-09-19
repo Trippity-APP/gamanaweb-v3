@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: 'User-Generated Tours & Custom Travel Paths',
   description: 'Create and explore user-generated tours with custom routes and local insights. Share your travel stories, discover unique paths, and explore with Gamana.',
   alternates: {
-    canonical: 'https://www.gamana.app/features/user-generated-tours',
+    canonical: 'https://www.gamana.app/features/user-generated-tours/',
   },
   openGraph: {
     title: 'User-Generated Tours & Custom Travel Paths | Gamana',
     description: 'Create and explore user-generated tours with custom routes and local insights. Share your travel stories, discover unique paths, and explore with Gamana.',
-    url: 'https://www.gamana.app/features/user-generated-tours',
+    url: 'https://www.gamana.app/features/user-generated-tours/',
     siteName: 'Gamana',
     type: 'website',
     images: [

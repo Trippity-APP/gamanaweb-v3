@@ -46,12 +46,12 @@ export async function generateMetadata({
         title,
         description,
         alternates: {
-            canonical: `https://www.gamana.app/cities/${city.id}`,
+            canonical: `https://www.gamana.app/cities/${city.id}/`,
         },
         openGraph: {
             title,
             description,
-            url: `https://www.gamana.app/cities/${city.id}`,
+            url: `https://www.gamana.app/cities/${city.id}/`,
             siteName: "Gamana",
             type: "website",
         },

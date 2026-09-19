@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'FAQ – Frequently Asked Questions',
   description: 'Find answers to common questions about using the Gamana app, audio narrations, personalization, pricing, features, and how the app works.',
   alternates: {
-    canonical: 'https://www.gamana.app/faq',
+    canonical: 'https://www.gamana.app/faq/',
   },
   openGraph: {
     title: 'FAQ – Frequently Asked Questions | Gamana',
     description: 'Find answers to common questions about using the Gamana app, audio narrations, personalization, pricing, features, and how the app works.',
-    url: 'https://www.gamana.app/faq',
+    url: 'https://www.gamana.app/faq/',
     siteName: 'Gamana',
     type: 'website',
   },
