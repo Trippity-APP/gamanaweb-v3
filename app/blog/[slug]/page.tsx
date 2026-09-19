@@ -31,15 +31,16 @@ export async function generateMetadata({ params }: { params: Params }) {
   const { slug } = await params;
   if (isStaticSpaParam(slug)) {
     return {
-      title: "Story | Gamana Blog",
+      title: { absolute: "Story | Gamana Blog" },
       description: "Travel stories and guides from Gamana.",
     };
   }
 
   try {
     const post = await getPostBySlug(slug);
+    const absoluteTitle = `${post.title} | Gamana Blog`;
     return {
-      title: `${post.title} | Gamana Blog`,
+      title: { absolute: absoluteTitle },
       description: post.excerpt,
       alternates: {
         canonical: `https://www.gamana.app/blog/${slug}`,
@@ -57,7 +58,7 @@ export async function generateMetadata({ params }: { params: Params }) {
     };
   } catch {
     return {
-      title: "Story not found | Gamana Blog",
+      title: { absolute: "Story not found | Gamana Blog" },
       alternates: {
         canonical: "https://www.gamana.app/blog",
       },

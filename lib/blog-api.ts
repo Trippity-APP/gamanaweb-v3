@@ -15,6 +15,9 @@ export type ApiBlogPost = {
   featured?: boolean;
   published_at?: string | null;
   content_html?: string | null;
+  seo_title?: string | null;
+  seo_description?: string | null;
+  status?: string | null;
 };
 
 type ApiListResponse = {
@@ -79,14 +82,16 @@ export async function fetchAllPublishedPosts(): Promise<ApiBlogPost[]> {
 
   while (hasNext) {
     const data = await fetchJson<ApiListResponse>(
-      `${baseUrl}/blogs?page=${page}&page_size=100`
+      `${baseUrl}/blogs?page=${page}&page_size=100&status=published`
     );
     posts.push(...(data.items || []));
     hasNext = Boolean(data.has_next);
     page += 1;
   }
 
-  return posts;
+  return posts.filter(
+    (post) => !post.status || post.status === "published"
+  );
 }
 
 export async function fetchPublishedPostBySlug(
@@ -96,7 +101,11 @@ export async function fetchPublishedPostBySlug(
 
   try {
     const data = await fetchJson<ApiPostResponse>(`${baseUrl}/blogs/${slug}`);
-    return data.post ?? null;
+    const post = data.post ?? null;
+    if (post?.status && post.status !== "published") {
+      return null;
+    }
+    return post;
   } catch {
     return null;
   }
