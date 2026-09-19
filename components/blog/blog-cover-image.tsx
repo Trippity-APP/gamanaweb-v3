@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
 
 type BlogCoverImageProps = {
   src: string;
@@ -24,14 +27,18 @@ export function BlogCoverImage({
   fill = false,
   priority = false,
 }: BlogCoverImageProps) {
-  if (isRemoteSrc(src)) {
+  const [failed, setFailed] = useState(false);
+  const resolvedSrc = !src?.trim() || failed ? "/demo02.png" : src.trim();
+
+  if (isRemoteSrc(resolvedSrc)) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={src}
+        src={resolvedSrc}
         alt={alt}
         loading={priority ? "eager" : "lazy"}
         decoding="async"
+        onError={() => setFailed(true)}
         className={
           fill
             ? `absolute inset-0 h-full w-full object-cover ${className}`.trim()
@@ -43,11 +50,12 @@ export function BlogCoverImage({
 
   return (
     <Image
-      src={encodeURI(src)}
+      src={encodeURI(resolvedSrc)}
       alt={alt}
       fill={fill}
       priority={priority}
       className={className}
+      onError={() => setFailed(true)}
     />
   );
 }

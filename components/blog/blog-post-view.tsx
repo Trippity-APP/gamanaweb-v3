@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 
 import Footer from "@/components/navigation/footer";
 import { Button } from "@/components/ui/button";
+import { BlogCoverImage } from "@/components/blog/blog-cover-image";
 import { getRouteCTAByRegion } from "@/lib/data/route-ctas";
 import type { ArticleBlock } from "@/content/blog/articles";
 import type { BlogPost } from "@/lib/blog";
@@ -15,6 +16,29 @@ import RouteCTAModule from "@/components/blog/route-cta-module";
 import RelatedPosts from "@/components/blog/related-posts";
 import RelatedCities from "@/components/blog/related-cities";
 import InternalLinkingWidget from "@/components/blog/internal-linking-widget";
+
+const PLACEHOLDER_COVER = "/demo02.png";
+
+/** True when article HTML already opens with this cover (avoid double hero). */
+function htmlAlreadyHasCover(blocks: ArticleBlock[], coverImage: string): boolean {
+  if (!coverImage || coverImage === PLACEHOLDER_COVER) return false;
+  const first = blocks[0];
+  if (!first) return false;
+  if (first.type === "hero") {
+    return first.image === coverImage || encodeURI(first.image) === encodeURI(coverImage);
+  }
+  if (first.type === "html") {
+    const srcMatch = first.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+    const src = srcMatch?.[1]?.trim();
+    if (!src) return false;
+    try {
+      return decodeURI(src) === decodeURI(coverImage) || src === coverImage;
+    } catch {
+      return src === coverImage;
+    }
+  }
+  return false;
+}
 
 const formatInline = (text: string) =>
   text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
@@ -272,6 +296,10 @@ export function BlogPostView({ post }: { post: BlogPost }) {
       ? getRouteCTAByRegion(post.region)
       : undefined;
 
+  const showCoverHero =
+    Boolean(post.coverImage) &&
+    !htmlAlreadyHasCover(post.blocks, post.coverImage);
+
   return (
     <>
       <main className="bg-white">
@@ -321,6 +349,17 @@ export function BlogPostView({ post }: { post: BlogPost }) {
                   ))}
                 </div>
               </div>
+              {showCoverHero ? (
+                <div className="relative mb-10 aspect-[16/9] w-full overflow-hidden rounded-3xl shadow-2xl">
+                  <BlogCoverImage
+                    src={post.coverImage}
+                    alt={post.title}
+                    fill
+                    priority
+                    className="object-cover"
+                  />
+                </div>
+              ) : null}
               {(() => {
                 let dividerCount = 0;
                 return post.blocks.map((block, index) => {
