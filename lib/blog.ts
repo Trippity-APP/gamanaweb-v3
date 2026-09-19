@@ -56,13 +56,15 @@ function mapApiPostToArticle(post: ApiBlogPost): Article {
     ? [{ type: "html", content: post.content_html }]
     : [];
 
+  const cover = (post.cover_image_url || "").trim();
+
   return {
     slug: post.slug,
     title: (post.seo_title || post.title || "").trim(),
     date,
     author: post.author || "Gamana Editorial Team",
     authorTitle: post.author_title || "Travel Innovation",
-    coverImage: post.cover_image_url || "/demo02.png",
+    coverImage: cover || "/demo02.png",
     excerpt: (post.seo_description || post.excerpt || "").trim(),
     tags: post.tags || [],
     featured: Boolean(post.featured),
