@@ -27,7 +27,10 @@ export async function generateStaticParams() {
 
   console.log(`[blog] generateStaticParams: ${params.length} posts`);
 
-  // SPA shell for posts published after this build (/blog/:slug → /blog/__spa__).
+  // Keep a static SPA shell artifact for debugging; do NOT rewrite /blog/:slug
+  // to it in serve.json — serve-handler applies those rewrites before checking
+  // for an existing out/blog/{slug}/index.html, which hid per-article
+  // canonicals from Chrome view-source. New CMS posts need a redeploy.
   params.push({ slug: STATIC_SPA_PARAM });
   return params;
 }

@@ -83,14 +83,6 @@
   ],
   "rewrites": [
     {
-      "source": "/blog/:slug",
-      "destination": "/blog/__spa__/index.html"
-    },
-    {
-      "source": "/blog/:slug/",
-      "destination": "/blog/__spa__/index.html"
-    },
-    {
       "source": "/cities/:id",
       "destination": "/cities/__spa__/index.html"
     },
