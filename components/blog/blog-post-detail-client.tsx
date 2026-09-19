@@ -65,6 +65,21 @@ export function BlogPostDetailClient({
     };
   }, [paramSlug, initialPost]);
 
+  // When this page is the SPA shell (post published after last deploy), sync
+  // title + canonical once CMS data arrives so crawlers/JS see the right URL.
+  useEffect(() => {
+    if (!post?.slug || typeof document === 'undefined') return;
+    const canonicalHref = `https://www.gamana.app/blog/${post.slug}/`;
+    document.title = `${post.title} | Gamana Blog`;
+    let link = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'canonical';
+      document.head.appendChild(link);
+    }
+    link.href = canonicalHref;
+  }, [post]);
+
   if (loading) {
     return (
       <>
