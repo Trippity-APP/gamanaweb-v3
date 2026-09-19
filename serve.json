@@ -46,13 +46,28 @@
       "permanent": true
     },
     {
-      "source": "/marketplace",
-      "destination": "/explore/",
+      "source": "/explore",
+      "destination": "/marketplace/",
       "permanent": true
     },
     {
-      "source": "/marketplace/tours/:id",
-      "destination": "/explore/tours/:id/",
+      "source": "/explore/tours/:id",
+      "destination": "/marketplace/tours/:id/",
+      "permanent": true
+    },
+    {
+      "source": "/explore/story/:id",
+      "destination": "/marketplace/story/:id/",
+      "permanent": true
+    },
+    {
+      "source": "/explore/tours",
+      "destination": "/marketplace/tours/",
+      "permanent": true
+    },
+    {
+      "source": "/explore/story",
+      "destination": "/marketplace/story/",
       "permanent": true
     },
     {
@@ -76,16 +91,20 @@
       "destination": "/cities/__spa__/index.html"
     },
     {
+      "source": "/marketplace/tours/:id",
+      "destination": "/marketplace/tours/__spa__/index.html"
+    },
+    {
+      "source": "/marketplace/story/:id",
+      "destination": "/marketplace/story/__spa__/index.html"
+    },
+    {
       "source": "/explore/tours/:id",
-      "destination": "/explore/tours/__spa__/index.html"
+      "destination": "/marketplace/tours/__spa__/index.html"
     },
     {
       "source": "/explore/story/:id",
-      "destination": "/explore/story/__spa__/index.html"
-    },
-    {
-      "source": "/marketplace/tours/:id",
-      "destination": "/explore/tours/__spa__/index.html"
+      "destination": "/marketplace/story/__spa__/index.html"
     },
     {
       "source": "/storylist/:id",

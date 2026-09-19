@@ -174,7 +174,7 @@ export default function HomeClient({ latestStories, catalog = [] }: HomeClientPr
             "url": "https://www.gamana.app",
             "applicationCategory": "TravelApplication",
             "operatingSystem": "iOS, Android",
-            "description": "Gamana is India's first heritage travel app, offering audio tours that match your interests and smart travel guides to explore destinations effortlessly.",
+            "description": "Gamana is an AI-powered travel app offering personalized audio tours and smart travel guides to explore destinations effortlessly and intelligently.",
             "offers": {
               "@type": "Offer",
               "price": "0.00",

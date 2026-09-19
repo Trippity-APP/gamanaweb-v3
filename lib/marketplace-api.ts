@@ -136,9 +136,9 @@ function assignTourSlugs(tours: Tour[]): Tour[] {
 
 export function getTourHref(tour: Pick<Tour, "id" | "contentKind">): string {
   if ((tour.contentKind ?? "walk") === "story") {
-    return `/explore/story/${tour.id}`;
+    return `/marketplace/story/${tour.id}`;
   }
-  return `/explore/tours/${tour.id}`;
+  return `/marketplace/tours/${tour.id}`;
 }
 
 function extractCityCountry(storylist: ApiStorylist): { city: string; country: string } {

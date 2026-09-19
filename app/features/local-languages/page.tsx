@@ -5,13 +5,13 @@ import EnhancedPageLayout from '@/components/enhanced-page-layout';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
   title: 'Local Languages for Cultural Walking Tours',
-  description: 'Hear walking tours in English, Hindi, Kannada, and more. Pick the language that feels most natural to you on Gamana.',
+  description: 'Experience authentic local narratives in multiple languages during immersive walking tours. Connect deeper with culture and communities through Gamana.',
   alternates: {
     canonical: 'https://www.gamana.app/features/local-languages',
   },
   openGraph: {
     title: 'Local Languages for Cultural Walking Tours | Gamana',
-    description: 'Hear walking tours in English, Hindi, Kannada, and more. Pick the language that feels most natural to you on Gamana.',
+    description: 'Experience authentic local narratives in multiple languages during immersive walking tours. Connect deeper with culture and communities through Gamana.',
     url: 'https://www.gamana.app/features/local-languages',
     siteName: 'Gamana',
     type: 'website',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Local Languages for Cultural Walking Tours | Gamana',
-    description: 'Hear walking tours in English, Hindi, Kannada, and more. Pick the language that feels most natural to you on Gamana.',
+    description: 'Experience authentic local narratives in multiple languages during immersive walking tours. Connect deeper with culture and communities through Gamana.',
     images: ['/gamana-logo.svg'],
   },
 };

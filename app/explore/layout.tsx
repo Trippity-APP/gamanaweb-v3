@@ -1,66 +1,13 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.gamana.app'),
-  title: 'Audio Tours & Travel Experiences Marketplace',
-  description: 'Browse self-guided audio tours and storylists in 50+ cities. Walk, listen, and explore with Gamana.',
-  alternates: {
-    canonical: 'https://www.gamana.app/explore',
-  },
-  openGraph: {
-    title: 'Audio Tours & Travel Experiences Marketplace | Gamana',
-    description: 'Browse self-guided audio tours and storylists in 50+ cities. Walk, listen, and explore with Gamana.',
-    url: 'https://www.gamana.app/explore',
-    siteName: 'Gamana',
-    type: 'website',
-    images: [
-      {
-        url: '/gamana-logo.svg',
-        alt: 'Gamana Logo',
-        width: 1200,
-        height: 630,
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Audio Tours & Travel Experiences Marketplace | Gamana',
-    description: 'Browse self-guided audio tours and storylists in 50+ cities. Walk, listen, and explore with Gamana.',
-    images: ['/gamana-logo.svg'],
-  },
+  robots: { index: false, follow: true },
 };
 
-export default function MarketplaceLayout({
+export default function ExploreLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "Gamana",
-            "url": "https://www.gamana.app",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://www.gamana.app/gamana-logo.svg",
-              "name": "Gamana Logo",
-              "caption": "Gamana Logo"
-            },
-            "sameAs": [
-              "https://www.facebook.com/gamanaapp",
-              "https://twitter.com/gamanaapp",
-              "https://www.instagram.com/gamanaapp"
-            ]
-          })
-        }}
-      />
-      {children}
-    </>
-  );
+  return children;
 }
-

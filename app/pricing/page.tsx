@@ -19,6 +19,21 @@ export const metadata: Metadata = {
     url: "https://www.gamana.app/pricing",
     siteName: "Gamana",
     type: "website",
+    images: [
+      {
+        url: "/gamana-logo.svg",
+        alt: "Gamana Logo",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Gamana Coins Pricing | Gamana",
+    description:
+      "Pay once. Hear the city as you walk. Packs from 2 to 25 coins. India sees INR; everyone else sees USD. Need more than 25? Talk to us about Enterprise.",
+    images: ["/gamana-logo.svg"],
   },
 };
 

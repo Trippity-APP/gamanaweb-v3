@@ -17,7 +17,7 @@ export const featureItems = [
 // Gamana, Cities, Pricing, Contact — Features dropdown is inserted in site-header.tsx.
 export const primaryNavItems = [
   { name: "Home", href: "/" },
-  { name: "Explore", href: "/explore" },
+  { name: "Explore", href: "/marketplace" },
   { name: "Blog", href: "/blog" },
   { name: "Partner with Gamana", href: "/ecosystem" },
   { name: "Cities", href: "/cities" },
@@ -27,7 +27,7 @@ export const primaryNavItems = [
 
 export const footerCompanyLinks = [
   { name: "Cities", href: "/cities" },
-  { name: "Explore", href: "/explore" },
+  { name: "Explore", href: "/marketplace" },
   { name: "Partner with Gamana", href: "/ecosystem" },
   { name: "Blog", href: "/blog" },
   { name: "About", href: "/about" },

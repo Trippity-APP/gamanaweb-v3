@@ -108,20 +108,24 @@ export function findBestTourMatch(query: string, catalog: Tour[]): Tour | null {
 export type ExploreCatalogTab = "stories" | "walks" | "recommended";
 
 export function getExploreCatalogPath(tab: ExploreCatalogTab): string {
-  if (tab === "walks") return "/explore/tours";
-  if (tab === "stories") return "/explore/story";
-  return "/explore";
+  if (tab === "walks") return "/marketplace/tours";
+  if (tab === "stories") return "/marketplace/story";
+  return "/marketplace";
 }
 
 export function getExploreTabFromPathname(pathname: string): ExploreCatalogTab | null {
   const path = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
-  if (path === "/explore/tours") return "walks";
-  if (path === "/explore/story") return "stories";
+  if (path === "/marketplace/tours" || path === "/explore/tours") return "walks";
+  if (path === "/marketplace/story" || path === "/explore/story") return "stories";
   return null;
 }
 
 export function getExploreBackHref(pathname: string): string {
-  if (pathname.includes("/explore/tours")) return "/explore/tours";
-  if (pathname.includes("/explore/story")) return "/explore/story";
-  return "/explore";
+  if (pathname.includes("/marketplace/tours") || pathname.includes("/explore/tours")) {
+    return "/marketplace/tours";
+  }
+  if (pathname.includes("/marketplace/story") || pathname.includes("/explore/story")) {
+    return "/marketplace/story";
+  }
+  return "/marketplace";
 }

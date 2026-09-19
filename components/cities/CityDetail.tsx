@@ -75,7 +75,7 @@ export function CityDetail({ city, tours, relatedCities = [] }: CityDetailProps)
                         asChild
                         className="w-full sm:w-auto bg-gradient-to-r from-[#1A5F7A] to-[#159895] text-white hover:opacity-90 shadow-md rounded-xl"
                     >
-                        <Link href={`/explore?city=${encodeURIComponent(city.name)}`}>
+                        <Link href={`/marketplace?city=${encodeURIComponent(city.name)}`}>
                             <Play className="mr-2 h-4 w-4 fill-current" />
                             Browse tours in {city.name}
                         </Link>

@@ -624,7 +624,7 @@ export default function LandingContent() {
           {POPULAR_TOURS.map((t) => (
             <Link
               key={t.title}
-              href="/explore"
+              href="/marketplace"
               className="group rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow"
             >
               <div className="relative h-40">

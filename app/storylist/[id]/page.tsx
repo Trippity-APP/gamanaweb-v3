@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import StorylistRedirectPageClient from "./StorylistRedirectPageClient";
-import { STATIC_SPA_PARAM, isStaticSpaParam } from "@/lib/static-spa";
+import { STATIC_SPA_PARAM } from "@/lib/static-spa";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -12,13 +12,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   return {
     title: "Explore Audio Stories on Gamana",
-    description: "Location-based audio tours for your phone. Open this link on mobile to begin your journey.",
+    description: "Immersive, location-based audio tours created for your mobile device. Open this link on mobile to begin your journey.",
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
       title: "Discover Local Stories - Gamana App",
-      description: "Scan or open this link on mobile to explore audio storylists near you.",
+      description: "Scan or open this link on mobile to explore curated audio storylists around you.",
       url: canonicalUrl,
       siteName: "Gamana",
       images: [
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     twitter: {
       card: "summary_large_image",
       title: "Explore Audio Stories on Gamana",
-      description: "Location-based audio tours for your phone. Scan to begin.",
+      description: "Immersive, location-based audio tours created for your mobile device. Scan to begin.",
       images: ["https://shareable.gamana.app/ai-travel-guide-app.jpg"],
     },
   };

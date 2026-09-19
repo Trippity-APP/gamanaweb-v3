@@ -5,13 +5,13 @@ import EnhancedPageLayout from '@/components/enhanced-page-layout';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
   title: 'Virtual Travel Guides for Smart Exploration',
-  description: 'Pick a narrator for your walk: historians, comedians, and local guides with distinct voices and styles. Listen on Gamana.',
+  description: 'Explore destinations from anywhere with virtual travel guides that offer interactive tours, insights, and immersive storytelling. Discover more with Gamana!',
   alternates: {
     canonical: 'https://www.gamana.app/features/virtual-travel-guides',
   },
   openGraph: {
     title: 'Virtual Travel Guides for Smart Exploration | Gamana',
-    description: 'Pick a narrator for your walk: historians, comedians, and local guides with distinct voices and styles. Listen on Gamana.',
+    description: 'Explore destinations from anywhere with virtual travel guides that offer interactive tours, insights, and immersive storytelling. Discover more with Gamana!',
     url: 'https://www.gamana.app/features/virtual-travel-guides',
     siteName: 'Gamana',
     type: 'website',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Virtual Travel Guides for Smart Exploration | Gamana',
-    description: 'Pick a narrator for your walk: historians, comedians, and local guides with distinct voices and styles. Listen on Gamana.',
+    description: 'Explore destinations from anywhere with virtual travel guides that offer interactive tours, insights, and immersive storytelling. Discover more with Gamana!',
     images: ['/gamana-logo.svg'],
   },
 };

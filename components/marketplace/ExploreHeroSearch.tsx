@@ -23,7 +23,7 @@ type ExploreHeroSearchProps = {
 /**
  * Unified hero search — cities (API), audio stories, and audio walks (local catalog).
  * - explore: filters the current page via ?q=
- * - home: navigates to story/walk detail pages, or /explore?q= for cities
+ * - home: navigates to story/walk detail pages, or /marketplace?q= for cities
  */
 export function ExploreHeroSearch({
   catalog = [],
@@ -91,7 +91,7 @@ export function ExploreHeroSearch({
   const goToExploreSearch = (value: string) => {
     setOpen(false);
     setQuery(value);
-    router.push(`/explore?q=${encodeURIComponent(value)}`);
+    router.push(`/marketplace?q=${encodeURIComponent(value)}`);
   };
 
   const goToTour = (tour: Tour) => {

@@ -251,7 +251,7 @@ export function MarketplaceBrowser({
       setActiveTab(fromPath);
       return;
     }
-    if (pathname === '/explore') {
+    if (pathname === '/marketplace' || pathname === '/marketplace/') {
       setActiveTab(hasRecommendations ? 'recommended' : 'stories');
     }
   }, [pathname, hasRecommendations]);

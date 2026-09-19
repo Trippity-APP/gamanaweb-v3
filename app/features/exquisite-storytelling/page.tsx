@@ -4,14 +4,14 @@ import EnhancedPageLayout from '@/components/enhanced-page-layout';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'Story-Rich Audio Guides | Gamana',
-  description: 'Audio guides built around history, culture, and the stories behind each stop and travel stories. Discover culture, history, and hidden insights with Gamana.',
+  title: 'Exquisite Storytelling: Immersive Audio Guides',
+  description: 'Experience exquisite storytelling through immersive audio guides and travel stories. Discover culture, history, and hidden insights with Gamana.',
   alternates: {
     canonical: 'https://www.gamana.app/features/exquisite-storytelling',
   },
   openGraph: {
-    title: 'Story-Rich Audio Guides | Gamana | Gamana',
-    description: 'Audio guides built around history, culture, and the stories behind each stop and travel stories. Discover culture, history, and hidden insights with Gamana.',
+    title: 'Exquisite Storytelling: Immersive Audio Guides | Gamana',
+    description: 'Experience exquisite storytelling through immersive audio guides and travel stories. Discover culture, history, and hidden insights with Gamana.',
     url: 'https://www.gamana.app/features/exquisite-storytelling',
     siteName: 'Gamana',
     type: 'website',
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Story-Rich Audio Guides | Gamana | Gamana',
-    description: 'Audio guides built around history, culture, and the stories behind each stop and travel stories. Discover culture, history, and hidden insights with Gamana.',
+    title: 'Exquisite Storytelling: Immersive Audio Guides | Gamana',
+    description: 'Experience exquisite storytelling through immersive audio guides and travel stories. Discover culture, history, and hidden insights with Gamana.',
     images: ['/gamana-logo.svg'],
   },
 };
