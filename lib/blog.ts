@@ -58,12 +58,12 @@ function mapApiPostToArticle(post: ApiBlogPost): Article {
 
   return {
     slug: post.slug,
-    title: post.title,
+    title: (post.seo_title || post.title || "").trim(),
     date,
     author: post.author || "Gamana Editorial Team",
     authorTitle: post.author_title || "Travel Innovation",
     coverImage: post.cover_image_url || "/demo02.png",
-    excerpt: post.excerpt || "",
+    excerpt: (post.seo_description || post.excerpt || "").trim(),
     tags: post.tags || [],
     featured: Boolean(post.featured),
     region: (post.region as Article["region"]) || undefined,
