@@ -74,18 +74,13 @@ export async function fetchAllPublishedPosts(): Promise<ApiBlogPost[]> {
   let page = 1;
   let hasNext = true;
 
-  try {
-    while (hasNext) {
-      const data = await fetchJson<ApiListResponse>(
-        `${baseUrl}/blogs?page=${page}&page_size=100&status=published`
-      );
-      posts.push(...(data.items || []));
-      hasNext = Boolean(data.has_next);
-      page += 1;
-    }
-  } catch (error) {
-    console.error("Failed to load published blog posts:", error);
-    return [];
+  while (hasNext) {
+    const data = await fetchJson<ApiListResponse>(
+      `${baseUrl}/blogs?page=${page}&page_size=100&status=published`
+    );
+    posts.push(...(data.items || []));
+    hasNext = Boolean(data.has_next);
+    page += 1;
   }
 
   return posts.filter(

@@ -77,67 +77,67 @@
     },
     {
       "source": "/blog/:slug",
-      "destination": "/blog/__spa__/"
+      "destination": "/blog/__spa__/index.html"
     },
     {
       "source": "/blog/:slug/",
-      "destination": "/blog/__spa__/"
+      "destination": "/blog/__spa__/index.html"
     },
     {
       "source": "/cities/:id",
-      "destination": "/cities/__spa__/"
+      "destination": "/cities/__spa__/index.html"
     },
     {
       "source": "/cities/:id/",
-      "destination": "/cities/__spa__/"
+      "destination": "/cities/__spa__/index.html"
     },
     {
       "source": "/explore/tours/:id",
-      "destination": "/marketplace/tours/__spa__/"
+      "destination": "/marketplace/tours/__spa__/index.html"
     },
     {
       "source": "/explore/tours/:id/",
-      "destination": "/marketplace/tours/__spa__/"
+      "destination": "/marketplace/tours/__spa__/index.html"
     },
     {
       "source": "/explore/story/:id",
-      "destination": "/marketplace/story/__spa__/"
+      "destination": "/marketplace/story/__spa__/index.html"
     },
     {
       "source": "/explore/story/:id/",
-      "destination": "/marketplace/story/__spa__/"
+      "destination": "/marketplace/story/__spa__/index.html"
     },
     {
       "source": "/marketplace/tours/:id",
-      "destination": "/marketplace/tours/__spa__/"
+      "destination": "/marketplace/tours/__spa__/index.html"
     },
     {
       "source": "/marketplace/tours/:id/",
-      "destination": "/marketplace/tours/__spa__/"
+      "destination": "/marketplace/tours/__spa__/index.html"
     },
     {
       "source": "/storylist/:id",
-      "destination": "/storylist/__spa__/"
+      "destination": "/storylist/__spa__/index.html"
     },
     {
       "source": "/storylist/:id/",
-      "destination": "/storylist/__spa__/"
+      "destination": "/storylist/__spa__/index.html"
     },
     {
       "source": "/storylists/:id",
-      "destination": "/storylists/__spa__/"
+      "destination": "/storylists/__spa__/index.html"
     },
     {
       "source": "/storylists/:id/",
-      "destination": "/storylists/__spa__/"
+      "destination": "/storylists/__spa__/index.html"
     },
     {
       "source": "/marketplace/story/:id",
-      "destination": "/marketplace/story/__spa__/"
+      "destination": "/marketplace/story/__spa__/index.html"
     },
     {
       "source": "/marketplace/story/:id/",
-      "destination": "/marketplace/story/__spa__/"
+      "destination": "/marketplace/story/__spa__/index.html"
     }
   ]
 }

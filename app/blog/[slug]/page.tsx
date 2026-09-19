@@ -7,24 +7,29 @@ type Params = Promise<{
 }>;
 
 export async function generateStaticParams() {
-  try {
-    clearBlogCache();
-    const slugs = await getAllPostSlugs();
-    const params = slugs
-      .filter((slug): slug is string => Boolean(slug) && !isStaticSpaParam(slug))
-      .map((slug) => ({ slug }));
-    // SPA shell for static-host rewrites (/blog/:slug → /blog/__spa__).
-    if (!params.some((p) => p.slug === STATIC_SPA_PARAM)) {
-      params.push({ slug: STATIC_SPA_PARAM });
-    }
-    if (params.length > 0) {
-      return params;
-    }
-  } catch {
-    // Build-time API may be unavailable.
+  clearBlogCache();
+  const slugs = await getAllPostSlugs();
+  const params = slugs
+    .filter((slug): slug is string => Boolean(slug) && !isStaticSpaParam(slug))
+    .map((slug) => ({ slug }));
+
+  // Without per-slug HTML, Railway/`serve` rewrites every /blog/:slug to the
+  // __spa__ shell (noindex, no article canonical) — view-source looks broken
+  // even though the client hydrates the post. Fail the export so deploy can't
+  // ship SPA-only blog pages.
+  if (params.length === 0) {
+    throw new Error(
+      "Blog CMS returned 0 published slugs at build time. " +
+        "Set NEXT_PUBLIC_BLOG_API_URL (or GAMANA_API_URL) so generateStaticParams " +
+        "can emit out/blog/{slug}/index.html with correct canonical tags."
+    );
   }
 
-  return [{ slug: STATIC_SPA_PARAM }];
+  console.log(`[blog] generateStaticParams: ${params.length} posts`);
+
+  // SPA shell for posts published after this build (/blog/:slug → /blog/__spa__).
+  params.push({ slug: STATIC_SPA_PARAM });
+  return params;
 }
 
 export async function generateMetadata({ params }: { params: Params }) {
