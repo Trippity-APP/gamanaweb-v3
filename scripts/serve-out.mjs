@@ -8,6 +8,9 @@
  *  3. Persist that HTML under out/blog/{slug}/ so later hits are static
  *     (view-source shows the real article URL as canonical)
  *  4. Client JS still hydrates full content from the CMS
+ *
+ * Also serves a live /sitemap.xml that merges build-time non-blog URLs with
+ * every currently published CMS post (so new articles are indexed immediately).
  */
 import http from "node:http";
 import fs from "node:fs";
@@ -157,6 +160,116 @@ async function fetchPublishedPost(slug) {
   return post;
 }
 
+async function fetchAllPublishedPosts() {
+  const base = getBlogApiBaseUrl();
+  const posts = [];
+  let page = 1;
+  let hasNext = true;
+  while (hasNext) {
+    const res = await fetch(
+      `${base}/blogs?page=${page}&page_size=100&status=published`,
+      { headers: { Accept: "application/json" } }
+    );
+    if (!res.ok) break;
+    const data = await res.json();
+    posts.push(...(data.items || []));
+    hasNext = Boolean(data.has_next);
+    page += 1;
+  }
+  return posts.filter((post) => !post.status || post.status === "published");
+}
+
+function escapeXml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function urlEntry(loc, lastmod, changefreq, priority) {
+  const parts = [`<url>`, `<loc>${escapeXml(loc)}</loc>`];
+  if (lastmod) parts.push(`<lastmod>${escapeXml(lastmod)}</lastmod>`);
+  if (changefreq) parts.push(`<changefreq>${escapeXml(changefreq)}</changefreq>`);
+  if (priority != null) parts.push(`<priority>${escapeXml(priority)}</priority>`);
+  parts.push(`</url>`);
+  return parts.join("");
+}
+
+/**
+ * Live sitemap: keep non-blog URLs from the build-time sitemap.xml, replace
+ * /blog/* entries with the full published CMS list so new posts appear
+ * without a redeploy.
+ */
+async function buildLiveSitemapXml() {
+  const baseUrl = "https://www.gamana.app";
+  const sitemapPath = path.join(OUT, "sitemap.xml");
+  let staticXml = "";
+  try {
+    staticXml = fs.readFileSync(sitemapPath, "utf8");
+  } catch {
+    staticXml = "";
+  }
+
+  // Keep every <url> that is not a blog article (and keep /blog/ index).
+  const kept = [];
+  const urlBlocks = staticXml.match(/<url>[\s\S]*?<\/url>/g) || [];
+  for (const block of urlBlocks) {
+    const loc = block.match(/<loc>([^<]+)<\/loc>/)?.[1] || "";
+    const isBlogArticle =
+      /^https:\/\/www\.gamana\.app\/blog\/.+/.test(loc) &&
+      loc !== `${baseUrl}/blog/` &&
+      loc !== `${baseUrl}/blog`;
+    if (!isBlogArticle) kept.push(block);
+  }
+
+  if (kept.length === 0) {
+    kept.push(
+      urlEntry(baseUrl, new Date().toISOString(), "daily", "1"),
+      urlEntry(`${baseUrl}/blog/`, new Date().toISOString(), "weekly", "0.9")
+    );
+  }
+
+  let blogPosts = [];
+  try {
+    blogPosts = await fetchAllPublishedPosts();
+  } catch (err) {
+    console.error("[sitemap] CMS fetch failed:", err.message);
+  }
+
+  const blogEntries = blogPosts
+    .filter((post) => post.slug)
+    .map((post) => {
+      const lastmod = post.published_at
+        ? new Date(post.published_at).toISOString()
+        : new Date().toISOString();
+      return urlEntry(
+        `${baseUrl}/blog/${post.slug}/`,
+        lastmod,
+        "monthly",
+        "0.7"
+      );
+    });
+
+  return (
+    `<?xml version="1.0" encoding="UTF-8"?>\n` +
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+    [...kept, ...blogEntries].join("\n") +
+    `\n</urlset>\n`
+  );
+}
+
+function sendXml(response, xml) {
+  const body = Buffer.from(xml, "utf8");
+  response.writeHead(200, {
+    "Content-Type": "application/xml; charset=utf-8",
+    "Content-Length": body.length,
+    "Cache-Control": "public, max-age=300",
+  });
+  response.end(body);
+}
+
 /**
  * Build (and cache) SEO-complete HTML for a post that wasn't in the last export.
  * Returns absolute path to index.html, or null if CMS has no published post.
@@ -205,6 +318,21 @@ const server = http.createServer(async (request, response) => {
   try {
     const host = request.headers.host || `localhost:${PORT}`;
     const url = new URL(request.url || "/", `http://${host}`);
+    const pathname = url.pathname.replace(/\/+$/, "") || "/";
+
+    // Always serve a live sitemap so newly published CMS posts are indexed
+    // without waiting for the next Railway build.
+    if (pathname === "/sitemap.xml") {
+      try {
+        const xml = await buildLiveSitemapXml();
+        sendXml(response, xml);
+        return;
+      } catch (err) {
+        console.error("[sitemap] live build failed:", err);
+        // Fall through to static file if present.
+      }
+    }
+
     const slug = blogSlugFromPathname(url.pathname);
 
     if (slug && !hasStaticBlogPage(slug)) {

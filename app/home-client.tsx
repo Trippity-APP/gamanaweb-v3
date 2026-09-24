@@ -12,7 +12,7 @@ import SiteHeader from "@/components/navigation/site-header";
 import NarratorCard from "@/components/narrator-card";
 import { HeroCitySearch } from "@/components/HeroCitySearch";
 import { BlogCoverImage } from "@/components/blog/blog-cover-image";
-import type { BlogSummary } from "@/lib/blog";
+import { fetchBlogSummariesFromApi, type BlogSummary } from "@/lib/blog";
 import type { Tour } from "@/lib/marketplace-data";
 import { trackStoreClick } from "@/lib/analytics";
 import { useStoreUrl } from "@/hooks/use-store-url";
@@ -39,10 +39,29 @@ type HomeClientProps = {
   catalog?: Tour[];
 };
 
-export default function HomeClient({ latestStories, catalog = [] }: HomeClientProps) {
+export default function HomeClient({ latestStories: initialStories, catalog = [] }: HomeClientProps) {
+  const [latestStories, setLatestStories] = useState(initialStories);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [openFAQ, setOpenFAQ] = useState<number | null>(0); // First FAQ open by default
   const { url: storeUrl, platform } = useStoreUrl();
+
+  // Build-time props freeze on static export — refresh from CMS so new
+  // publishes appear in "Latest Stories" without a redeploy (same as /blog).
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const summaries = await fetchBlogSummariesFromApi();
+        if (cancelled || summaries.length === 0) return;
+        setLatestStories(summaries.slice(0, 3));
+      } catch (error) {
+        console.error("Failed to refresh home latest stories:", error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const singleStoryHighlight = latestStories.length === 1;
   const storyGridCols =
@@ -812,7 +831,7 @@ export default function HomeClient({ latestStories, catalog = [] }: HomeClientPr
               {latestStories.map((story) => (
                 <Link
                   key={story.slug}
-                  href={`/blog/${story.slug}`}
+                  href={`/blog/${story.slug}/`}
                   className={`bg-white rounded-3xl shadow-lg border border-gray-100 hover:border-[#159895]/40 transition-all flex flex-col overflow-hidden hover:-translate-y-2 h-full ${
                     singleStoryHighlight
                       ? "p-8 md:p-10"

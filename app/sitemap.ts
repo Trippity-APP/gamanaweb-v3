@@ -4,8 +4,10 @@ import { getAllPosts } from '@/lib/blog';
 // Required for static export compatibility
 export const dynamic = 'force-static';
 
-// Sitemap for static export - automatically includes all blog posts
-// Generated at build time
+// Sitemap for static export — baked at build time as a baseline.
+// On Railway, scripts/serve-out.mjs serves a live /sitemap.xml that replaces
+// blog article URLs with the full published CMS list so new posts are indexed
+// without waiting for the next deploy.
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.gamana.app';
   const currentDate = new Date();
