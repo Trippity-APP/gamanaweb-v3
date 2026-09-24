@@ -19,25 +19,50 @@ import InternalLinkingWidget from "@/components/blog/internal-linking-widget";
 
 const PLACEHOLDER_COVER = "/demo02.png";
 
-/** True when article HTML already opens with this cover (avoid double hero). */
-function htmlAlreadyHasCover(blocks: ArticleBlock[], coverImage: string): boolean {
-  if (!coverImage || coverImage === PLACEHOLDER_COVER) return false;
-  const first = blocks[0];
-  if (!first) return false;
+/**
+ * Remove the leading banner image from CMS HTML so we don't show the cover
+ * twice (once from cover_image_url, once inlined at the top of content_html).
+ */
+function stripLeadingBannerImage(html: string): string {
+  let s = html.replace(/^(?:\s*<p[^>]*>\s*<\/p>\s*)+/i, "").trimStart();
+  // Optional wrapper divs around the opening banner
+  const wrappedFigure = s.match(
+    /^(?:<div[^>]*>\s*)*<figure[\s\S]*?<\/figure>\s*(?:<\/div>\s*)*/i
+  );
+  if (wrappedFigure) return s.slice(wrappedFigure[0].length);
+  const figure = s.match(/^<figure[\s\S]*?<\/figure>\s*/i);
+  if (figure) return s.slice(figure[0].length);
+  const pImg = s.match(/^<p[^>]*>\s*<img[\s\S]*?>\s*<\/p>\s*/i);
+  if (pImg) return s.slice(pImg[0].length);
+  const img = s.match(/^<img[^>]*\/?>\s*/i);
+  if (img) return s.slice(img[0].length);
+  // First image appears shortly after open (e.g. after a short empty span)
+  const earlyImg = s.match(
+    /^([\s\S]{0,200}?)(<figure[\s\S]*?<\/figure>|<p[^>]*>\s*<img[\s\S]*?>\s*<\/p>|<img[^>]*\/?>)\s*/i
+  );
+  if (earlyImg && !/<h[1-6]\b/i.test(earlyImg[1]) && !/<p\b[^>]*>\s*[^<\s]/i.test(earlyImg[1])) {
+    return s.slice(earlyImg[0].length);
+  }
+  return html;
+}
+
+/** Blocks ready for render: drop leading hero/HTML banner when we show CMS cover. */
+function blocksWithoutDuplicateCover(
+  blocks: ArticleBlock[],
+  showingCmsCover: boolean
+): ArticleBlock[] {
+  if (!showingCmsCover || blocks.length === 0) return blocks;
+  const [first, ...rest] = blocks;
   if (first.type === "hero") {
-    return first.image === coverImage || encodeURI(first.image) === encodeURI(coverImage);
+    return rest;
   }
   if (first.type === "html") {
-    const srcMatch = first.content.match(/<img[^>]+src=["']([^"']+)["']/i);
-    const src = srcMatch?.[1]?.trim();
-    if (!src) return false;
-    try {
-      return decodeURI(src) === decodeURI(coverImage) || src === coverImage;
-    } catch {
-      return src === coverImage;
-    }
+    const stripped = stripLeadingBannerImage(first.content);
+    if (!stripped.trim()) return rest;
+    if (stripped === first.content) return blocks;
+    return [{ ...first, content: stripped }, ...rest];
   }
-  return false;
+  return blocks;
 }
 
 const formatInline = (text: string) =>
@@ -296,9 +321,14 @@ export function BlogPostView({ post }: { post: BlogPost }) {
       ? getRouteCTAByRegion(post.region)
       : undefined;
 
-  const showCoverHero =
-    Boolean(post.coverImage) &&
-    !htmlAlreadyHasCover(post.blocks, post.coverImage);
+  const hasCmsCover =
+    Boolean(post.coverImage) && post.coverImage !== PLACEHOLDER_COVER;
+  // Prefer CMS cover; strip the same banner from the start of content_html /
+  // hero blocks so articles don't show the image twice.
+  const showCoverHero = hasCmsCover;
+  const renderBlocks = showCoverHero
+    ? blocksWithoutDuplicateCover(post.blocks, true)
+    : post.blocks;
 
   return (
     <>
@@ -362,7 +392,7 @@ export function BlogPostView({ post }: { post: BlogPost }) {
               ) : null}
               {(() => {
                 let dividerCount = 0;
-                return post.blocks.map((block, index) => {
+                return renderBlocks.map((block, index) => {
                   if (block.type === "divider") {
                     const count = dividerCount;
                     dividerCount++;
