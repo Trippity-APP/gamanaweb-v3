@@ -73,7 +73,7 @@ export default function RelatedCities({
 
 function CityCard({ city }: { city: City }) {
   return (
-    <Link href="/all-cities" className="group block">
+    <Link href="/cities/" className="group block">
       <div className="relative rounded-xl overflow-hidden aspect-[4/3]">
         <img
           src={city.image}

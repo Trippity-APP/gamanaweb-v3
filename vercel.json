@@ -40,6 +40,11 @@
   ],
   "redirects": [
     {
+      "source": "/all-cities",
+      "destination": "/cities/",
+      "statusCode": 301
+    },
+    {
       "source": "/landing",
       "destination": "/download-app/",
       "permanent": true

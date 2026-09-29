@@ -16,15 +16,15 @@ export const routeCTAs: RouteCTA[] = [
     description:
       "From London's royal landmarks to Barcelona's Gaudí masterpieces, Gamana gives you narrated, self-guided walking tours across Europe's greatest cities.",
     cities: [
-      { name: "London", href: "/all-cities" },
-      { name: "Barcelona", href: "/all-cities" },
-      { name: "Paris", href: "/all-cities" },
-      { name: "Rome", href: "/all-cities" },
-      { name: "Amsterdam", href: "/all-cities" },
-      { name: "Prague", href: "/all-cities" },
+      { name: "London", href: "/cities/" },
+      { name: "Barcelona", href: "/cities/" },
+      { name: "Paris", href: "/cities/" },
+      { name: "Rome", href: "/cities/" },
+      { name: "Amsterdam", href: "/cities/" },
+      { name: "Prague", href: "/cities/" },
     ],
     ctaText: "Start your Europe route",
-    ctaLink: "/all-cities",
+    ctaLink: "/cities/",
   },
   {
     id: "southeast-asia",
@@ -33,15 +33,15 @@ export const routeCTAs: RouteCTA[] = [
     description:
       "Singapore, Vietnam, Cambodia and beyond. Walk through markets, temples, and coast with audio in your ears.",
     cities: [
-      { name: "Singapore", href: "/all-cities" },
-      { name: "Hanoi", href: "/all-cities" },
-      { name: "Ho Chi Minh City", href: "/all-cities" },
-      { name: "Kuala Lumpur", href: "/all-cities" },
-      { name: "Jakarta", href: "/all-cities" },
-      { name: "Bangkok", href: "/all-cities" },
+      { name: "Singapore", href: "/cities/" },
+      { name: "Hanoi", href: "/cities/" },
+      { name: "Ho Chi Minh City", href: "/cities/" },
+      { name: "Kuala Lumpur", href: "/cities/" },
+      { name: "Jakarta", href: "/cities/" },
+      { name: "Bangkok", href: "/cities/" },
     ],
     ctaText: "Start your Southeast Asia route",
-    ctaLink: "/all-cities",
+    ctaLink: "/cities/",
   },
   {
     id: "japan",
@@ -50,12 +50,12 @@ export const routeCTAs: RouteCTA[] = [
     description:
       "Tokyo's alleyways, Kyoto's temples, Osaka's street food. Hear Japan at your own pace with GPS-triggered audio tours.",
     cities: [
-      { name: "Tokyo", href: "/all-cities" },
-      { name: "Kyoto", href: "/all-cities" },
-      { name: "Osaka", href: "/all-cities" },
+      { name: "Tokyo", href: "/cities/" },
+      { name: "Kyoto", href: "/cities/" },
+      { name: "Osaka", href: "/cities/" },
     ],
     ctaText: "Start your Japan route",
-    ctaLink: "/all-cities",
+    ctaLink: "/cities/",
   },
   {
     id: "turkey",
@@ -64,10 +64,10 @@ export const routeCTAs: RouteCTA[] = [
     description:
       "Istanbul's bazaars, Byzantine architecture, and Bosphorus views. Hear the city's history as you walk.",
     cities: [
-      { name: "Istanbul", href: "/all-cities" },
+      { name: "Istanbul", href: "/cities/" },
     ],
     ctaText: "Start your Turkey route",
-    ctaLink: "/all-cities",
+    ctaLink: "/cities/",
   },
 ];
 
