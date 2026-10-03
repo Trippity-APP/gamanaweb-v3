@@ -2,186 +2,71 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, MapPin, Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { ArrowUpRight } from "@/components/icons";
+import { ResponsiveImage } from "@/components/site/ResponsiveImage";
 import { City } from "@/lib/data/cities";
 import { ApiCity, getCityHref } from "@/lib/services/cityService";
-import { cn } from "@/lib/utils";
+import { getCityFallbackImage, getCityImage, type CityImage } from "@/lib/city-image";
 
 interface CityCardProps {
     city: City | ApiCity;
 }
 
-const FALLBACK_IMAGE =
-    "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80&fit=crop";
+const SIZES = "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw";
+const IMAGE_CLASS = "object-cover transition-transform duration-700 ease-out-expo group-hover:scale-110 motion-reduce:transition-none";
 
+/** Portrait destination tile (same look as the home CityTile) with a local fallback for expired API images. */
 export const CityCard = ({ city }: CityCardProps) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    
-    // Normalize data
     const cityName = city.name;
-    const countryName = 'country' in city ? city.country : city.country_name;
-    const description = 'description' in city ? city.description : `${cityName} in ${countryName}`;
-    const tags = 'tags' in city ? city.tags : [];
-    const isNew = 'isNew' in city ? city.isNew : (city as ApiCity).is_new;
-    const isPopular = 'isPopular' in city ? city.isPopular : (city as ApiCity).is_popular;
-    const imageUrl = 'image' in city ? city.image : (city.images && city.images.length > 0 ? city.images[0] : FALLBACK_IMAGE);
-    
-    const details = 'details' in city ? city.details : {
-        intro: `Explore the beautiful city of ${cityName}.`,
-        highlights: [city.state_name, countryName].filter(Boolean),
-        languages: ["English"] // Default
-    };
+    const countryName = "country" in city ? city.country : city.country_name;
+    const isNew = "isNew" in city ? city.isNew : (city as ApiCity).is_new;
+    const isPopular = "isPopular" in city ? city.isPopular : (city as ApiCity).is_popular;
 
-    const cityHref = "id" in city && city.id ? getCityHref(city as ApiCity) : null;
-    const [imgSrc, setImgSrc] = useState(imageUrl);
+    const fallback: CityImage = "image" in city ? { src: city.image, alt: cityName } : getCityFallbackImage(city);
+    const primary: CityImage = "image" in city ? fallback : getCityImage(city);
+    const [failed, setFailed] = useState(false);
+    const image = failed ? fallback : primary;
 
-    const handleImgError = () => setImgSrc(FALLBACK_IMAGE);
-
-    const titleBlock = (
-        <>
-            <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-semibold uppercase tracking-wider opacity-90">
-                    {countryName}
-                </span>
-                {isNew && (
-                    <Badge variant="secondary" className="bg-gradient-to-r from-[#1A5F7A] to-[#159895] text-white border-0 text-[10px] h-5 px-1.5 shadow-sm">
-                        NEW
-                    </Badge>
-                )}
-                {isPopular && (
-                    <Badge variant="secondary" className="bg-[#0B6E4F] text-white hover:bg-[#0B6E4F]/90 border-0 text-[10px] h-5 px-1.5 shadow-sm">
-                        POPULAR
-                    </Badge>
-                )}
-            </div>
-            <h3 className="text-2xl font-bold leading-tight drop-shadow-md">{cityName}</h3>
-        </>
-    );
+    const cityHref = "id" in city && city.id ? getCityHref(city as ApiCity) : `/marketplace/?q=${encodeURIComponent(cityName)}`;
 
     return (
-        <div
-            className={cn(
-                "group relative overflow-hidden rounded-2xl border bg-card text-card-foreground transition-all duration-300 hover:border-[#159895]/50",
-                isExpanded ? "ring-2 ring-[#159895] shadow-lg border-[#159895]" : "hover:shadow-md border-muted"
-            )}
+        <Link
+            href={cityHref}
+            className="focus-ring group relative block aspect-[4/5] overflow-hidden rounded-3xl bg-ink shadow-card transition-shadow duration-500 hover:shadow-lift"
         >
-            {/* Card Header / Image Area */}
-            <div
-                className="relative h-48 w-full cursor-pointer overflow-hidden"
-                onClick={() => setIsExpanded(!isExpanded)}
-            >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+            {image.photo ? (
+                <ResponsiveImage image={image.photo} alt={image.alt} title={image.title} sizes={SIZES} fill className={IMAGE_CLASS} />
+            ) : (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
-                    src={imgSrc}
-                    alt={cityName}
-                    onError={handleImgError}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    src={image.src}
+                    alt={image.alt}
+                    loading="lazy"
+                    decoding="async"
+                    onError={() => !failed && setFailed(true)}
+                    className={`absolute inset-0 h-full w-full ${IMAGE_CLASS}`}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" aria-hidden />
 
-                <div className="absolute bottom-4 left-4 right-4 text-white">
-                    {cityHref ? (
-                        <Link href={cityHref} className="block hover:opacity-95 transition-opacity">
-                            {titleBlock}
-                        </Link>
-                    ) : (
-                        titleBlock
+            {(isPopular || isNew) && (
+                <div className="absolute left-3 top-3 flex gap-1.5">
+                    {isPopular && (
+                        <span className="rounded-full bg-white/95 px-2.5 py-0.5 text-[11px] font-bold text-ink shadow-sm">Popular</span>
+                    )}
+                    {isNew && (
+                        <span className="rounded-full bg-sunset-500 px-2.5 py-0.5 text-[11px] font-bold text-white shadow-sm">New</span>
                     )}
                 </div>
+            )}
+            <span className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-ink opacity-0 transition-all duration-500 ease-out-expo group-hover:opacity-100 group-focus-visible:opacity-100">
+                <ArrowUpRight className="h-4 w-4" aria-hidden />
+            </span>
+
+            <div className="absolute inset-x-0 bottom-0 p-4 text-white sm:p-5">
+                <h3 className="font-display text-xl font-bold leading-tight sm:text-2xl">{cityName}</h3>
+                {countryName && <p className="mt-0.5 text-sm text-white/75">{countryName}</p>}
             </div>
-
-            {/* Card Body */}
-            <div className="p-5">
-                <p className="text-muted-foreground text-sm line-clamp-2 mb-4 min-h-[40px]">
-                    {description}
-                </p>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                    {tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs font-normal text-muted-foreground bg-slate-50">
-                            {tag}
-                        </Badge>
-                    ))}
-                    {tags.length > 3 && (
-                        <Badge variant="outline" className="text-xs font-normal text-muted-foreground bg-slate-50">
-                            +{tags.length - 3}
-                        </Badge>
-                    )}
-                </div>
-
-                <Button
-                    variant={isExpanded ? "secondary" : "default"}
-                    className={cn(
-                        "w-full justify-between transition-all duration-300 rounded-xl",
-                        !isExpanded && "bg-gradient-to-r from-[#159895] to-[#1A5F7A] hover:from-[#159895] hover:to-[#1A5F7A] text-white border-0 shadow-md hover:shadow-lg"
-                    )}
-                    onClick={() => setIsExpanded(!isExpanded)}
-                >
-                    {isExpanded ? "Close" : "Open"}
-                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </Button>
-
-                {/* Expanded Content */}
-                <div
-                    className={cn(
-                        "grid transition-all duration-300 ease-in-out",
-                        isExpanded ? "grid-rows-[1fr] opacity-100 mt-6 pt-6 border-t border-[#159895]/20" : "grid-rows-[0fr] opacity-0"
-                    )}
-                >
-                    <div className="overflow-hidden">
-                        <h4 className="font-semibold mb-2 flex items-center gap-2 text-[#1A5F7A]">
-                            <MapPin className="h-4 w-4 text-[#159895]" />
-                            What Gamana covers
-                        </h4>
-                        <p className="text-sm text-muted-foreground mb-4">
-                            {details.intro}
-                        </p>
-
-                        <h4 className="font-semibold mb-2 text-sm text-[#1A5F7A]">Highlights</h4>
-                        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6">
-                            {details.highlights.map((item, idx) => (
-                                <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#159895]/60 mt-1.5 shrink-0" />
-                                    {item}
-                                </li>
-                            ))}
-                        </ul>
-
-                        <div className="flex flex-col gap-3">
-                            <div className="text-xs text-muted-foreground">
-                                <span className="font-medium text-foreground">Languages: </span>
-                                {details.languages.join(", ")}
-                            </div>
-
-
-                            {/* Routes into Explore pre-filtered to this city rather than out
-                                to the app store, MarketplaceBrowser reads ?city= client-side
-                                and seeds both the Tours and Experiences filters from it. */}
-                            {cityHref && (
-                                <Button
-                                    asChild
-                                    variant="outline"
-                                    className="w-full rounded-xl"
-                                >
-                                    <Link href={cityHref}>View city page</Link>
-                                </Button>
-                            )}
-
-                            <Button
-                                asChild
-                                className="w-full bg-gradient-to-r from-[#1A5F7A] to-[#159895] text-white hover:opacity-90 shadow-md rounded-xl"
-                            >
-                                <Link href={`/marketplace?city=${encodeURIComponent(cityName)}`}>
-                                    <Play className="mr-2 h-4 w-4 fill-current" />
-                                    Explore this City
-                                </Link>
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </Link>
     );
 };

@@ -1,69 +1,45 @@
 import { Metadata } from 'next';
-import { TrendingUp, Gift as GiftIcon, Shield, Wallet, DollarSign, Award } from 'lucide-react';
+import { TrendingUp, Gift as GiftIcon, Shield, Wallet, DollarSign, Award } from '@/components/icons';
 import EnhancedPageLayout from '@/components/enhanced-page-layout';
 import { GamanaCoinIcon } from '@/components/GamanaCoinIcon';
+import { JsonLd } from '@/components/site/JsonLd';
+import { OG_IMAGE, organizationJsonLd } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'Gamana Coins Rewards & Benefits',
-  description: 'Earn and redeem Gamana Coins for discounts, upgrades, and exclusive travel perks. Get more value from every self-guided audio tour on Gamana.',
+  title: { absolute: "Travel Rewards with Gamana Coins | Gamana" },
+  description: "Earn Gamana Coins through tours, reviews, and milestones, then redeem them for premium tours, discounts, upgrades, and exclusive experiences.",
   alternates: {
     canonical: 'https://www.gamana.app/features/gamana-coins/',
   },
   openGraph: {
-    title: 'Gamana Coins Rewards & Benefits | Gamana',
-    description: 'Earn and redeem Gamana Coins for discounts, upgrades, and exclusive travel perks. Get more value from every self-guided audio tour on Gamana.',
+    title: "Travel Rewards with Gamana Coins | Gamana",
+    description: "Earn Gamana Coins through tours, reviews, and milestones, then redeem them for premium tours, discounts, upgrades, and exclusive experiences.",
     url: 'https://www.gamana.app/features/gamana-coins/',
     siteName: 'Gamana',
     type: 'website',
-    images: [
-      {
-        url: '/gamana-logo.svg',
-        alt: 'Gamana Logo',
-        width: 1200,
-        height: 630,
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Gamana Coins Rewards & Benefits | Gamana',
-    description: 'Earn and redeem Gamana Coins for discounts, upgrades, and exclusive travel perks. Get more value from every self-guided audio tour on Gamana.',
-    images: ['/gamana-logo.svg'],
+    title: "Travel Rewards with Gamana Coins | Gamana",
+    description: "Earn Gamana Coins through tours, reviews, and milestones, then redeem them for premium tours, discounts, upgrades, and exclusive experiences.",
+    images: [OG_IMAGE.url],
   },
 };
 
 export default function GamanaCoinsPage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "Gamana",
-            "url": "https://www.gamana.app",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://www.gamana.app/gamana-logo.svg",
-              "name": "Gamana Logo",
-              "caption": "Gamana Logo"
-            },
-            "sameAs": [
-              "https://www.facebook.com/gamanaapp",
-              "https://twitter.com/gamanaapp",
-              "https://www.instagram.com/gamanaapp"
-            ]
-          })
-        }}
-      />
+      <JsonLd data={organizationJsonLd()} />
       <EnhancedPageLayout
       icon={GamanaCoinIcon}
       title="Gamana Coins"
-      subtitle="Loyalty rewards that turn your adventures into tangible benefits"
-      gradient="from-[#159895] via-[#1A5F7A] to-[#57C5B6]"
-      heroImage="/jaipur travel guide explore top places in the pink city with an audio guide app.jpg"
+      subtitle="Turn your exploration into rewards by earning Gamana Coins through tours, reviews, and milestones, then using them for valuable travel experiences."
+      slug="gamana-coins"
+      heading="Earn Travel Rewards as You Explore"
+      heroAlt="Gamana Coins travel rewards for tours, reviews, and premium travel experiences"
+      heroTitle="Gamana Coins travel rewards"
       introTitle="Earn While You Explore"
       introText={[
         'Gamana Coins are our loyalty reward system that recognizes and rewards your engagement with the platform. Every tour you complete, review you write, and milestone you reach earns you coins that have real value.',

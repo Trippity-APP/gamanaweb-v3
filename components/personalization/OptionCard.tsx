@@ -1,6 +1,7 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check } from "@/components/icons";
+import { cn } from "@/lib/utils";
 
 /**
  * Shared with the Start Your Gamana Journey wizard and the /account Personalization
@@ -21,19 +22,26 @@ export function OptionCard({
     <button
       type="button"
       onClick={onClick}
-      className={`text-left rounded-xl border-2 p-4 transition-all ${
-        selected ? "border-[#159895] bg-[#159895]/5" : "border-gray-200 hover:border-[#159895]/40"
-      }`}
+      aria-pressed={selected}
+      className={cn(
+        "focus-ring group text-left rounded-2xl border-2 p-4 transition-all duration-300 ease-spring active:scale-[0.98]",
+        selected
+          ? "scale-[1.01] border-brand-600 bg-brand-50 shadow-card"
+          : "border-ink/10 bg-white hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-card"
+      )}
     >
-      <div className="flex items-center justify-between">
-        <span className="font-semibold text-gray-900">{label}</span>
-        {selected && (
-          <span className="w-5 h-5 rounded-full bg-[#159895] flex items-center justify-center shrink-0">
-            <Check className="h-3 w-3 text-white" />
-          </span>
-        )}
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-semibold text-ink">{label}</span>
+        <span
+          className={cn(
+            "grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition-all duration-300 ease-spring",
+            selected ? "scale-100 border-brand-600 bg-brand-600" : "scale-90 border-ink/15 group-hover:border-brand-400"
+          )}
+        >
+          <Check className={cn("h-3.5 w-3.5 text-white transition-transform duration-300 ease-spring", selected ? "scale-100" : "scale-0")} />
+        </span>
       </div>
-      {description && <p className="text-sm text-gray-600 mt-1">{description}</p>}
+      {description && <p className="mt-1 text-sm text-ink-soft">{description}</p>}
     </button>
   );
 }

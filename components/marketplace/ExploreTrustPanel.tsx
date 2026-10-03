@@ -1,6 +1,6 @@
 'use client';
 
-import { Headphones, CloudDownload, Users2, Compass, Smartphone, type LucideIcon } from 'lucide-react';
+import { Headphones, CloudDownload, Users2, Compass, Smartphone, type LucideIcon } from '@/components/icons';
 import { GetAppFreeButton } from '@/components/DownloadAppDialog';
 
 export const trustPoints: { icon: LucideIcon; title: string; description: string }[] = [

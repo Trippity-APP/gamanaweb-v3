@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LogIn, ShoppingBag, Sparkles, Settings, LogOut, User as UserIcon } from "lucide-react";
+import { LogIn, ShoppingBag, Sparkles, Settings, LogOut, User as UserIcon } from "@/components/icons";
 import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

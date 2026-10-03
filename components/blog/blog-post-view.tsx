@@ -2,16 +2,21 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ChevronRight } from "@/components/icons";
+import { useRef } from "react";
 
 import Footer from "@/components/navigation/footer";
-import { Button } from "@/components/ui/button";
+import SiteHeader from "@/components/navigation/site-header";
+import { DownloadBand } from "@/components/site/DownloadBand";
+import { JsonLd } from "@/components/site/JsonLd";
+import { StoreBadges } from "@/components/site/StoreBadges";
+import { ReadingProgress, TableOfContents } from "@/components/blog/reading-aids";
+import { absoluteUrl, breadcrumbJsonLd } from "@/lib/seo";
 import { BlogCoverImage } from "@/components/blog/blog-cover-image";
 import { getRouteCTAByRegion } from "@/lib/data/route-ctas";
-import type { ArticleBlock } from "@/content/blog/articles";
+import type { ArticleBlock } from "@/content/blog/types";
 import type { BlogPost } from "@/lib/blog";
 import StickyDownloadCTA from "@/components/blog/sticky-download-cta";
-import EndOfArticleCTA from "@/components/blog/end-of-article-cta";
 import RouteCTAModule from "@/components/blog/route-cta-module";
 import RelatedPosts from "@/components/blog/related-posts";
 import RelatedCities from "@/components/blog/related-cities";
@@ -98,7 +103,7 @@ const processLinks = (html: string) => {
 };
 
 const articleHtmlClassName =
-  "blog-article-html [&_p]:text-base sm:[&_p]:text-lg [&_p]:text-gray-700 [&_p]:leading-relaxed [&_p]:mb-6 [&_a]:text-[#159895] [&_a]:font-medium [&_a]:underline hover:[&_a]:text-[#1A5F7A] [&_h2]:mt-12 [&_h2]:mb-4 [&_h2]:text-xl sm:[&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h3]:mt-8 [&_h3]:mb-3 [&_h3]:text-lg sm:[&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:font-semibold [&_h3]:text-gray-900 [&_h4]:mt-6 [&_h4]:mb-3 [&_h4]:text-base sm:[&_h4]:text-lg md:[&_h4]:text-xl [&_h4]:font-semibold [&_h4]:text-gray-800 [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-3 [&_ul]:mb-8 [&_ul]:text-gray-700 [&_ol]:list-decimal [&_ol]:list-inside [&_ol]:space-y-3 [&_ol]:mb-8 [&_ol]:text-gray-700 [&_blockquote]:border-l-4 [&_blockquote]:border-[#159895] [&_blockquote]:pl-4 sm:[&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:text-base sm:[&_blockquote]:text-lg md:[&_blockquote]:text-xl [&_blockquote]:mb-8 [&_figure]:mb-10 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-3xl [&_hr]:my-12";
+  "blog-article-html [&_p]:text-base sm:[&_p]:text-lg [&_p]:text-ink-soft [&_p]:leading-[1.8] [&_p]:mb-6 [&_a]:text-brand-700 [&_a]:font-medium [&_a]:underline hover:[&_a]:text-[#1A5F7A] [&_h2]:mt-12 [&_h2]:mb-4 [&_h2]:text-xl sm:[&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:font-display [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:text-ink [&_h3]:mt-8 [&_h3]:mb-3 [&_h3]:text-lg sm:[&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:font-display [&_h3]:font-semibold [&_h3]:text-ink [&_h4]:mt-6 [&_h4]:mb-3 [&_h4]:text-base sm:[&_h4]:text-lg md:[&_h4]:text-xl [&_h4]:font-semibold [&_h4]:text-gray-800 [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-3 [&_ul]:mb-8 [&_ul]:text-ink-soft [&_ol]:list-decimal [&_ol]:list-inside [&_ol]:space-y-3 [&_ol]:mb-8 [&_ol]:text-ink-soft [&_blockquote]:border-l-4 [&_blockquote]:border-[#159895] [&_blockquote]:pl-4 sm:[&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-ink-soft [&_blockquote]:text-base sm:[&_blockquote]:text-lg md:[&_blockquote]:text-xl [&_blockquote]:mb-8 [&_figure]:mb-10 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-3xl [&_hr]:my-12";
 
 const renderBlock = (
   block: ArticleBlock,
@@ -281,32 +286,7 @@ const renderBlock = (
             <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed font-medium mb-8 [&_a]:text-[#159895] [&_a]:font-medium [&_a]:underline [&_a:hover]:text-[#1A5F7A] [&_a]:transition-colors"
               dangerouslySetInnerHTML={{ __html: processLinks(formatInline(block.subtitle)) }}
             />
-            <div className="flex gap-4 justify-center flex-wrap">
-              <a
-                href="https://play.google.com/store/apps/details?id=com.agent.gamana.ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:scale-105 transition-transform"
-              >
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
-                  alt="Download Gamana on Google Play"
-                  className="h-14 w-auto"
-                />
-              </a>
-              <a
-                href="https://apps.apple.com/in/app/gamana-ai/id6748155654"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:scale-105 transition-transform"
-              >
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg"
-                  alt="Download Gamana on the App Store"
-                  className="h-14 w-auto"
-                />
-              </a>
-            </div>
+            <StoreBadges source="blog_inline_cta" keyword="travel guide app" size="lg" className="justify-center" />
           </div>
         </div>
       );
@@ -316,6 +296,7 @@ const renderBlock = (
 };
 
 export function BlogPostView({ post }: { post: BlogPost }) {
+  const articleRef = useRef<HTMLDivElement>(null);
   const routeCTA =
     post.region && post.region !== "general"
       ? getRouteCTAByRegion(post.region)
@@ -329,67 +310,97 @@ export function BlogPostView({ post }: { post: BlogPost }) {
   const renderBlocks = showCoverHero
     ? blocksWithoutDuplicateCover(post.blocks, true)
     : post.blocks;
+  const canonicalPath = `/blog/${post.slug}/`;
 
   return (
     <>
-      <main className="bg-white">
-        <article className="relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-10 right-10 w-72 h-72 rounded-full bg-[#159895]/30 blur-3xl" />
-            <div className="absolute bottom-10 left-0 w-96 h-96 rounded-full bg-[#1A5F7A]/30 blur-3xl" />
-          </div>
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-16">
-            <Button
-              variant="ghost"
-              asChild
-              className="mb-10 text-[#1A5F7A] hover:text-[#159895]"
-            >
-              <Link href="/blog">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to stories
-              </Link>
-            </Button>
-            <div className="max-w-4xl mx-auto">
-              <p className="text-xs sm:text-sm text-[#1A5F7A] font-semibold mb-4">
-                {new Date(post.date).toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}{" "}
-                • {post.readTime}
-              </p>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-gray-900 mb-6">
-                {post.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-8">
+      <SiteHeader variant="solid" />
+      <ReadingProgress target={articleRef} />
+      <main className="bg-sand-50">
+        <JsonLd
+          data={[
+            breadcrumbJsonLd([
+              { name: "Home", path: "/" },
+              { name: "Blog", path: "/blog/" },
+              { name: post.title, path: canonicalPath },
+            ]),
+            {
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              headline: post.title,
+              description: post.excerpt,
+              datePublished: post.date,
+              author: { "@type": "Person", name: post.author },
+              publisher: { "@type": "Organization", name: "Gamana", url: "https://www.gamana.app" },
+              mainEntityOfPage: absoluteUrl(canonicalPath),
+              ...(hasCmsCover ? { image: absoluteUrl(post.coverImage) } : {}),
+            },
+          ]}
+        />
+        <article className="container-site pb-16 pt-6 sm:pt-8">
+          <nav aria-label="Breadcrumb" className="mx-auto mb-8 max-w-3xl lg:mx-0">
+            <ol className="flex flex-wrap items-center gap-1.5 text-sm text-ink-muted">
+              <li className="flex items-center gap-1.5">
+                <Link href="/" className="focus-ring rounded hover:text-brand-700">Home</Link>
+                <ChevronRight className="h-3.5 w-3.5 text-ink/30" aria-hidden />
+              </li>
+              <li className="flex items-center gap-1.5">
+                <Link href="/blog/" className="focus-ring rounded hover:text-brand-700">Blog</Link>
+                <ChevronRight className="h-3.5 w-3.5 text-ink/30" aria-hidden />
+              </li>
+              <li aria-current="page" className="max-w-[16rem] truncate font-medium text-ink sm:max-w-md">{post.title}</li>
+            </ol>
+          </nav>
+
+          <header className="mx-auto max-w-3xl text-center">
+            <p className="text-sm font-semibold text-brand-700">
+              {new Date(post.date).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+              {" · "}
+              {post.readTime}
+            </p>
+            <h1 className="text-display-title mt-4 text-balance text-ink">
+              {post.title}
+            </h1>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
+              <div className="flex items-center gap-2.5 text-left">
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white" aria-hidden>
+                  {post.author.trim().charAt(0).toUpperCase()}
+                </span>
                 <div>
-                  <p className="text-base sm:text-lg font-semibold text-gray-900">
-                    {post.author}
-                  </p>
-                  <p className="text-xs sm:text-sm">{post.authorTitle}</p>
+                  <p className="text-sm font-semibold text-ink">{post.author}</p>
+                  {post.authorTitle && <p className="text-xs text-ink-muted">{post.authorTitle}</p>}
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1 rounded-full bg-[#159895]/10 text-[#159895] text-xs font-semibold"
-                    >
+              </div>
+              {post.tags.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  {post.tags.slice(0, 4).map((tag) => (
+                    <span key={tag} className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-800">
                       #{tag}
                     </span>
                   ))}
                 </div>
-              </div>
-              {showCoverHero ? (
-                <div className="relative mb-10 aspect-[16/9] w-full overflow-hidden rounded-3xl shadow-2xl">
-                  <BlogCoverImage
-                    src={post.coverImage}
-                    alt={post.title}
-                    fill
-                    priority
-                    className="object-cover"
-                  />
-                </div>
-              ) : null}
+              )}
+            </div>
+          </header>
+
+          {showCoverHero ? (
+            <div className="relative mx-auto mt-10 aspect-[16/9] w-full max-w-5xl overflow-hidden rounded-4xl shadow-lift">
+              <BlogCoverImage
+                src={post.coverImage}
+                alt={post.title}
+                fill
+                priority
+                className="object-cover"
+              />
+            </div>
+          ) : null}
+
+          <div className="mx-auto mt-12 grid max-w-5xl gap-10 lg:grid-cols-[minmax(0,1fr)_240px] xl:max-w-6xl xl:grid-cols-[minmax(0,1fr)_280px]">
+            <div ref={articleRef} className="min-w-0 max-w-3xl">
               {(() => {
                 let dividerCount = 0;
                 return renderBlocks.map((block, index) => {
@@ -402,15 +413,26 @@ export function BlogPostView({ post }: { post: BlogPost }) {
                 });
               })()}
             </div>
+            <aside className="hidden lg:block">
+              <div className="sticky top-32">
+                <TableOfContents target={articleRef} />
+              </div>
+            </aside>
           </div>
         </article>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-          <EndOfArticleCTA region={post.region} title={post.title} />
+
+        <div className="container-site max-w-4xl space-y-4">
           {routeCTA && <RouteCTAModule route={routeCTA} />}
           <RelatedPosts currentSlug={post.slug} currentTags={post.tags} />
           <RelatedCities region={post.region} />
           <InternalLinkingWidget />
         </div>
+        <DownloadBand
+          title={post.region && post.region !== "general" ? "Plan this trip with Gamana" : "Use Gamana for this trip"}
+          lead="Audio stories and self-guided walks that play as you explore, even without signal."
+          source="blog_post_end"
+          keyword="travel guide app"
+        />
       </main>
       <StickyDownloadCTA />
       <Footer />

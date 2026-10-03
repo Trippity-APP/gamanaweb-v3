@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ShoppingBag, Minus, Plus, X, Check, CreditCard, Smartphone as UpiIcon, Smartphone, MapPin } from "lucide-react";
+import { ShoppingBag, Minus, Plus, X, Check, CreditCard, Smartphone as UpiIcon, Smartphone, MapPin } from "@/components/icons";
 import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import { Button } from "@/components/ui/button";
 import {

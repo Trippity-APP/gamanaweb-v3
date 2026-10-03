@@ -1,68 +1,44 @@
 import { Metadata } from 'next';
-import { Globe, Languages, Volume2, Map, Mic2, BookOpen, MessageSquare } from 'lucide-react';
+import { Globe, Languages, Volume2, Map, Mic2, BookOpen, MessageSquare } from '@/components/icons';
 import EnhancedPageLayout from '@/components/enhanced-page-layout';
+import { JsonLd } from '@/components/site/JsonLd';
+import { OG_IMAGE, organizationJsonLd } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'Local Languages for Cultural Walking Tours',
-  description: 'Experience authentic local narratives in multiple languages during immersive walking tours. Connect deeper with culture and communities through Gamana.',
+  title: { absolute: "Multilingual Audio Tours in Local Languages | Gamana" },
+  description: "Explore with multilingual audio tours, native-speaker narration, cultural context, and language options that help you connect with each destination.",
   alternates: {
     canonical: 'https://www.gamana.app/features/local-languages/',
   },
   openGraph: {
-    title: 'Local Languages for Cultural Walking Tours | Gamana',
-    description: 'Experience authentic local narratives in multiple languages during immersive walking tours. Connect deeper with culture and communities through Gamana.',
+    title: "Multilingual Audio Tours in Local Languages | Gamana",
+    description: "Explore with multilingual audio tours, native-speaker narration, cultural context, and language options that help you connect with each destination.",
     url: 'https://www.gamana.app/features/local-languages/',
     siteName: 'Gamana',
     type: 'website',
-    images: [
-      {
-        url: '/gamana-logo.svg',
-        alt: 'Gamana Logo',
-        width: 1200,
-        height: 630,
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Local Languages for Cultural Walking Tours | Gamana',
-    description: 'Experience authentic local narratives in multiple languages during immersive walking tours. Connect deeper with culture and communities through Gamana.',
-    images: ['/gamana-logo.svg'],
+    title: "Multilingual Audio Tours in Local Languages | Gamana",
+    description: "Explore with multilingual audio tours, native-speaker narration, cultural context, and language options that help you connect with each destination.",
+    images: [OG_IMAGE.url],
   },
 };
 
 export default function LocalLanguagesPage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "Gamana",
-            "url": "https://www.gamana.app",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://www.gamana.app/gamana-logo.svg",
-              "name": "Gamana Logo",
-              "caption": "Gamana Logo"
-            },
-            "sameAs": [
-              "https://www.facebook.com/gamanaapp",
-              "https://twitter.com/gamanaapp",
-              "https://www.instagram.com/gamanaapp"
-            ]
-          })
-        }}
-      />
+      <JsonLd data={organizationJsonLd()} />
       <EnhancedPageLayout
       icon={Globe}
       title="Local Languages"
-      subtitle="Hear tours in the language that feels most natural to you"
-      gradient="from-[#159895] via-[#1A5F7A] to-[#57C5B6]"
-      heroImage="/fort-kochi-local-market.jpg"
+      subtitle="Listen to tours in the language that feels natural to you, with native-speaker narration and cultural context that helps you connect more deeply with each destination."
+      slug="local-languages"
+      heading="Explore Destinations Through Local Languages"
+      heroAlt="Gamana multilingual audio tours with local-language narration and cultural context"
+      heroTitle="Gamana multilingual audio tours in local languages"
       introTitle="Connect Through Language"
       introText={[
         'Experience destinations the way locals do with multi-language support. Gamana offers tours and narratives in numerous languages, allowing you to connect more deeply with the culture, history, and community of each place you visit.',

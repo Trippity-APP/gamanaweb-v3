@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Building2, Check, Lock, Shield, Wallet } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { ArrowRight, Building2, Check, Lock, Shield, Sparkles, Wallet } from "@/components/icons";
 import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
+import { Reveal } from "@/components/motion/Reveal";
+import { cn } from "@/lib/utils";
 import {
   coinPacks,
   detectPricingCurrency,
@@ -15,20 +15,7 @@ import {
   type PricingCurrency,
 } from "@/lib/coin-pricing";
 
-const steps = [
-  {
-    title: "Buy a pack",
-    text: "Pick the coins you need for this trip. One payment, no subscription.",
-  },
-  {
-    title: "Coins sit in your wallet",
-    text: "They stay with your Gamana account until you spend them.",
-  },
-  {
-    title: "Unlock as you walk",
-    text: "Use coins on premium stories and walks. Free stories stay free.",
-  },
-];
+const CURRENCIES = ["INR", "USD"] as const;
 
 export function PricingCatalog() {
   const [currency, setCurrency] = useState<PricingCurrency>("USD");
@@ -44,191 +31,179 @@ export function PricingCatalog() {
     persistPricingCurrency(next);
   };
 
-  const faqs = [
-    {
-      question: "Where do my coins appear?",
-      answer:
-        "After a successful purchase, coins are credited to your Gamana account. Use them in the app or on the website to unlock premium stories and walks.",
-    },
-    {
-      question: "Can I get a refund?",
-      answer:
-        "Unused coin packs follow our refund policy. If a payment fails or looks wrong, email support@gamana.app and we will help.",
-    },
-    {
-      question: "What if I need more than 25 coins?",
-      answer:
-        "Volumes above 25 coins are Enterprise. Contact us for teams, partners, and bulk purchases.",
-    },
-  ];
-
   return (
-    <>
-      <section className="bg-gray-50 py-12 sm:py-16">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Choose a pack</h2>
-              <p className="mt-1 text-sm text-gray-500">
-                {ready
-                  ? `Showing prices in ${currency}. Switch anytime.`
-                  : "Loading prices for your location…"}
-              </p>
-            </div>
-            <div className="inline-flex rounded-full border border-gray-200 bg-white p-1 text-sm font-semibold">
-              {(["INR", "USD"] as const).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => chooseCurrency(option)}
-                  className={`rounded-full px-4 py-1.5 transition-colors ${
-                    currency === option
-                      ? "bg-[#159895] text-white"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
+    <section className="section bg-sand-50">
+      <div className="container-site">
+        <div className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-h2 text-ink">Choose a pack</h2>
+            <p className="mt-2 text-ink-soft" aria-live="polite">
+              {ready ? `Showing prices in ${currency}. Switch anytime.` : "Loading prices for your location…"}
+            </p>
           </div>
+          <div
+            role="group"
+            aria-label="Currency"
+            className="relative inline-grid w-fit grid-cols-2 rounded-full border border-ink/10 bg-white p-1 text-sm font-semibold shadow-card"
+          >
+            <span
+              className={cn(
+                "absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-brand-700 shadow-sm transition-transform duration-500 ease-spring",
+                currency === "USD" && "translate-x-full"
+              )}
+              aria-hidden
+            />
+            {CURRENCIES.map((option) => (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={currency === option}
+                onClick={() => chooseCurrency(option)}
+                className={cn(
+                  "focus-ring relative z-10 rounded-full px-6 py-2 transition-colors duration-300",
+                  currency === option ? "text-white" : "text-ink-soft hover:text-ink"
+                )}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4 xl:items-stretch">
-            {coinPacks.map((pack) => {
-              const price = formatMoney(packPrice(pack, currency), currency);
-              const popular = Boolean(pack.popular);
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4 xl:items-stretch">
+          {coinPacks.map((pack, i) => {
+            const price = formatMoney(packPrice(pack, currency), currency);
+            const popular = Boolean(pack.popular);
 
-              return (
-                <Card
-                  key={pack.id}
-                  className={`relative flex h-full flex-col overflow-hidden rounded-2xl bg-white ${
+            return (
+              <Reveal key={pack.id} delay={i * 80} className={cn("h-full", popular && "xl:-mt-4")}>
+                <div
+                  className={cn(
+                    "group relative flex h-full flex-col overflow-hidden rounded-3xl transition-all duration-500 ease-out-expo hover:-translate-y-1",
                     popular
-                      ? "border-transparent shadow-lg ring-2 ring-[#159895] xl:-mt-2"
-                      : "border-gray-200 shadow-sm"
-                  }`}
+                      ? "bg-gradient-to-br from-brand-800 via-brand-700 to-brand-600 text-white shadow-lift ring-2 ring-sunset-400/70"
+                      : "border border-ink/10 bg-white text-ink shadow-card hover:shadow-lift"
+                  )}
                 >
                   {popular && (
-                    <p className="bg-[#159895] py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-white">
-                      Most popular with travelers
-                    </p>
+                    <>
+                      <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-sunset-400/25 blur-2xl" aria-hidden />
+                      <p className="relative flex items-center justify-center gap-1.5 bg-sunset-400 py-2 text-center text-[11px] font-bold uppercase tracking-wider text-ink">
+                        <Sparkles className="h-3.5 w-3.5" aria-hidden />
+                        Most popular with travelers
+                      </p>
+                    </>
                   )}
-                  <CardHeader className="space-y-3 p-6 pb-2">
-                    {!popular && <div className="h-6" />}
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F0FBFA]">
-                      <GamanaCoinIcon className="h-5 w-5" aria-hidden />
-                    </div>
-                    <div>
-                      <p className="text-4xl font-bold leading-none text-gray-900">{pack.coins}</p>
-                      <p className="mt-1 text-sm text-gray-500">Coins</p>
-                    </div>
-                    <p className="text-2xl font-semibold text-gray-900">{price}</p>
-                    <p className="text-sm leading-relaxed text-gray-500">{pack.blurb}</p>
-                  </CardHeader>
-                  <CardContent className="flex-1 px-6 pb-2">
-                    <ul className="space-y-2">
+                  <div className={cn("relative flex flex-1 flex-col p-7", !popular && "pt-[3.75rem]")}>
+                    <span
+                      className={cn(
+                        "grid h-12 w-12 place-items-center rounded-2xl transition-transform duration-500 ease-spring group-hover:-rotate-12 group-hover:scale-110",
+                        popular ? "bg-white/15" : "bg-brand-50"
+                      )}
+                    >
+                      <GamanaCoinIcon className="h-6 w-6" aria-hidden />
+                    </span>
+                    <p className="mt-5 flex items-baseline gap-2">
+                      <span className="font-display text-5xl font-extrabold leading-none">{pack.coins}</span>
+                      <span className={cn("text-sm", popular ? "text-white/75" : "text-ink-muted")}>Coins</span>
+                    </p>
+                    <p
+                      key={currency}
+                      className="mt-3 animate-fade-in font-display text-3xl font-bold"
+                    >
+                      {price}
+                    </p>
+                    <p className={cn("mt-3 text-sm leading-relaxed", popular ? "text-white/80" : "text-ink-soft")}>
+                      {pack.blurb}
+                    </p>
+                    <ul className="mt-5 flex-1 space-y-2.5">
                       {pack.bullets.map((bullet) => (
-                        <li key={bullet} className="flex gap-2 text-sm text-gray-600">
-                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#159895]" />
+                        <li
+                          key={bullet}
+                          className={cn("flex gap-2.5 text-sm", popular ? "text-white/90" : "text-ink-soft")}
+                        >
+                          <span
+                            className={cn(
+                              "mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full",
+                              popular ? "bg-sunset-400 text-ink" : "bg-brand-700 text-white"
+                            )}
+                          >
+                            <Check className="h-2.5 w-2.5" aria-hidden />
+                          </span>
                           {bullet}
                         </li>
                       ))}
                     </ul>
-                  </CardContent>
-                  <CardFooter className="flex flex-col items-stretch gap-2 p-6 pt-4">
-                    <Button
+                    <button
                       type="button"
                       disabled
                       aria-disabled="true"
-                      className={
-                        popular
-                          ? "w-full bg-[#159895] text-white opacity-90 hover:bg-[#159895]"
-                          : "w-full bg-gray-900 text-white opacity-80 hover:bg-gray-900"
-                      }
+                      className={cn(
+                        "mt-7 w-full cursor-not-allowed rounded-full px-5 py-3 text-sm font-semibold",
+                        popular ? "bg-white text-brand-800 opacity-95" : "bg-ink text-white opacity-85"
+                      )}
                     >
                       Buy {pack.coins} coins · {price}
-                    </Button>
-                    <p className="text-center text-xs text-gray-400">Checkout coming soon</p>
-                  </CardFooter>
-                </Card>
-              );
-            })}
-          </div>
-
-          <div className="mt-10 grid gap-3 sm:grid-cols-3">
-            <div className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
-              <Shield className="mt-0.5 h-4 w-4 shrink-0 text-[#159895]" />
-              <p className="text-sm text-gray-600">
-                Secure checkout with Razorpay when payments go live.
-              </p>
-            </div>
-            <div className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
-              <Lock className="mt-0.5 h-4 w-4 shrink-0 text-[#159895]" />
-              <p className="text-sm text-gray-600">
-                One-time packs. Not a subscription. Unused coins stay in your wallet.
-              </p>
-            </div>
-            <div className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
-              <Wallet className="mt-0.5 h-4 w-4 shrink-0 text-[#159895]" />
-              <p className="text-sm text-gray-600">
-                Questions? Write to{" "}
-                <a href="mailto:support@gamana.app" className="font-medium text-[#159895]">
-                  support@gamana.app
-                </a>
-                .
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8 rounded-2xl border border-[#159895]/20 bg-white p-8 shadow-sm sm:p-10">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="max-w-2xl space-y-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F0FBFA]">
-                  <Building2 className="h-5 w-5 text-[#1A5F7A]" />
+                    </button>
+                    <p className={cn("mt-2 text-center text-xs", popular ? "text-white/65" : "text-ink-muted")}>
+                      Checkout coming soon
+                    </p>
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Enterprise</h2>
-                <p className="text-base leading-relaxed text-gray-600">
-                  Need more than 25 coins? Teams, partners, and bulk purchases go through
-                  Enterprise. We will set a volume that matches how you travel or work with
-                  Gamana.
+              </Reveal>
+            );
+          })}
+        </div>
+
+        <ul className="mt-10 grid gap-3 sm:grid-cols-3">
+          {[
+            { icon: Shield, text: <>Secure checkout with Razorpay when payments go live.</> },
+            { icon: Lock, text: <>One-time packs. Not a subscription. Unused coins stay in your wallet.</> },
+            {
+              icon: Wallet,
+              text: (
+                <>
+                  Questions? Write to{" "}
+                  <a href="mailto:support@gamana.app" className="font-semibold text-brand-700 underline-offset-2 hover:underline">
+                    support@gamana.app
+                  </a>
+                  .
+                </>
+              ),
+            },
+          ].map(({ icon: Icon, text }, i) => (
+            <li key={i} className="flex items-start gap-3 rounded-2xl border border-ink/5 bg-white px-5 py-4 shadow-card">
+              <Icon className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" aria-hidden />
+              <p className="text-sm text-ink-soft">{text}</p>
+            </li>
+          ))}
+        </ul>
+
+        <Reveal className="mt-8">
+          <div className="relative overflow-hidden rounded-4xl bg-ink p-8 text-white shadow-lift sm:p-10">
+            <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-500/25 blur-3xl" aria-hidden />
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-2xl">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/10">
+                  <Building2 className="h-6 w-6 text-brand-200" aria-hidden />
+                </span>
+                <h2 className="text-h3 mt-5">Enterprise</h2>
+                <p className="mt-3 leading-relaxed text-white/75">
+                  Need more than 25 coins? Teams, partners, and bulk purchases go through Enterprise. We will set a
+                  volume that matches how you travel or work with Gamana.
                 </p>
               </div>
-              <Button
-                asChild
-                className="h-11 shrink-0 bg-[#1A5F7A] px-6 font-semibold text-white hover:bg-[#164e63]"
+              <Link
+                href="/contact/"
+                className="focus-ring group inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-7 py-3.5 font-semibold text-ink transition-all duration-300 ease-spring hover:-translate-y-0.5 hover:shadow-lift active:scale-95"
               >
-                <Link href="/contact">Contact us</Link>
-              </Button>
+                Contact us
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+              </Link>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="bg-white py-12 sm:py-16">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900">How it works</h2>
-          <div className="mt-6 grid gap-5 sm:grid-cols-3">
-            {steps.map((step, index) => (
-              <div key={step.title} className="rounded-2xl border border-gray-100 bg-gray-50 p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#159895]">
-                  Step {index + 1}
-                </p>
-                <h3 className="mt-2 font-semibold text-gray-900">{step.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{step.text}</p>
-              </div>
-            ))}
-          </div>
-
-          <h2 className="mt-12 text-2xl font-bold text-gray-900">Questions</h2>
-          <dl className="mt-6 space-y-6">
-            {faqs.map((faq) => (
-              <div key={faq.question} className="border-b border-gray-100 pb-6">
-                <dt className="font-semibold text-gray-900">{faq.question}</dt>
-                <dd className="mt-2 text-sm leading-relaxed text-gray-600">{faq.answer}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </section>
-    </>
+        </Reveal>
+      </div>
+    </section>
   );
 }

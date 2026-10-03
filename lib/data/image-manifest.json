@@ -1,0 +1,820 @@
+{
+  "dest-agra": {
+    "tile": {
+      "src": "/images/destinations/agra-taj-mahal-sunset-audio-tour-tile-1200.jpg",
+      "width": 1200,
+      "height": 1500,
+      "srcSet": [
+        {
+          "src": "/images/destinations/agra-taj-mahal-sunset-audio-tour-tile-480.jpg",
+          "width": 480,
+          "height": 600
+        },
+        {
+          "src": "/images/destinations/agra-taj-mahal-sunset-audio-tour-tile-800.jpg",
+          "width": 800,
+          "height": 1000
+        },
+        {
+          "src": "/images/destinations/agra-taj-mahal-sunset-audio-tour-tile-1200.jpg",
+          "width": 1200,
+          "height": 1500
+        }
+      ]
+    },
+    "alt": "Taj Mahal at sunset in Agra, explored with a self-guided audio guide",
+    "title": "Agra Taj Mahal audio guide"
+  },
+  "dest-bengaluru": {
+    "tile": {
+      "src": "/images/destinations/bengaluru-palace-audio-tour-tile-1200.jpg",
+      "width": 1200,
+      "height": 1500,
+      "srcSet": [
+        {
+          "src": "/images/destinations/bengaluru-palace-audio-tour-tile-480.jpg",
+          "width": 480,
+          "height": 600
+        },
+        {
+          "src": "/images/destinations/bengaluru-palace-audio-tour-tile-800.jpg",
+          "width": 800,
+          "height": 1000
+        },
+        {
+          "src": "/images/destinations/bengaluru-palace-audio-tour-tile-1200.jpg",
+          "width": 1200,
+          "height": 1500
+        }
+      ]
+    },
+    "alt": "Ivy-covered towers of Bangalore Palace, explored with a Bengaluru audio tour",
+    "title": "Bengaluru Palace audio tour"
+  },
+  "dest-chennai": {
+    "tile": {
+      "src": "/images/destinations/chennai-vadapalani-murugan-temple-audio-tour-tile-1200.jpg",
+      "width": 1200,
+      "height": 1500,
+      "srcSet": [
+        {
+          "src": "/images/destinations/chennai-vadapalani-murugan-temple-audio-tour-tile-480.jpg",
+          "width": 480,
+          "height": 600
+        },
+        {
+          "src": "/images/destinations/chennai-vadapalani-murugan-temple-audio-tour-tile-800.jpg",
+          "width": 800,
+          "height": 1000
+        },
+        {
+          "src": "/images/destinations/chennai-vadapalani-murugan-temple-audio-tour-tile-1200.jpg",
+          "width": 1200,
+          "height": 1500
+        }
+      ]
+    },
+    "alt": "Colourful gopuram of Vadapalani Murugan Temple in Chennai, explored with an audio guide",
+    "title": "Chennai temple audio tour"
+  },
+  "dest-delhi": {
+    "tile": {
+      "src": "/images/destinations/delhi-humayuns-tomb-heritage-audio-tour-tile-1200.jpg",
+      "width": 1200,
+      "height": 1500,
+      "srcSet": [
+        {
+          "src": "/images/destinations/delhi-humayuns-tomb-heritage-audio-tour-tile-480.jpg",
+          "width": 480,
+          "height": 600
+        },
+        {
+          "src": "/images/destinations/delhi-humayuns-tomb-heritage-audio-tour-tile-800.jpg",
+          "width": 800,
+          "height": 1000
+        },
+        {
+          "src": "/images/destinations/delhi-humayuns-tomb-heritage-audio-tour-tile-1200.jpg",
+          "width": 1200,
+          "height": 1500
+        }
+      ]
+    },
+    "alt": "Humayun's Tomb framed by palms in Delhi, a stop on Gamana's heritage audio tour",
+    "title": "Delhi Humayun's Tomb audio tour"
+  },
+  "dest-goa": {
+    "tile": {
+      "src": "/images/destinations/goa-panaji-immaculate-conception-church-audio-tour-tile-1200.jpg",
+      "width": 1200,
+      "height": 1500,
+      "srcSet": [
+        {
+          "src": "/images/destinations/goa-panaji-immaculate-conception-church-audio-tour-tile-480.jpg",
+          "width": 480,
+          "height": 600
+        },
+        {
+          "src": "/images/destinations/goa-panaji-immaculate-conception-church-audio-tour-tile-800.jpg",
+          "width": 800,
+          "height": 1000
+        },
+        {
+          "src": "/images/destinations/goa-panaji-immaculate-conception-church-audio-tour-tile-1200.jpg",
+          "width": 1200,
+          "height": 1500
+        }
+      ]
+    },
+    "alt": "Our Lady of the Immaculate Conception Church in Panaji, Goa, on a self-guided audio tour",
+    "title": "Goa churches audio tour"
+  },
+  "dest-jaipur": {
+    "tile": {
+      "src": "/images/destinations/jaipur-hawa-mahal-pink-city-audio-tour-tile-1200.jpg",
+      "width": 1200,
+      "height": 1500,
+      "srcSet": [
+        {
+          "src": "/images/destinations/jaipur-hawa-mahal-pink-city-audio-tour-tile-480.jpg",
+          "width": 480,
+          "height": 600
+        },
+        {
+          "src": "/images/destinations/jaipur-hawa-mahal-pink-city-audio-tour-tile-800.jpg",
+          "width": 800,
+          "height": 1000
+        },
+        {
+          "src": "/images/destinations/jaipur-hawa-mahal-pink-city-audio-tour-tile-1200.jpg",
+          "width": 1200,
+          "height": 1500
+        }
+      ]
+    },
+    "alt": "Hawa Mahal facade in Jaipur's Pink City, a highlight of Gamana's Jaipur audio tour",
+    "title": "Jaipur Hawa Mahal audio tour"
+  },
+  "dest-mumbai": {
+    "tile": {
+      "src": "/images/destinations/mumbai-gateway-of-india-audio-tour-tile-1200.jpg",
+      "width": 1200,
+      "height": 1500,
+      "srcSet": [
+        {
+          "src": "/images/destinations/mumbai-gateway-of-india-audio-tour-tile-480.jpg",
+          "width": 480,
+          "height": 600
+        },
+        {
+          "src": "/images/destinations/mumbai-gateway-of-india-audio-tour-tile-800.jpg",
+          "width": 800,
+          "height": 1000
+        },
+        {
+          "src": "/images/destinations/mumbai-gateway-of-india-audio-tour-tile-1200.jpg",
+          "width": 1200,
+          "height": 1500
+        }
+      ]
+    },
+    "alt": "Gateway of India under a pink evening sky in Mumbai, on a self-guided audio walk",
+    "title": "Mumbai Gateway of India audio tour"
+  },
+  "dest-varanasi": {
+    "tile": {
+      "src": "/images/destinations/varanasi-ghats-ganga-aarti-audio-tour-tile-1200.jpg",
+      "width": 1200,
+      "height": 1500,
+      "srcSet": [
+        {
+          "src": "/images/destinations/varanasi-ghats-ganga-aarti-audio-tour-tile-480.jpg",
+          "width": 480,
+          "height": 600
+        },
+        {
+          "src": "/images/destinations/varanasi-ghats-ganga-aarti-audio-tour-tile-800.jpg",
+          "width": 800,
+          "height": 1000
+        },
+        {
+          "src": "/images/destinations/varanasi-ghats-ganga-aarti-audio-tour-tile-1200.jpg",
+          "width": 1200,
+          "height": 1500
+        }
+      ]
+    },
+    "alt": "Varanasi ghats during Ganga Aarti, explored with a self-guided audio tour",
+    "title": "Varanasi Ganga Aarti audio tour"
+  },
+  "hero-about": {
+    "alt": "",
+    "title": "",
+    "hero": {
+      "src": "/images/heroes/traveller-backpack-old-delhi-lane-audio-tour-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/traveller-backpack-old-delhi-lane-audio-tour-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/traveller-backpack-old-delhi-lane-audio-tour-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/traveller-backpack-old-delhi-lane-audio-tour-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    }
+  },
+  "hero-blog": {
+    "hero": {
+      "src": "/images/heroes/travel-journal-flat-lay-gamana-blog-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/travel-journal-flat-lay-gamana-blog-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/travel-journal-flat-lay-gamana-blog-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/travel-journal-flat-lay-gamana-blog-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-cities": {
+    "hero": {
+      "src": "/images/heroes/udaipur-city-palace-lake-pichola-audio-tour-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/udaipur-city-palace-lake-pichola-audio-tour-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/udaipur-city-palace-lake-pichola-audio-tour-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/udaipur-city-palace-lake-pichola-audio-tour-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-coins": {
+    "hero": {
+      "src": "/images/heroes/jaipur-pink-city-bazaar-travel-rewards-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/jaipur-pink-city-bazaar-travel-rewards-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/jaipur-pink-city-bazaar-travel-rewards-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/jaipur-pink-city-bazaar-travel-rewards-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-contact": {
+    "hero": {
+      "src": "/images/heroes/mumbai-marine-drive-dusk-queens-necklace-1536.jpg",
+      "width": 1536,
+      "height": 864,
+      "srcSet": [
+        {
+          "src": "/images/heroes/mumbai-marine-drive-dusk-queens-necklace-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/mumbai-marine-drive-dusk-queens-necklace-1536.jpg",
+          "width": 1536,
+          "height": 864
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-discounts": {
+    "hero": {
+      "src": "/images/heroes/dubai-marina-golden-hour-audio-tour-offers-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/dubai-marina-golden-hour-audio-tour-offers-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/dubai-marina-golden-hour-audio-tour-offers-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/dubai-marina-golden-hour-audio-tour-offers-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-ecosystem": {
+    "hero": {
+      "src": "/images/heroes/indian-handloom-weaver-local-experience-partner-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/indian-handloom-weaver-local-experience-partner-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/indian-handloom-weaver-local-experience-partner-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/indian-handloom-weaver-local-experience-partner-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-explore-stories": {
+    "hero": {
+      "src": "/images/heroes/golconda-fort-sunset-audio-story-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/golconda-fort-sunset-audio-story-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/golconda-fort-sunset-audio-story-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/golconda-fort-sunset-audio-story-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-explore-tours": {
+    "hero": {
+      "src": "/images/heroes/old-delhi-lane-self-guided-walking-tour-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/old-delhi-lane-self-guided-walking-tour-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/old-delhi-lane-self-guided-walking-tour-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/old-delhi-lane-self-guided-walking-tour-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-faq": {
+    "hero": {
+      "src": "/images/heroes/travellers-phone-and-city-map-audio-guide-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/travellers-phone-and-city-map-audio-guide-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/travellers-phone-and-city-map-audio-guide-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/travellers-phone-and-city-map-audio-guide-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-features": {
+    "hero": {
+      "src": "/images/heroes/hampi-vittala-temple-sunset-audio-tour-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/hampi-vittala-temple-sunset-audio-tour-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/hampi-vittala-temple-sunset-audio-tour-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/hampi-vittala-temple-sunset-audio-tour-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-immersive": {
+    "hero": {
+      "src": "/images/heroes/traveller-headphones-hands-free-gps-audio-tour-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/traveller-headphones-hands-free-gps-audio-tour-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/traveller-headphones-hands-free-gps-audio-tour-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/traveller-headphones-hands-free-gps-audio-tour-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-local-languages": {
+    "hero": {
+      "src": "/images/heroes/kochi-chinese-fishing-nets-sunset-audio-tour-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/kochi-chinese-fishing-nets-sunset-audio-tour-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/kochi-chinese-fishing-nets-sunset-audio-tour-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/kochi-chinese-fishing-nets-sunset-audio-tour-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-personalization": {
+    "hero": {
+      "src": "/images/heroes/london-buckingham-palace-personalised-audio-tour-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/london-buckingham-palace-personalised-audio-tour-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/london-buckingham-palace-personalised-audio-tour-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/london-buckingham-palace-personalised-audio-tour-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-pricing": {
+    "hero": {
+      "src": "/images/heroes/agra-taj-mahal-sunrise-reflection-pool-1536.jpg",
+      "width": 1536,
+      "height": 864,
+      "srcSet": [
+        {
+          "src": "/images/heroes/agra-taj-mahal-sunrise-reflection-pool-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/agra-taj-mahal-sunrise-reflection-pool-1536.jpg",
+          "width": 1536,
+          "height": 864
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-storytelling": {
+    "hero": {
+      "src": "/images/heroes/varanasi-aarti-lamps-audio-storytelling-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/varanasi-aarti-lamps-audio-storytelling-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/varanasi-aarti-lamps-audio-storytelling-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/varanasi-aarti-lamps-audio-storytelling-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-ugt": {
+    "hero": {
+      "src": "/images/heroes/friends-planning-travel-route-on-phone-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/friends-planning-travel-route-on-phone-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/friends-planning-travel-route-on-phone-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/friends-planning-travel-route-on-phone-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "hero-virtual-guides": {
+    "hero": {
+      "src": "/images/heroes/jodhpur-mehrangarh-fort-golden-hour-virtual-guide-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/jodhpur-mehrangarh-fort-golden-hour-virtual-guide-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/jodhpur-mehrangarh-fort-golden-hour-virtual-guide-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/jodhpur-mehrangarh-fort-golden-hour-virtual-guide-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "",
+    "title": ""
+  },
+  "neutral-city": {
+    "hero": {
+      "src": "/images/destinations/travel-essentials-map-passport-city-guide-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/destinations/travel-essentials-map-passport-city-guide-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/destinations/travel-essentials-map-passport-city-guide-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/destinations/travel-essentials-map-passport-city-guide-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "tile": {
+      "src": "/images/destinations/travel-essentials-map-passport-city-guide-tile-1200.jpg",
+      "width": 1200,
+      "height": 1500,
+      "srcSet": [
+        {
+          "src": "/images/destinations/travel-essentials-map-passport-city-guide-tile-480.jpg",
+          "width": 480,
+          "height": 600
+        },
+        {
+          "src": "/images/destinations/travel-essentials-map-passport-city-guide-tile-800.jpg",
+          "width": 800,
+          "height": 1000
+        },
+        {
+          "src": "/images/destinations/travel-essentials-map-passport-city-guide-tile-1200.jpg",
+          "width": 1200,
+          "height": 1500
+        }
+      ]
+    },
+    "alt": "Passport, camera and travel essentials on a world map, ready for a self-guided city tour",
+    "title": "Self-guided city audio tours"
+  },
+  "slide-delhi": {
+    "hero": {
+      "src": "/images/heroes/delhi-humayuns-tomb-reflection-audio-tour-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/delhi-humayuns-tomb-reflection-audio-tour-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/delhi-humayuns-tomb-reflection-audio-tour-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/delhi-humayuns-tomb-reflection-audio-tour-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "Humayun's Tomb reflected in its garden pools in Delhi",
+    "title": "Delhi Humayun's Tomb audio tour"
+  },
+  "slide-goa": {
+    "hero": {
+      "src": "/images/heroes/old-goa-basilica-bom-jesus-audio-tour-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/old-goa-basilica-bom-jesus-audio-tour-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/old-goa-basilica-bom-jesus-audio-tour-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/old-goa-basilica-bom-jesus-audio-tour-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "Basilica of Bom Jesus in Old Goa, a UNESCO World Heritage church",
+    "title": "Old Goa Basilica of Bom Jesus audio tour"
+  },
+  "slide-jaipur": {
+    "hero": {
+      "src": "/images/heroes/jaipur-hawa-mahal-golden-hour-audio-tour-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/jaipur-hawa-mahal-golden-hour-audio-tour-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/jaipur-hawa-mahal-golden-hour-audio-tour-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/jaipur-hawa-mahal-golden-hour-audio-tour-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "Hawa Mahal glowing at golden hour in Jaipur's Pink City",
+    "title": "Jaipur Hawa Mahal audio tour"
+  },
+  "slide-varanasi": {
+    "hero": {
+      "src": "/images/heroes/varanasi-ganga-aarti-evening-audio-tour-2400.jpg",
+      "width": 2400,
+      "height": 1350,
+      "srcSet": [
+        {
+          "src": "/images/heroes/varanasi-ganga-aarti-evening-audio-tour-960.jpg",
+          "width": 960,
+          "height": 540
+        },
+        {
+          "src": "/images/heroes/varanasi-ganga-aarti-evening-audio-tour-1600.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "src": "/images/heroes/varanasi-ganga-aarti-evening-audio-tour-2400.jpg",
+          "width": 2400,
+          "height": 1350
+        }
+      ]
+    },
+    "alt": "Priests performing the evening Ganga Aarti with brass lamps on the Varanasi ghats",
+    "title": "Varanasi Ganga Aarti audio tour"
+  }
+}

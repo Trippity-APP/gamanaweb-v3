@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { X } from "@/components/icons";
 
 const DISMISSED_KEY = "gamana_side_cta_dismissed";
 
@@ -12,6 +13,7 @@ const DISMISSED_KEY = "gamana_side_cta_dismissed";
  * exactly what they used to do.
  */
 export default function GlobalStickyDownload() {
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
@@ -37,7 +39,10 @@ export default function GlobalStickyDownload() {
     sessionStorage.setItem(DISMISSED_KEY, "1");
   };
 
-  if (dismissed || !visible) return null;
+  // Tour, story and blog post pages carry their own sticky app prompt.
+  const hasOwnAppCard =
+    /^\/(marketplace\/(tours|story)|blog|cities)\/[^/]+/.test(pathname ?? "") || /^\/download-app\/?$/.test(pathname ?? "");
+  if (dismissed || !visible || hasOwnAppCard) return null;
 
   return (
     <div className="relative hidden sm:flex flex-col items-center gap-3 bg-white/95 backdrop-blur-sm border border-gray-200 border-r-0 rounded-l-xl shadow-lg px-2.5 py-4">
@@ -60,7 +65,7 @@ export default function GlobalStickyDownload() {
         className="hover:scale-105 transition-transform"
       >
         <img
-          src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+          src="/badges/google-play-badge.svg"
           alt="Download Gamana on Google Play"
           className="w-[110px] h-auto"
         />
@@ -73,7 +78,7 @@ export default function GlobalStickyDownload() {
         className="hover:scale-105 transition-transform"
       >
         <img
-          src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg"
+          src="/badges/app-store-badge.svg"
           alt="Download Gamana on the App Store"
           className="w-[110px] h-auto"
         />

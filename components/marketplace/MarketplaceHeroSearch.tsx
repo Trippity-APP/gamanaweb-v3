@@ -10,5 +10,13 @@ export function MarketplaceHeroSearch({ catalog = [] }: { catalog?: Tour[] }) {
   const searchParams = useSearchParams();
   const urlQuery = getExploreSearchQuery(searchParams);
 
-  return <ExploreHeroSearch catalog={catalog} variant="explore" urlQuery={urlQuery} />;
+  return (
+    <ExploreHeroSearch
+      catalog={catalog}
+      variant="explore"
+      urlQuery={urlQuery}
+      size="xl"
+      containerClassName="relative w-full"
+    />
+  );
 }

@@ -117,7 +117,7 @@ export function TravelQuotes({ intervalMs = 12000 }: { intervalMs?: number }) {
         </figure>
       </div>
 
-      <div className="mt-6 flex items-center justify-center gap-2">
+      <div className="mt-4 flex items-center justify-center">
         {QUOTES.map((q, i) => (
           <button
             key={q.author}
@@ -125,10 +125,14 @@ export function TravelQuotes({ intervalMs = 12000 }: { intervalMs?: number }) {
             onClick={() => showQuote(i)}
             aria-label={`Show quote ${i + 1} of ${QUOTES.length}`}
             aria-current={i === index}
-            className={`h-2 w-2 rounded-full transition-all hover:scale-125 ${
-              i === index ? "bg-[#159895]" : "bg-gray-300"
-            }`}
-          />
+            className="focus-ring group grid h-6 w-6 place-items-center rounded-full"
+          >
+            <span
+              className={`h-2 rounded-full transition-all duration-300 ease-spring group-hover:scale-125 ${
+                i === index ? "w-5 bg-brand-600" : "w-2 bg-ink/20"
+              }`}
+            />
+          </button>
         ))}
       </div>
     </div>

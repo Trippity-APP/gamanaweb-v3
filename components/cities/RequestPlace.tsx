@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Locate, MapPin } from "lucide-react";
+import { Loader2, Locate, MapPin } from "@/components/icons";
 import { PlacesSearchInput } from "./PlacesSearchInput";
 
 // Ensure Google Maps (with Places) is loaded when this section is used
@@ -21,11 +21,14 @@ const AUDIO_TYPE_OPTIONS = [
     "Nature or scenic narration",
 ] as const;
 
+const FIELD =
+    "h-12 rounded-2xl border-ink/15 px-4 text-base text-ink transition-all duration-300 hover:border-ink/30 focus:border-brand-600 focus:ring-4 focus:ring-brand-600/15 focus:ring-offset-0";
+
 // Dynamically import MapPicker with no SSR to avoid window is not defined errors
 const MapPicker = dynamic(() => import("./MapPicker"), {
     ssr: false,
     loading: () => (
-        <div className="h-[400px] w-full bg-muted animate-pulse rounded-xl flex items-center justify-center text-muted-foreground">
+        <div className="flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl bg-sand-100 text-ink-muted">
             <Loader2 className="h-8 w-8 animate-spin" />
             <span className="ml-2">Loading Map...</span>
         </div>
@@ -110,21 +113,18 @@ export const RequestPlace = () => {
 
     if (isSuccess) {
         return (
-            <section id="request-place" className="py-16 md:py-20 bg-muted/30 border-t border-border">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl text-center">
-                    <div className="bg-card p-8 rounded-2xl shadow-sm border border-border">
-                        <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <MapPin className="w-8 h-8 text-green-600 dark:text-green-400" />
+            <section id="request-place" className="section-tight scroll-mt-28 bg-sand-100">
+                <div className="container-site max-w-3xl text-center">
+                    <div className="rounded-4xl border border-ink/5 bg-white p-10 shadow-card" role="status">
+                        <div className="mx-auto mb-6 grid h-20 w-20 animate-pop place-items-center rounded-full bg-brand-600 text-white shadow-lift">
+                            <MapPin className="h-9 w-9" aria-hidden />
                         </div>
-                        <h2 className="text-2xl font-bold mb-4">Request Received!</h2>
-                        <p className="text-muted-foreground mb-8">
+                        <h2 className="text-h3 mb-3 text-ink">Request Received!</h2>
+                        <p className="mx-auto mb-8 max-w-md text-ink-soft">
                             Thanks for helping us map the world of audio. We've added your request to our discovery queue.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Button onClick={() => window.open('https://apps.apple.com', '_blank')}>
-                                Download on App Store
-                            </Button>
-                            <Button variant="outline" onClick={() => {
+                            <Button className="rounded-full border-ink/15 px-6" variant="outline" onClick={() => {
                                 setIsSuccess(false);
                                 setCoordinates(null);
                                 setPlaceName("");
@@ -144,20 +144,21 @@ export const RequestPlace = () => {
     }
 
     return (
-        <section id="request-place" className="py-16 md:py-20 bg-muted/30 border-t border-border">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-                <div className="text-center mb-10">
-                    <h2 className="text-3xl font-bold mb-4">Can’t Find the Place You’re Visiting?</h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto">
+        <section id="request-place" className="section-tight scroll-mt-28 bg-sand-100">
+            <div className="container-site max-w-4xl">
+                <div className="mb-10 text-center">
+                    <p className="eyebrow mb-3">Request a place</p>
+                    <h2 className="text-h2 mb-4 text-ink">Can’t Find the Place You’re Visiting?</h2>
+                    <p className="text-lead mx-auto max-w-2xl text-ink-soft">
                         Pin a location and request an audio story or walking tour for your trip.
                     </p>
                 </div>
 
-                <div className="bg-card rounded-2xl shadow-sm border border-border p-6 md:p-8">
+                <div className="rounded-4xl border border-ink/5 bg-white p-6 shadow-card sm:p-10">
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-8">
-                            <TabsTrigger value="map">Pin Map Location</TabsTrigger>
-                            <TabsTrigger value="manual">Search on Maps</TabsTrigger>
+                        <TabsList className="mb-8 grid h-12 w-full grid-cols-2 rounded-full bg-sand-100 p-1">
+                            <TabsTrigger value="map" className="h-10 rounded-full data-[state=active]:bg-white data-[state=active]:text-ink data-[state=active]:shadow-card">Pin Map Location</TabsTrigger>
+                            <TabsTrigger value="manual" className="h-10 rounded-full data-[state=active]:bg-white data-[state=active]:text-ink data-[state=active]:shadow-card">Search on Maps</TabsTrigger>
                         </TabsList>
 
                         <form onSubmit={handleSubmit}>
@@ -178,7 +179,7 @@ export const RequestPlace = () => {
                                         size="sm"
                                         onClick={handleUseCurrentLocation}
                                         disabled={isGettingLocation}
-                                        className="mt-2"
+                                        className="mt-2 rounded-full border-ink/15"
                                     >
                                         {isGettingLocation ? (
                                             <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -187,11 +188,11 @@ export const RequestPlace = () => {
                                         )}
                                         {isGettingLocation ? "Getting location…" : "Pin current location"}
                                     </Button>
-                                    <p className="text-sm text-muted-foreground mt-1">Tap the map to place a pin, or enter coordinates below.</p>
+                                    <p className="text-sm text-ink-muted mt-1">Tap the map to place a pin, or enter coordinates below.</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="pin-lat">Latitude</Label>
-                                            <Input
+                                            <Input className={FIELD}
                                                 id="pin-lat"
                                                 type="text"
                                                 inputMode="decimal"
@@ -207,7 +208,7 @@ export const RequestPlace = () => {
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="pin-lng">Longitude</Label>
-                                            <Input
+                                            <Input className={FIELD}
                                                 id="pin-lng"
                                                 type="text"
                                                 inputMode="decimal"
@@ -223,14 +224,14 @@ export const RequestPlace = () => {
                                         </div>
                                     </div>
                                     {coordinates && (coordinates.lat !== 0 || coordinates.lng !== 0) && (
-                                        <p className="text-sm text-green-600 font-medium flex items-center gap-1">
+                                        <p className="text-sm text-brand-700 font-medium flex items-center gap-1">
                                             <MapPin className="w-4 h-4 shrink-0" />
                                             Location set: {coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)}
                                         </p>
                                     )}
                                     <div className="space-y-2">
                                         <Label htmlFor="map-place-name">Name of place</Label>
-                                        <Input
+                                        <Input className={FIELD}
                                             id="map-place-name"
                                             placeholder="e.g. Charminar, Hyderabad"
                                             value={placeName}
@@ -253,11 +254,11 @@ export const RequestPlace = () => {
                                         }}
                                     />
                                 )}
-                                <p className="text-sm text-muted-foreground">Or enter the details manually below.</p>
+                                <p className="text-sm text-ink-muted">Or enter the details manually below.</p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="place">Place Name</Label>
-                                        <Input
+                                        <Input className={FIELD}
                                             id="place"
                                             placeholder="e.g. The Louvre"
                                             value={placeName}
@@ -267,7 +268,7 @@ export const RequestPlace = () => {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="city">City / Region</Label>
-                                        <Input
+                                        <Input className={FIELD}
                                             id="city"
                                             placeholder="e.g. Paris"
                                             value={city}
@@ -277,7 +278,7 @@ export const RequestPlace = () => {
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
                                         <Label htmlFor="country">Country</Label>
-                                        <Input
+                                        <Input className={FIELD}
                                             id="country"
                                             placeholder="e.g. France"
                                             value={country}
@@ -287,7 +288,7 @@ export const RequestPlace = () => {
                                     </div>
                                 </div>
                                 {coordinates && (coordinates.lat !== 0 || coordinates.lng !== 0) && (
-                                    <p className="text-sm text-green-600 font-medium flex items-center gap-1">
+                                    <p className="text-sm text-brand-700 font-medium flex items-center gap-1">
                                         <MapPin className="w-4 h-4 shrink-0" />
                                         Location pinned: {coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)}
                                     </p>
@@ -299,7 +300,7 @@ export const RequestPlace = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="user-name">Your name</Label>
-                                        <Input
+                                        <Input className={FIELD}
                                             id="user-name"
                                             type="text"
                                             placeholder="e.g. John Doe"
@@ -309,7 +310,7 @@ export const RequestPlace = () => {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="user-email">Email</Label>
-                                        <Input
+                                        <Input className={FIELD}
                                             id="user-email"
                                             type="email"
                                             placeholder="e.g. john@example.com"
@@ -326,14 +327,14 @@ export const RequestPlace = () => {
                                             <label
                                                 key={type}
                                                 htmlFor={`audio-${type}`}
-                                                className="flex items-center space-x-2 cursor-pointer"
+                                                className="flex cursor-pointer items-center gap-3 rounded-2xl border border-ink/10 px-4 py-3 transition-colors hover:border-ink/30 has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50"
                                             >
                                                 <input
                                                     id={`audio-${type}`}
                                                     type="checkbox"
                                                     checked={audioTypes.includes(type)}
                                                     onChange={(e) => handleAudioTypeChange(type, e.target.checked)}
-                                                    className="h-4 w-4 rounded border border-input bg-background accent-[#159895] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                                    className="h-4 w-4 rounded border border-input bg-background accent-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                                 />
                                                 <span className="text-sm font-normal">{type}</span>
                                             </label>
@@ -342,14 +343,14 @@ export const RequestPlace = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="date" className="font-normal text-muted-foreground">Travel Month (optional)</Label>
-                                    <Input id="date" placeholder="e.g. October 2024" />
+                                    <Label htmlFor="date" className="font-normal text-ink-muted">Travel Month (optional)</Label>
+                                    <Input className={FIELD} id="date" placeholder="e.g. October 2024" />
                                 </div>
 
                                 <Button
                                     type="submit"
                                     size="lg"
-                                    className="w-full bg-gradient-to-r from-[#159895] to-[#1A5F7A] hover:from-[#159895] hover:to-[#1A5F7A] text-white"
+                                    className="focus-ring h-auto w-full rounded-full bg-brand-600 px-8 py-4 text-lg font-semibold text-white shadow-lift transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-700 disabled:translate-y-0"
                                     disabled={isSubmitting || (activeTab === "map" && (!coordinates || !placeName.trim())) || (activeTab === "manual" && !placeName)}
                                 >
                                     {isSubmitting ? (
@@ -361,7 +362,7 @@ export const RequestPlace = () => {
                                         "Request Audio Story for This Place"
                                     )}
                                 </Button>
-                                <p className="text-center text-xs text-muted-foreground mt-2">
+                                <p className="text-center text-xs text-ink-muted mt-2">
                                     We use these requests to decide what to build next.
                                 </p>
                             </div>

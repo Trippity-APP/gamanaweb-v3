@@ -4,16 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/verify-blog-seo.mjs",
+    "build": "node -e \"require('fs').rmSync('.next/cache/fetch-cache',{recursive:true,force:true})\" && next build && node scripts/verify-blog-seo.mjs && node scripts/verify-site-seo.mjs",
     "start": "node scripts/serve-out.mjs",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "new:blog": "node scripts/new-blog.js",
-    "upload:blogs": "tsx scripts/upload-blogs-to-cms.mjs"
+    "images:process": "node scripts/process-images.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
     "@next/third-parties": "^16.0.0",
+    "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -56,7 +57,6 @@
     "gray-matter": "^4.0.3",
     "input-otp": "^1.2.4",
     "leaflet": "^1.9.4",
-    "lucide-react": "^0.446.0",
     "next": "^16.1.0",
     "next-mdx-remote": "^6.0.0",
     "next-themes": "^0.3.0",

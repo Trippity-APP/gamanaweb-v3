@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Header from "@/components/navigation/header";
 import Footer from "@/components/navigation/footer";
 import { Hero } from "@/components/cities/Hero";
+import { getPhoto } from "@/lib/images";
 import { CoverageSnapshot } from "@/components/cities/CoverageSnapshot";
 import { CityGrid } from "@/components/cities/CityGrid";
 import { Differentiation } from "@/components/cities/Differentiation";
@@ -16,7 +17,7 @@ export default function CitiesPage() {
     return (
         <main className="min-h-screen bg-background">
             <Header />
-            <Hero />
+            <Hero photo={getPhoto("hero-cities")} />
             <div className="pt-0">
                 <CoverageSnapshot />
                 <Suspense fallback={null}>

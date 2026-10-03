@@ -50,6 +50,16 @@
       "permanent": true
     },
     {
+      "source": "/subscription",
+      "destination": "/pricing/",
+      "statusCode": 301
+    },
+    {
+      "source": "/marketplace-redesign",
+      "destination": "/marketplace/",
+      "statusCode": 301
+    },
+    {
       "source": "/explore",
       "destination": "/marketplace/",
       "permanent": true

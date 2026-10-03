@@ -1,371 +1,299 @@
-'use client';
-
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Store, Hotel, Utensils, Plane, Car, Ticket, TrendingUp, Users, ArrowRight, CircleCheck as CheckCircle2, ChartBar as BarChart3, Globe, Sparkles, Award, Target, Handshake, MapPinned } from "lucide-react";
+import Image from "next/image";
+import {
+  Store,
+  Hotel,
+  Utensils,
+  Ticket,
+  TrendingUp,
+  Users,
+  ArrowRight,
+  CircleCheck as CheckCircle2,
+  ChartBar as BarChart3,
+  Globe,
+  Sparkles,
+  Handshake,
+  MapPinned,
+} from "@/components/icons";
 import HeroHeader from "@/components/navigation/hero-header";
 import PartnerForm from "@/components/partner-form";
-import { HeroSlideshow } from "@/components/HeroSlideshow";
-import { HeroEyebrow } from "@/components/HeroEyebrow";
+import { PageHero } from "@/components/site/PageHero";
+import { SectionHeader } from "@/components/site/SectionHeader";
+import { Reveal } from "@/components/motion/Reveal";
+import { CountUp } from "@/components/motion/CountUp";
+import { getPhoto } from "@/lib/images";
+import { cn } from "@/lib/utils";
+
+import { IconTile, toneFor } from "@/components/icons/IconTile";
+const tourismSegments = [
+  {
+    icon: Ticket,
+    title: "Heritage Tourism",
+    description: "Archaeological sites, architectural landmarks, museums, and historical attractions",
+    market: "Core segment of $13.25B market",
+  },
+  {
+    icon: Utensils,
+    title: "Creative & Culinary Tourism",
+    description: "Art, craft, music festivals, cooking classes, wine tastings, and gastronomic routes",
+    market: "Fastest-growing intangible culture segment",
+  },
+  {
+    icon: Users,
+    title: "Festival Tourism",
+    description: "Arts festivals, cultural events, music, dances, and traditional celebrations",
+    market: "67.10% of indigenous tourism market share",
+  },
+  {
+    icon: Globe,
+    title: "Community-Based Tourism",
+    description: "Local community experiences emphasizing sustainability and responsibility",
+    market: "Local community experiences",
+  },
+  {
+    icon: Store,
+    title: "Local Artisans & Producers",
+    description: "Traditional craftspeople, local markets, and local product makers",
+    market: "Supporting local economies",
+  },
+  {
+    icon: Hotel,
+    title: "Cultural Accommodations",
+    description: "Heritage hotels, traditional stays, and heritage stays and homestays",
+    market: "Better guest experiences",
+  },
+];
+
+const benefits = [
+  {
+    icon: TrendingUp,
+    title: "Increased Visibility",
+    description: "Get discovered by thousands of travelers actively exploring destinations",
+    details: [
+      "Featured in personalized recommendations",
+      "Priority placement in location-based searches",
+      "Inclusion in personalized itineraries",
+    ],
+  },
+  {
+    icon: Users,
+    title: "Targeted Traffic",
+    description: "Connect with travelers who are genuinely interested in your offerings",
+    details: [
+      "Match with travelers based on preferences",
+      "Reach users at the right moment in their journey",
+      "Access to engaged, high-intent customers",
+    ],
+  },
+  {
+    icon: BarChart3,
+    title: "Analytics & Insights",
+    description: "Understand your customers better with detailed analytics",
+    details: [
+      "Track visitor engagement and conversion rates",
+      "Access demographic and preference data",
+      "Optimize offerings based on real-time feedback",
+    ],
+  },
+];
+
+const partnerSnapshot = [
+  { icon: Handshake, title: "6 Partner Segments", description: "Heritage to hyperlocal artisans, all in one network" },
+  { icon: MapPinned, title: "India-First Reach", description: "Deep coverage across Indian cities and growing" },
+  { icon: Sparkles, title: "Featured in the app", description: "Featured in personalized recommendations, not buried in search" },
+  { icon: TrendingUp, title: "Built for Growth", description: "Support and insights as your partnership scales" },
+];
+
+const howItWorks = [
+  {
+    title: "Join the Ecosystem",
+    description: "Sign up and create your partner profile with details about your business",
+  },
+  {
+    title: "Set Up Offers",
+    description: "Configure member discounts and promotions for Gamana travelers",
+  },
+  {
+    title: "Get Discovered",
+    description: "Appear in traveler searches, recommendations, and featured tours",
+  },
+  {
+    title: "Welcome Travelers",
+    description: "Serve Gamana users and grow your business on Gamana",
+  },
+];
+
+// Bento: the first benefit is the tall feature tile; a photo tile fills the third column.
+const BENEFIT_LAYOUT = ["lg:row-span-2", "", ""];
 
 export default function EcosystemPageContent() {
-  const scrollToForm = () => {
-    const formSection = document.getElementById('partner-form-section');
-    if (formSection) {
-      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  const tourismSegments = [
-    {
-      icon: Ticket,
-      title: "Heritage Tourism",
-      description: "Archaeological sites, architectural landmarks, museums, and historical attractions",
-      market: "Core segment of $13.25B market",
-    },
-    {
-      icon: Utensils,
-      title: "Creative & Culinary Tourism",
-      description: "Art, craft, music festivals, cooking classes, wine tastings, and gastronomic routes",
-      market: "Fastest-growing intangible culture segment",
-    },
-    {
-      icon: Users,
-      title: "Festival Tourism",
-      description: "Arts festivals, cultural events, music, dances, and traditional celebrations",
-      market: "67.10% of indigenous tourism market share",
-    },
-    {
-      icon: Globe,
-      title: "Community-Based Tourism",
-      description: "Local community experiences emphasizing sustainability and responsibility",
-      market: "Local community experiences",
-    },
-    {
-      icon: Store,
-      title: "Local Artisans & Producers",
-      description: "Traditional craftspeople, local markets, and local product makers",
-      market: "Supporting local economies",
-    },
-    {
-      icon: Hotel,
-      title: "Cultural Accommodations",
-      description: "Heritage hotels, traditional stays, and heritage stays and homestays",
-      market: "Better guest experiences",
-    },
-  ];
-
-  const benefits = [
-    {
-      icon: TrendingUp,
-      title: "Increased Visibility",
-      description: "Get discovered by thousands of travelers actively exploring destinations",
-      details: [
-        "Featured in personalized recommendations",
-        "Priority placement in location-based searches",
-        "Inclusion in personalized itineraries",
-      ],
-    },
-    {
-      icon: Users,
-      title: "Targeted Traffic",
-      description: "Connect with travelers who are genuinely interested in your offerings",
-      details: [
-        "Match with travelers based on preferences",
-        "Reach users at the right moment in their journey",
-        "Access to engaged, high-intent customers",
-      ],
-    },
-    {
-      icon: BarChart3,
-      title: "Analytics & Insights",
-      description: "Understand your customers better with detailed analytics",
-      details: [
-        "Track visitor engagement and conversion rates",
-        "Access demographic and preference data",
-        "Optimize offerings based on real-time feedback",
-      ],
-    },
-  ];
-
-  const partnerSnapshot = [
-    { icon: Handshake, title: "6 Partner Segments", description: "Heritage to hyperlocal artisans, all in one network" },
-    { icon: MapPinned, title: "India-First Reach", description: "Deep coverage across Indian cities and growing" },
-    { icon: Sparkles, title: "Featured in the app", description: "Featured in personalized recommendations, not buried in search" },
-    { icon: TrendingUp, title: "Built for Growth", description: "Support and insights as your partnership scales" },
-  ];
-
-  const howItWorks = [
-    {
-      step: "1",
-      title: "Join the Ecosystem",
-      description: "Sign up and create your partner profile with details about your business",
-    },
-    {
-      step: "2",
-      title: "Set Up Offers",
-      description: "Configure member discounts and promotions for Gamana travelers",
-    },
-    {
-      step: "3",
-      title: "Get Discovered",
-      description: "Appear in traveler searches, recommendations, and featured tours",
-    },
-    {
-      step: "4",
-      title: "Welcome Travelers",
-      description: "Serve Gamana users and grow your business on Gamana",
-    },
-  ];
-
   return (
-    <main className="min-h-screen">
-      <section className="relative h-[62vh] sm:h-[68vh] flex flex-col overflow-hidden">
-        {/*
-          Audience for this page is Indian experience operators, not travellers, so the
-          carousel is cast to answer "what kind of customer would Gamana send me?"
+    <>
+      <HeroHeader transparent />
+      <main>
+        {/* Audience is Indian experience operators, so the hero shows a visitor visibly
+            listening: the behaviour a partner's guests will arrive with. */}
+        <PageHero
+          size="lg"
+          className="pb-28 sm:pb-32"
+          image={getPhoto("hero-ecosystem")}
+          imageAlt="Gamana travel partnerships for tourism businesses"
+          imageTitle="Gamana Travel Partnerships for Tourism Businesses"
+          eyebrow="Join the Journey"
+          heading="Build Travel Partnerships with Gamana"
+          subtitle="Partner with Gamana to reach travellers, showcase your tourism experiences, and grow your presence through digital travel discovery and audio tours."
+        >
+          <a
+            href="#partner-form-section"
+            className="focus-ring group inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-lg font-semibold text-ink shadow-lift transition-all duration-300 ease-spring hover:-translate-y-0.5 active:scale-95"
+          >
+            Become a Gamana Partner
+            <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+          </a>
+        </PageHero>
 
-          Every frame is bright, uncluttered and premium, and, critically, every visitor
-          is visibly *listening*: earphones at the Jama Masjid courtyard, headphones at
-          Gokak Falls, an earbud on the cobbled street. Gamana is an audio product, so a
-          hero full of people simply looking at scenery sells the wrong thing; a partner
-          should see the actual behaviour their guests will arrive with. Photos without a
-          visible listener (Kerala houseboat, Taj at sunrise, Mehrangarh) were dropped for
-          exactly that reason, as were the earlier Fort Kochi fish market and Bangkok night
-          market, which read as crowded and low-margin.
-
-          Half the rotation sits outside India (London, Italy), the catalogue isn't
-          India-only, and for this audience an international frame doubles as evidence that
-          Gamana's travellers are the well-travelled, higher-spend kind.
-        */}
-        <div className="absolute inset-0">
-          <HeroSlideshow
-            images={[
-              "/traveller-jama-masjid-courtyard-self-guided-audio-tour-delhi.png",
-              "/buckingham-palace-morning-audio-tour-london.png",
-              "/traveller-gokak-falls-audio-guide-belagavi-tour.png",
-              "/solo-traveller-cobblestone-street-audio-guide-hands-free-exploration.png",
-            ]}
-          />
-          {/* Cooler, lighter tint than the amber this page carried before — the warm wash
-              muddied the bright, clean feel these photos are doing the work to convey. */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0B6E4F]/20 via-[#159895]/16 to-[#1A5F7A]/20"></div>
-          <div className="absolute inset-0 bg-black/20"></div>
-        </div>
-
-        <HeroHeader transparent={true} />
-
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 right-10 w-64 h-64 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 left-10 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-white/50 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex-1 flex flex-col justify-start pt-28 pb-16">
-          <div className="max-w-5xl mx-auto text-center space-y-8">
-            <div className="space-y-4">
-              <div className="animate-fade-in pb-2">
-                <HeroEyebrow icon={Handshake} label="Join the Journey" />
-              </div>
-              <div className="inline-block w-fit">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight mb-2 opacity-0 animate-fade-in" style={{ animationDelay: "150ms" }}>
-                  Partner with Gamana
-                </h1>
-                <div className="h-2 bg-white/60 rounded-full opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}></div>
-              </div>
-              <p className="text-xl md:text-2xl text-white/95 leading-relaxed max-w-3xl mx-auto opacity-0 animate-fade-in" style={{ animationDelay: "450ms" }}>
-                Reach travellers already exploring cities with Gamana audio tours
-              </p>
-            </div>
-
-
-            <Button
-              size="lg"
-              className="bg-white text-gray-900 hover:bg-gray-100 text-lg px-10 py-7 h-auto shadow-xl font-semibold opacity-0 animate-fade-in"
-              style={{ animationDelay: "600ms" }}
-              onClick={scrollToForm}
-            >
-              Become a Partner
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent"></div>
-      </section>
-
-      {/* Snapshot strip, floated up over the hero photo in the same overlapping-card pattern
-          used on /marketplace-redesign and /cities, so the page reads as one consistent
-          system rather than each surface inventing its own hero treatment. */}
-      <section className="relative z-10 -mt-14 sm:-mt-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-gray-100 bg-white shadow-lg p-5 sm:p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-5 md:gap-6">
-              {partnerSnapshot.map((p) => (
-                <div key={p.title} className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#159895]/10">
-                    <p.icon className="h-4 w-4 text-[#159895]" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{p.title}</p>
-                    <p className="text-xs leading-snug text-gray-500">{p.description}</p>
-                  </div>
-                </div>
+        <section className="relative z-10 -mt-16 sm:-mt-20">
+          <div className="container-site">
+            <ul className="grid grid-cols-1 gap-2 rounded-4xl border border-ink/5 bg-white p-4 shadow-lift sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
+              {partnerSnapshot.map((p, i) => (
+                <Reveal as="li" key={p.title} delay={i * 80} className="group flex items-start gap-4 rounded-3xl p-4 transition-colors duration-300 hover:bg-sand-50">
+                  <IconTile icon={p.icon} tone={toneFor(i)} className="transition-all duration-500 ease-spring group-hover:-rotate-6 group-hover:scale-110" />
+                  <span>
+                    <CountUp value={p.title} className="block font-semibold text-ink" />
+                    <span className="mt-0.5 block text-sm leading-snug text-ink-soft">{p.description}</span>
+                  </span>
+                </Reveal>
               ))}
-            </div>
+            </ul>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="pt-14 pb-20 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-gray-900">
-              Cultural Tourism Segments
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Join the global movement in heritage, creative, festival, and community-based tourism
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tourismSegments.map((segment, index) => {
-              const Icon = segment.icon;
-              const gradients = [
-                'from-[#0B6E4F] to-[#159895]',
-                'from-[#159895] to-[#1A5F7A]',
-                'from-[#1A5F7A] to-[#57C5B6]',
-                'from-[#57C5B6] to-[#159895]',
-                'from-[#0B6E4F] to-[#57C5B6]',
-                'from-[#1A5F7A] to-[#0B6E4F]',
-              ];
-              return (
-                <Card key={index} className="border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group overflow-hidden">
-                  <CardContent className="p-6 space-y-4">
-                    <div className={`bg-gradient-to-br ${gradients[index]} w-14 h-14 rounded-2xl flex items-center justify-center shadow-md`}>
-                      <Icon className="h-7 w-7 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900">{segment.title}</h3>
-                    <p className="text-gray-600 leading-relaxed">{segment.description}</p>
-                    <Badge className={`bg-gradient-to-r ${gradients[index]} text-white border-0 text-xs font-semibold`}>
-                      {segment.market}
-                    </Badge>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 bg-gray-50 relative overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
-            <Badge className="bg-[#159895] text-white border-0 px-5 py-2 text-sm font-semibold mb-4">
-              WHY PARTNER WITH US
-            </Badge>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-gray-900">
-              Partner Benefits
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Everything you need to succeed as a Gamana partner
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {benefits.map((benefit, index) => {
-              const Icon = benefit.icon;
-              const iconGradients = [
-                'from-[#0B6E4F] to-[#159895]',
-                'from-[#1A5F7A] to-[#159895]',
-                'from-[#57C5B6] to-[#159895]',
-              ];
-
-              return (
-                <Card
-                  key={index}
-                  className="group relative overflow-hidden border border-gray-100 bg-white hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-                >
-                  <CardContent className="p-8 space-y-6 relative z-10">
-                    <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${iconGradients[index]} shadow-md`}>
-                      <Icon className="h-8 w-8 text-white" />
-                    </div>
-
-                    <div className="space-y-3">
-                      <h3 className="text-2xl font-bold text-gray-900">
-                        {benefit.title}
-                      </h3>
-                      <p className="text-base text-gray-600 leading-relaxed">
-                        {benefit.description}
+        <section className="section bg-white">
+          <div className="container-site">
+            <SectionHeader
+              title="Cultural Tourism Segments"
+              lead="Explore travel partnership opportunities across heritage, creative, festival, and community-based tourism."
+            />
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {tourismSegments.map((segment, index) => {
+                const Icon = segment.icon;
+                return (
+                  <Reveal key={segment.title} delay={(index % 3) * 80} className="h-full">
+                    <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-ink/5 bg-sand-50 p-7 transition-all duration-500 ease-out-expo hover:-translate-y-1 hover:bg-white hover:shadow-lift">
+                      <div className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-brand-500 to-sunset-400 transition-transform duration-500 ease-out-expo group-hover:scale-x-100" aria-hidden />
+                      <IconTile icon={Icon} tone={toneFor(index)} size="lg" className="transition-transform duration-500 ease-spring group-hover:-rotate-6 group-hover:scale-110" />
+                      <h3 className="text-h3 mt-6 text-ink">{segment.title}</h3>
+                      <p className="mt-2 flex-1 leading-relaxed text-ink-soft">{segment.description}</p>
+                      <p className="mt-5 inline-flex w-fit rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800">
+                        {segment.market}
                       </p>
                     </div>
+                  </Reveal>
+                );
+              })}
+            </div>
+          </div>
+        </section>
 
-                    <div className="pt-4 border-t border-gray-200">
-                      <ul className="space-y-3">
-                        {benefit.details.map((detail, idx) => (
-                          <li key={idx} className="flex items-start space-x-3">
-                            <CheckCircle2 className="mt-0.5 h-4 w-4 text-[#159895] flex-shrink-0" />
-                            <span className="text-sm text-gray-700 leading-relaxed">{detail}</span>
+        <section className="section bg-sand-50">
+          <div className="container-site">
+            <SectionHeader
+              eyebrow="Why partner with us"
+              title="Partner Benefits"
+              lead="Everything you need to succeed as a Gamana partner"
+            />
+            <div className="grid auto-rows-[minmax(14rem,auto)] gap-5 md:grid-cols-2 lg:grid-cols-3 lg:grid-rows-2">
+              {benefits.map((benefit, index) => {
+                const Icon = benefit.icon;
+                const hero = index === 0;
+                return (
+                  <Reveal key={benefit.title} delay={index * 90} className={cn("h-full", BENEFIT_LAYOUT[index])}>
+                    <div
+                      className={cn(
+                        "group flex h-full flex-col rounded-3xl p-8 shadow-card transition-all duration-500 ease-out-expo hover:-translate-y-1 hover:shadow-lift",
+                        hero ? "relative overflow-hidden bg-gradient-to-br from-brand-800 via-brand-700 to-brand-600 text-white" : "bg-white text-ink"
+                      )}
+                    >
+                      {hero && (
+                        <Icon
+                          className="pointer-events-none absolute -right-10 top-1/3 h-56 w-56 text-white/[0.07] transition-transform duration-700 ease-out-expo group-hover:-translate-y-2 group-hover:rotate-6"
+                          aria-hidden
+                        />
+                      )}
+                      <span
+                        className={cn(
+                          "grid h-14 w-14 place-items-center rounded-2xl transition-transform duration-500 ease-spring group-hover:-rotate-6 group-hover:scale-110",
+                          hero ? "bg-white/15" : "bg-brand-50 text-brand-700"
+                        )}
+                      >
+                        <Icon className="h-7 w-7" aria-hidden />
+                      </span>
+                      <h3 className={cn("mt-6 font-display font-bold", hero ? "text-3xl" : "text-h3")}>{benefit.title}</h3>
+                      <p className={cn("mt-2 leading-relaxed", hero ? "text-lg text-white/85" : "text-ink-soft")}>
+                        {benefit.description}
+                      </p>
+                      <ul className={cn("mt-auto space-y-2.5 pt-6", hero ? "border-t border-white/15" : "border-t border-ink/10")}>
+                        {benefit.details.map((detail) => (
+                          <li key={detail} className="flex items-start gap-2.5 text-sm">
+                            <CheckCircle2
+                              className={cn("mt-0.5 h-4 w-4 flex-shrink-0", hero ? "text-sunset-300" : "text-brand-600")}
+                              aria-hidden
+                            />
+                            <span className={hero ? "text-white/90" : "text-ink-soft"}>{detail}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-              How It Works
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Getting started is simple and straightforward
-            </p>
-          </div>
-
-          <div className="max-w-5xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {howItWorks.map((item, index) => (
-                <div key={index} className="relative">
-                  <Card className="border-2 h-full hover:border-[#37B8AF] transition-all duration-300">
-                    <CardContent className="p-6 space-y-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xl">
-                        {item.step}
-                      </div>
-                      <h3 className="text-xl font-semibold">{item.title}</h3>
-                      <p className="text-gray-600 leading-relaxed">{item.description}</p>
-                    </CardContent>
-                  </Card>
-                  {index < howItWorks.length - 1 && (
-                    <ArrowRight className="hidden lg:block absolute top-1/2 -right-3 transform -translate-y-1/2 h-6 w-6 text-[#2C7A89]" />
-                  )}
-                </div>
-              ))}
+                  </Reveal>
+                );
+              })}
+              <Reveal variant="scale" delay={270} className="relative hidden min-h-[20rem] overflow-hidden rounded-3xl shadow-card lg:col-start-3 lg:row-span-2 lg:row-start-1 lg:block">
+                <Image
+                  src="/solo-traveller-cobblestone-street-audio-guide-hands-free-exploration.png"
+                  alt=""
+                  fill
+                  sizes="33vw"
+                  className="object-cover transition-transform duration-700 ease-out-expo hover:scale-105"
+                />
+              </Reveal>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section id="partner-form-section" className="py-20 bg-white scroll-mt-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center space-y-8 mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
-              Ready to Join Our Ecosystem?
-            </h2>
-            <p className="text-xl text-gray-600">
-              Start connecting with travelers and growing your business today
-            </p>
+        <section className="section bg-white">
+          <div className="container-site">
+            <SectionHeader title="How It Works" lead="Getting started is simple and straightforward" />
+            <Reveal variant="fade" className="group relative">
+              <div className="absolute left-[12.5%] right-[12.5%] top-7 hidden h-0.5 overflow-hidden rounded-full bg-brand-100 lg:block" aria-hidden>
+                <div className="h-full origin-left bg-gradient-to-r [.js_&]:scale-x-0 from-brand-500 to-sunset-400 transition-transform delay-300 duration-[1600ms] ease-out-expo group-[.is-visible]:!scale-x-100" />
+              </div>
+              <ol className="relative grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                {howItWorks.map((item, index) => (
+                  <li key={item.title} className="text-center">
+                    <span
+                      className="relative mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-600 font-display text-xl font-bold text-white shadow-lift ring-8 ring-white transition-all duration-500 ease-spring [.js_&]:scale-75 [.js_&]:opacity-0 group-[.is-visible]:!scale-100 group-[.is-visible]:!opacity-100"
+                      style={{ transitionDelay: `${300 + index * 350}ms` }}
+                    >
+                      {index + 1}
+                    </span>
+                    <h3 className="text-h3 mt-6 text-ink">{item.title}</h3>
+                    <p className="mx-auto mt-2 max-w-xs leading-relaxed text-ink-soft">{item.description}</p>
+                  </li>
+                ))}
+              </ol>
+            </Reveal>
           </div>
-          <PartnerForm />
-        </div>
-      </section>
-    </main>
+        </section>
+
+        <section id="partner-form-section" className="section scroll-mt-20 bg-sand-50">
+          <div className="container-site">
+            <SectionHeader
+              title="Ready to Join Our Ecosystem?"
+              lead="Start connecting with travelers and growing your business today"
+            />
+            <PartnerForm />
+          </div>
+        </section>
+      </main>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import { ExploreCatalogPage } from '@/components/marketplace/ExploreCatalogPage';
 
 export default async function MarketplaceWalksCatalogPage() {
-  return <ExploreCatalogPage />;
+  return <ExploreCatalogPage heroPhoto="hero-explore-tours" />;
 }

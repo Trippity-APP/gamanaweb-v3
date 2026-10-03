@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "@/components/icons";
 
 /**
  * The small translucent pill that sits above a hero heading — first used on the Blog

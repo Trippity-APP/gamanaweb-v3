@@ -6,8 +6,14 @@ import { CityCard } from "./CityCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchCities, ApiCity, FetchCitiesParams } from "@/lib/services/cityService";
-import { fetchPublicTours } from "@/lib/marketplace-api";
+import { loadSearchCatalog } from "@/lib/search-catalog";
 import { CityGridSkeleton } from "@/components/ui/list-skeletons";
+import { StoreBadges } from "@/components/site/StoreBadges";
+
+const chipClass = (active: boolean) =>
+    `focus-ring inline-flex h-9 shrink-0 items-center rounded-full border px-4 text-sm font-medium transition-colors duration-200 ${
+        active ? "border-ink bg-ink text-white" : "border-ink/10 bg-white text-ink hover:border-ink/30"
+    }`;
 
 type FilterType = "all" | "popular" | "new" | "country";
 
@@ -85,7 +91,7 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
 
         void (async () => {
             try {
-                const tours = await fetchPublicTours();
+                const tours = await loadSearchCatalog();
                 if (!cancelled) setTotalTours(tours.length);
             } catch {
                 if (!cancelled) setTotalTours(0);
@@ -169,73 +175,55 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
 
     return (
         <section id="city-grid" className={isPreview ? "py-16 md:py-20" : "py-12 md:py-16"}>
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col xl:flex-row items-end xl:items-center justify-between mb-8 md:mb-10 gap-4 md:gap-6">
+            <div className="container-site">
+            <div className="mb-8 flex flex-col gap-6 md:mb-10 xl:flex-row xl:items-end xl:justify-between">
                 {isPreview && (
-                    <div className="w-full xl:w-auto">
-                        <p className="text-sm font-semibold text-[#1A5F7A] uppercase tracking-wider mb-2">
-                            Destinations
-                        </p>
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 text-foreground leading-tight">
-                            Explore <span className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] bg-clip-text text-transparent">Our Cities</span>
+                    <div className="max-w-2xl">
+                        <p className="eyebrow mb-3">Destinations</p>
+                        <h2 className="text-h2 text-ink">
+                            Travel Destinations <span className="text-brand-600">Covered by Gamana</span>
                         </h2>
-                        <p className="text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed font-medium">
-                            Find your next audio adventure.
+                        <p className="text-lead mt-4 text-ink-soft">
+                            Gamana covers a growing range of travel destinations where you can experience cities through immersive audio stories, local history, cultural insights, and walking experiences. From historic streets to iconic landmarks, each destination offers a hands-free way to experience more as you walk.
                         </p>
                     </div>
                 )}
 
-                {/* Search & Filters */}
-                <div className={`flex flex-col md:flex-row gap-4 w-full ${isPreview ? "xl:w-auto xl:justify-end" : ""}`}>
-                    {/* Search Input - shown when explicitly requested, or when arriving with ?q= */}
+                <div className={`flex w-full flex-col gap-3 md:flex-row md:items-center ${isPreview ? "xl:w-auto xl:justify-end" : ""}`}>
                     {effectiveShowSearch && (
-                        <div className="relative w-full md:w-64">
-                            <Input
-                                placeholder="Search cities..."
-                                className="pl-4 rounded-full bg-white shadow-sm"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
+                        <Input
+                            type="search"
+                            aria-label="Search cities"
+                            placeholder="Search cities..."
+                            className="h-10 w-full rounded-full border-ink/10 bg-white pl-4 shadow-card md:w-64"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     )}
 
-                    <div className="flex flex-wrap gap-2">
-                        <Button
-                            variant={activeFilter === "all" ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => {
-                                setActiveFilter("all");
-                                setSelectedCountry(null);
-                            }}
-                            className="rounded-full shadow-sm"
-                        >
-                            All
-                        </Button>
-                        <Button
-                            variant={activeFilter === "popular" ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => {
-                                setActiveFilter("popular");
-                                setSelectedCountry(null);
-                            }}
-                            className="rounded-full shadow-sm"
-                        >
-                            Popular
-                        </Button>
-                        <Button
-                            variant={activeFilter === "new" ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => {
-                                setActiveFilter("new");
-                                setSelectedCountry(null);
-                            }}
-                            className="rounded-full shadow-sm"
-                        >
-                            New
-                        </Button>
-
+                    <div role="group" aria-label="Filter cities" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden">
+                        {([
+                            ["all", "All"],
+                            ["popular", "Popular"],
+                            ["new", "New"],
+                        ] as const).map(([value, label]) => (
+                            <button
+                                key={value}
+                                type="button"
+                                aria-pressed={activeFilter === value}
+                                onClick={() => {
+                                    setActiveFilter(value);
+                                    setSelectedCountry(null);
+                                }}
+                                className={chipClass(activeFilter === value)}
+                            >
+                                {label}
+                            </button>
+                        ))}
                         <select
-                            className="h-9 w-[140px] rounded-full border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 bg-white"
+                            aria-label="Filter by country"
+                            className={`${chipClass(activeFilter === "country")} appearance-none pr-8 bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat`}
+                            style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%235F6E7A%27 stroke-width=%272.5%27%3E%3Cpath d=%27m6 9 6 6 6-6%27/%3E%3C/svg%3E\")" }}
                             onChange={(e) => {
                                 if (e.target.value) {
                                     setActiveFilter("country");
@@ -247,7 +235,7 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
                             }}
                             value={activeFilter === "country" ? selectedCountry || "" : ""}
                         >
-                            <option value="">By Country</option>
+                            <option value="">By country</option>
                             {countries.map(c => (
                                 <option key={c.code} value={c.code}>{c.name}</option>
                             ))}
@@ -259,14 +247,14 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
             {loading && !loadingMore ? (
                 <CityGridSkeleton count={isPreview ? 8 : 12} />
             ) : cities.length === 0 ? (
-                <div className="text-center py-16 md:py-20 text-muted-foreground text-sm sm:text-base">
+                <div className="py-16 text-center text-ink-soft md:py-20 text-sm sm:text-base">
                     {searchQuery || activeFilter !== "all" || selectedCountry
                         ? "No cities found matching your criteria."
                         : "No cities available."}
                 </div>
             ) : (
                 <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
                         {cities.map((city) => (
                             <CityCard key={city.id} city={city} />
                         ))}
@@ -277,44 +265,19 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
             {/* Preview Mode CTA */}
             {isPreview && !loading && cities.length > 0 && (
                 <div className="mt-10 md:mt-12 text-center space-y-6">
-                    <div className="pt-6 md:pt-8 border-t border-border">
-                        <p className="text-muted-foreground mb-6 text-sm sm:text-base">
+                    <div className="border-t border-ink/10 pt-6 md:pt-8">
+                        <p className="mb-6 text-ink-soft text-sm sm:text-base">
                             We have{" "}
-                            <strong className="text-foreground">
+                            <strong className="text-ink">
                                 {totalTours > 0 ? `${totalTours} audio tours` : "audio tours"}
                             </strong>{" "}
                             across{" "}
-                            <strong className="text-foreground">
+                            <strong className="text-ink">
                                 {totalCities > 0 ? `${totalCities} cities` : "cities worldwide"}
                             </strong>
                             .
                         </p>
-                        <div className="flex flex-wrap gap-4 justify-center">
-                            <a
-                                href="https://play.google.com/store/apps/details?id=com.agent.gamana.ai"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:scale-105 transition-transform"
-                            >
-                                <img
-                                    src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
-                                    alt="Download Gamana on Android"
-                                    className="h-12 w-auto"
-                                />
-                            </a>
-                            <a
-                                href="https://apps.apple.com/in/app/gamana-ai/id6748155654"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:scale-105 transition-transform"
-                            >
-                                <img
-                                    src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg"
-                                    alt="Download Gamana on iOS"
-                                    className="h-12 w-auto"
-                                />
-                            </a>
-                        </div>
+                        <StoreBadges source="cities_grid" keyword="travel guide app" className="justify-center" />
                     </div>
                 </div>
             )}
@@ -327,7 +290,7 @@ export const CityGrid = ({ isPreview = false, showSearch = false }: CityGridProp
                         size="lg"
                         onClick={handleLoadMore}
                         disabled={loadingMore}
-                        className="rounded-full px-8 shadow-sm border-[#159895] text-[#1A5F7A] hover:bg-gradient-to-r hover:from-[#159895] hover:to-[#1A5F7A] hover:text-white hover:border-transparent min-w-[200px]"
+                        className="min-w-[200px] rounded-full border-ink/15 px-8 text-ink hover:border-ink hover:bg-ink hover:text-white"
                     >
                         {loadingMore ? "Loading..." : "Load More Cities"}
                     </Button>

@@ -1,53 +1,27 @@
 "use client";
 
-import Link from "next/link";
-import { Shield, Mail, Calendar, FileText } from "lucide-react";
-import Header from "@/components/navigation/header";
-import Footer from "@/components/navigation/footer";
+import { Shield, Mail, FileText, Building2 } from "@/components/icons";
+import { LegalPageLayout } from "@/components/legal/LegalPageLayout";
+import { COMPANY, ENTITY_STATEMENT } from "@/lib/data/company";
 
 export default function PrivacyPolicyPage() {
   return (
-    <>
-      <Header />
-      <main>
-        {/* Hero Section */}
-        <section className="bg-gradient-to-br from-[#159895] via-[#57C5B6] to-[#1A5F7A] text-white py-20 pt-32 md:pt-40">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-6">
-                <Shield className="h-8 w-8" />
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[62px] font-black mb-6 leading-tight">
-                Privacy Policy
-              </h1>
-              <p className="text-xl text-white/90 max-w-2xl mx-auto">
-                Your privacy is important to us. This policy explains how we collect, use, and protect your information.
-              </p>
-              <div className="flex items-center justify-center gap-4 mt-6 text-sm text-white/80">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>Effective Date: August 1, 2025</span>
-                </div>
-                <span className="text-white/60">•</span>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>Last Updated: November 2, 2025</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Content Section */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto prose prose-lg">
-              <div className="space-y-8 text-gray-700">
+    <LegalPageLayout
+      title="Privacy Policy"
+      subtitle="Your privacy is important to us. This policy explains how we collect, use, and protect your information."
+      icon={Shield}
+      effectiveDate="August 1, 2025"
+      lastUpdated="October 3, 2026"
+    >
+              <div className="space-y-8">
                 {/* Section 1 */}
                 <div>
                   <h2 className="text-3xl font-bold text-gray-900 mb-4">1. About This Policy</h2>
                   <p className="leading-relaxed">
                     This Privacy Policy explains how SIARLabs LLC ("Gamana," "we," "us," or "our") collects, uses, shares, and protects your personal information when you use the Gamana mobile app, website, and related services, referred to here as 'Gamana Services'. It also outlines your privacy rights and choices under applicable laws.
+                  </p>
+                  <p className="leading-relaxed mt-4">
+                    {ENTITY_STATEMENT}
                   </p>
                   <p className="leading-relaxed mt-4">
                     By using Gamana, you agree to the practices described in this Policy. If you do not agree, please refrain from using our app and any Gamana Services.
@@ -395,6 +369,9 @@ export default function PrivacyPolicyPage() {
                   <p className="leading-relaxed mb-3">
                     If you are using Gamana from India, the Digital Personal Data Protection Act, 2023 (DPDP) provides you with certain rights and we adhere to its requirements:
                   </p>
+                  <p className="leading-relaxed mb-3">
+                    For users in India, Gamana is operated by {COMPANY.india.name} (LLPIN {COMPANY.india.llpin}), a limited liability partnership registered in India and a subsidiary of {COMPANY.parent.name}. {COMPANY.india.name} is the local point of contact for Indian users, including correspondence with our Grievance Officer, which you can reach at <a href={`mailto:${COMPANY.email}`} className="text-[#159895] hover:underline">{COMPANY.email}</a> with &quot;Grievance&quot; in the subject line.
+                  </p>
                   <ul className="list-disc pl-6 space-y-2">
                     <li><strong>Consent and Withdrawal:</strong> We will seek your consent before processing personal data, especially for any non-obvious uses. For example, by allowing location access or signing up, you consent to those uses. You have the right to withdraw consent at any time – for instance, you can turn off location access or unsubscribe from marketing, and we will stop the related data processing. Withdrawal of consent will not affect processing done prior to withdrawal.</li>
                     <li><strong>Right to Access Information:</strong> You can request a summary of the personal data we have about you and how we have processed it. We provide much of this information in this Privacy Policy and will additionally answer any specific queries you have about your data.</li>
@@ -433,6 +410,13 @@ export default function PrivacyPolicyPage() {
                       <div>
                         <p className="font-semibold">Postal Mail</p>
                         <p className="text-sm text-gray-600">SIARLabs LLC (Siar Labs) – 24 East Avenue #127, New Canaan, CT 06840, USA. (Attn: Privacy Officer)</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Building2 className="h-5 w-5 text-[#159895] mt-1" />
+                      <div>
+                        <p className="font-semibold">India</p>
+                        <p className="text-sm text-gray-600">{COMPANY.india.name} (LLPIN {COMPANY.india.llpin}), subsidiary of {COMPANY.parent.name}, {COMPANY.india.short}. Email <a href={`mailto:${COMPANY.email}`} className="text-[#159895] hover:underline">{COMPANY.email}</a> (Attn: Grievance Officer).</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -489,11 +473,6 @@ export default function PrivacyPolicyPage() {
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </>
+    </LegalPageLayout>
   );
 }

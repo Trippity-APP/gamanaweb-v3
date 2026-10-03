@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "@/components/icons";
 
 import { getAllPostSummaries, type BlogSummary } from "@/lib/blog";
 import { BlogCoverImage } from "@/components/blog/blog-cover-image";

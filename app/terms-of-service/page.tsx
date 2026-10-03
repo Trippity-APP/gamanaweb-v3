@@ -1,54 +1,26 @@
 "use client";
 
-import Link from "next/link";
-import { FileText, Mail, Calendar } from "lucide-react";
-import Header from "@/components/navigation/header";
-import Footer from "@/components/navigation/footer";
+import { FileText, Mail } from "@/components/icons";
+import { LegalPageLayout } from "@/components/legal/LegalPageLayout";
+import { ENTITY_STATEMENT } from "@/lib/data/company";
 
 export default function TermsOfServicePage() {
   return (
-    <>
-      <Header />
-      <main>
-        {/* Hero Section */}
-        <section className="bg-gradient-to-br from-[#159895] via-[#57C5B6] to-[#1A5F7A] text-white py-20 pt-32 md:pt-40">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-6">
-                <FileText className="h-8 w-8" />
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[62px] font-black mb-6 leading-tight">
-                Terms of Use
-              </h1>
-              <p className="text-xl text-white/90 max-w-2xl mx-auto">
-                Please read these terms carefully before using Gamana.
-              </p>
-              <div className="flex items-center justify-center gap-4 mt-6 text-sm text-white/80">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>Effective Date: August 01, 2025</span>
-                </div>
-                <span className="text-white/60">•</span>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>Last Updated: August 01, 2025</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Content Section */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto prose prose-lg">
-              <div className="space-y-8 text-gray-700">
+    <LegalPageLayout
+      title="Terms of Service"
+      subtitle="Please read these terms carefully before using Gamana."
+      icon={FileText}
+      effectiveDate="August 01, 2025"
+      lastUpdated="October 03, 2026"
+    >
+              <div className="space-y-8">
                 {/* Section 1 */}
                 <div>
                   <h2 className="text-3xl font-bold text-gray-900 mb-4">1. Agreement to Terms</h2>
                   <p className="leading-relaxed">
                     These Terms of Use ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and SIARLabs LLC ("Company," "we," "us," or "our") regarding your use of the Gamana mobile application and related services (collectively, the "Service").
                   </p>
+                  <p className="leading-relaxed mt-4">{ENTITY_STATEMENT}</p>
                   <p className="leading-relaxed mt-4">
                     By downloading, installing, accessing, or using Gamana, you agree to be bound by these Terms and our Privacy Policy. If you do not agree to these Terms, do not use our Service.
                   </p>
@@ -373,7 +345,7 @@ export default function TermsOfServicePage() {
                   
                   <h3 className="text-2xl font-semibold text-gray-900 mt-6 mb-3">14.1 Governing Law</h3>
                   <p className="leading-relaxed">
-                    These Terms are governed by the laws of [Insert State/Jurisdiction], without regard to conflict of law principles.
+                    These Terms are governed by the laws of the State of Connecticut, United States, without regard to conflict of law principles.
                   </p>
 
                   <h3 className="text-2xl font-semibold text-gray-900 mt-6 mb-3">14.2 Dispute Resolution Process</h3>
@@ -482,7 +454,7 @@ export default function TermsOfServicePage() {
                 {/* Footer Note */}
                 <div className="border-t border-gray-200 pt-8 mt-12">
                   <p className="text-sm text-gray-600 mb-2">
-                    <strong>Last Updated:</strong> August 01, 2025
+                    <strong>Last Updated:</strong> October 03, 2026
                   </p>
                   <p className="text-sm text-gray-600 mb-2">
                     <strong>Version:</strong> 1.0
@@ -492,12 +464,7 @@ export default function TermsOfServicePage() {
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </>
+    </LegalPageLayout>
   );
 }
 

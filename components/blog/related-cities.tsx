@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import { MapPin } from "@/components/icons";
 
 import { cities, type City } from "@/lib/data/cities";
-import type { ArticleRegion } from "@/content/blog/articles";
+import type { ArticleRegion } from "@/content/blog/types";
 
 const regionToCountries: Record<string, string[]> = {
   india: ["India"],

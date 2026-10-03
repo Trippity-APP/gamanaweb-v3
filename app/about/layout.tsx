@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { OG_IMAGE } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
@@ -13,11 +14,13 @@ export const metadata: Metadata = {
     url: 'https://www.gamana.app/about/',
     siteName: 'Gamana',
     type: 'website',
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'About | Gamana',
     description: 'Explore Gamana, the AI-powered travel app providing immersive, hands-free audio tours and unforgettable cultural experiences.',
+    images: [OG_IMAGE.url],
   },
 };
 

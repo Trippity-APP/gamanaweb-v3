@@ -1,22 +1,20 @@
 import { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  BookOpen,
-  Headphones,
-  User,
-  Share2,
-  Globe,
-  ArrowRight,
-  Zap,
-  Users,
-} from "lucide-react";
-import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
+import { ArrowRight, Check, Globe, Users, Zap } from "@/components/icons";
 import HeroHeader from "@/components/navigation/hero-header";
 import Footer from "@/components/navigation/footer";
-import { HeroSlideshow } from "@/components/HeroSlideshow";
+import { PageHero } from "@/components/site/PageHero";
+import { SectionHeader } from "@/components/site/SectionHeader";
+import { StoreBadges } from "@/components/site/StoreBadges";
+import { DownloadBand } from "@/components/site/DownloadBand";
+import { Reveal } from "@/components/motion/Reveal";
+import { FEATURES, featureHref } from "@/lib/data/features";
+import { cn } from "@/lib/utils";
+import { getPhoto } from "@/lib/images";
+import { OG_IMAGE } from '@/lib/seo';
 
+import { IconTile, toneFor } from "@/components/icons/IconTile";
 export const metadata: Metadata = {
   title: "Features",
   description: "Discover Gamana's premium features: AI-powered narrators, handcrafted audio stories, location-aware tours, offline access, and expertly researched content for immersive travel experiences.",
@@ -29,260 +27,207 @@ export const metadata: Metadata = {
     url: 'https://www.gamana.app/features/',
     siteName: 'Gamana',
     type: 'website',
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Features | Gamana',
     description: "Discover Gamana's premium features: AI-powered narrators, handcrafted audio stories, location-aware tours, offline access, and expertly researched content for immersive travel experiences.",
+    images: [OG_IMAGE.url],
   },
 };
 
+const additionalBenefits = [
+  {
+    icon: Zap,
+    title: "Instant Access",
+    description: "See nearby places and start tours immediately",
+  },
+  {
+    icon: Users,
+    title: "For Everyone",
+    description: "Perfect for solo travelers, families, and groups",
+  },
+  {
+    icon: Globe,
+    title: "Global Coverage",
+    description: "Tours available in major cities worldwide",
+  },
+];
+
+// Bento placement for the six core features: a hero tile, then a mix of wide and square cards.
+const BENTO = [
+  "md:col-span-2 md:row-span-2",
+  "",
+  "",
+  "md:col-span-1",
+  "md:col-span-1",
+  "md:col-span-1",
+];
+
+const core = FEATURES.filter((f) => f.core);
+const secondary = FEATURES.filter((f) => !f.core);
+
 export default function FeaturesPage() {
-  const features = [
-    {
-      id: "exquisite-storytelling",
-      icon: BookOpen,
-      title: "Exquisite Storytelling",
-      description: "History, culture, and the details most guides skip",
-      details: [
-        "Professionally researched and written narratives",
-        "Historical facts blended with local legends",
-        "Surprising discoveries and hidden stories",
-        "Cultural context that deepens understanding",
-      ],
-      gradient: "from-[#0B6E4F] to-[#159895]",
-    },
-    {
-      id: "truly-immersive",
-      icon: Headphones,
-      title: "Truly Immersive",
-      description: "Hands-free, eyes-up exploration",
-      details: [
-        "Completely hands-free operation",
-        "Eyes-up, device-down exploration",
-        "Fully present in the moment",
-        "No need to read or check your phone",
-      ],
-      gradient: "from-[#57C5B6] to-[#159895]",
-    },
-    {
-      id: "virtual-travel-guides",
-      icon: User,
-      title: "Virtual Travel Guides",
-      description: "Knowledgeable narrator companions",
-      details: [
-        "Multiple guide personalities to choose from",
-        "Expert knowledge across various topics",
-        "Natural, conversational narration",
-        "Adaptive communication style",
-      ],
-      gradient: "from-[#1A5F7A] to-[#159895]",
-    },
-    {
-      id: "gamana-coins",
-      icon: GamanaCoinIcon,
-      title: "Gamana Coins",
-      description: "Earn rewards as you explore",
-      details: [
-        "Earn coins for tours, reviews, and engagement",
-        "Securely tracked in your wallet",
-        "Redeem for discounts and upgrades",
-        "Unlock premium tours",
-      ],
-      gradient: "from-[#159895] to-[#0B6E4F]",
-    },
-    {
-      id: "user-generated-tours",
-      icon: Share2,
-      title: "User-Generated Tours",
-      description: "Create and share storylists",
-      details: [
-        "Create custom tours and storylists",
-        "Share your local knowledge",
-        "Discover community-created content",
-        "Curate themed experiences",
-      ],
-      gradient: "from-[#57C5B6] to-[#1A5F7A]",
-    },
-    {
-      id: "local-languages",
-      icon: Globe,
-      title: "Local Languages",
-      description: "Stories in local languages",
-      details: [
-        "Native speaker narration",
-        "Cultural context in local language",
-        "Learn key phrases as you explore",
-        "Pronunciation guides included",
-      ],
-      gradient: "from-[#1A5F7A] to-[#57C5B6]",
-    },
-  ];
-
-  const additionalBenefits = [
-    {
-      icon: Zap,
-      title: "Instant Access",
-      description: "See nearby places and start tours immediately",
-    },
-    {
-      icon: Users,
-      title: "For Everyone",
-      description: "Perfect for solo travelers, families, and groups",
-    },
-    {
-      icon: Globe,
-      title: "Global Coverage",
-      description: "Tours available in major cities worldwide",
-    },
-  ];
-
   return (
     <>
-      <main className="min-h-screen">
-        <section className="relative h-[62vh] sm:h-[68vh] flex flex-col overflow-hidden">
-          {/* Photo behind the brand gradient, matching the treatment on /marketplace-redesign,
-              /cities, /ecosystem, /about, and /contact. */}
-          <div className="absolute inset-0">
-            <HeroSlideshow
-              images={[
-                "/hampi-vittala-temple-chariot-golden-hour-boulder-landscape.jpg",
-                "/buckingham-palace-morning-audio-tour-london.png",
-                "/traveller-gokak-falls-audio-guide-belagavi-tour.png",
-                "/solo-traveller-cobblestone-street-audio-guide-hands-free-exploration.png",
-              ]}
+      <HeroHeader transparent />
+      <main>
+        <PageHero
+          image={getPhoto("hero-features")}
+          imageAlt=""
+          breadcrumbs={[{ label: "Features", href: "/features/" }]}
+          heading="Premium Audio Tour Features"
+          subtitle="See what Gamana does: audio tours you take on foot, at your pace"
+        >
+          <StoreBadges source="features_hero" keyword="audio tour app" priority />
+        </PageHero>
+
+        <section className="section bg-sand-50">
+          <div className="container-site">
+            <div className="grid auto-rows-[minmax(15rem,auto)] grid-cols-1 gap-5 md:grid-cols-3">
+              {core.map((f, i) => {
+                const Icon = f.icon;
+                const hero = i === 0;
+                return (
+                  <Reveal key={f.slug} delay={i * 70} className={cn("h-full", BENTO[i])}>
+                    <Link
+                      id={f.slug}
+                      href={featureHref(f.slug)}
+                      className={cn(
+                        "focus-ring group relative flex h-full scroll-mt-24 flex-col overflow-hidden rounded-3xl p-7 shadow-card transition-all duration-500 ease-out-expo hover:-translate-y-1 hover:shadow-lift sm:p-8",
+                        hero ? "bg-ink text-white" : "bg-white text-ink"
+                      )}
+                    >
+                      {hero && (
+                        <>
+                          <Image
+                            src={f.image}
+                            alt=""
+                            fill
+                            sizes="(min-width: 768px) 66vw, 100vw"
+                            className="object-cover opacity-75 transition-transform duration-700 ease-out-expo group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/10" aria-hidden />
+                        </>
+                      )}
+                      <span
+                        className={cn(
+                          "relative grid h-14 w-14 place-items-center rounded-2xl transition-transform duration-500 ease-spring group-hover:-rotate-6 group-hover:scale-110",
+                          hero ? "bg-white/15 text-white backdrop-blur" : "bg-brand-50 text-brand-700"
+                        )}
+                      >
+                        <Icon className="h-7 w-7" />
+                      </span>
+                      <div className="relative mt-auto pt-8">
+                        <h2 className={cn("font-display font-bold", hero ? "text-3xl sm:text-4xl" : "text-xl")}>
+                          {f.title}
+                        </h2>
+                        <p className={cn("mt-2 leading-relaxed", hero ? "max-w-md text-lg text-white/80" : "text-ink-soft")}>
+                          {f.description}
+                        </p>
+                        <ul className={cn("mt-5 space-y-2 text-sm", hero ? "text-white/85 sm:columns-2 sm:gap-6" : "text-ink-soft")}>
+                          {f.details.map((d) => (
+                            <li key={d} className="flex items-start gap-2 break-inside-avoid">
+                              <Check
+                                className={cn("mt-0.5 h-4 w-4 flex-shrink-0", hero ? "text-sunset-300" : "text-brand-600")}
+                                aria-hidden
+                              />
+                              {d}
+                            </li>
+                          ))}
+                        </ul>
+                        <span
+                          className={cn(
+                            "mt-6 inline-flex items-center gap-1.5 text-sm font-semibold",
+                            hero ? "text-white" : "text-brand-700"
+                          )}
+                        >
+                          Explore More
+                          <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out-expo group-hover:translate-x-1" aria-hidden />
+                        </span>
+                      </div>
+                    </Link>
+                  </Reveal>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="section bg-white">
+          <div className="container-site">
+            <SectionHeader
+              title="And There's More"
+              lead="Additional benefits that make Gamana your perfect travel companion"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-[#0B6E4F]/25 via-[#159895]/20 to-[#1A5F7A]/20"></div>
-            <div className="absolute inset-0 bg-black/20"></div>
-          </div>
 
-          <HeroHeader transparent={true} />
-
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex-1 flex flex-col justify-start pt-28 pb-16">
-            <div className="max-w-4xl mx-auto text-center space-y-6">
-              <div className="inline-block w-fit">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight mb-2 animate-fade-in">
-                  Premium Audio Tour Features
-                </h1>
-                <div className="h-2 bg-white/60 rounded-full opacity-0 animate-fade-in" style={{ animationDelay: "150ms" }}></div>
-              </div>
-              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/95 leading-relaxed opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
-                See what Gamana does: audio tours you take on foot, at your pace
-              </p>
-            </div>
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent"></div>
-        </section>
-
-        <section className="py-20 bg-gray-50">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="space-y-20">
-              {features.map((feature, index) => {
-                const Icon = feature.icon;
-                const isEven = index % 2 === 0;
-
+            <div className="grid gap-5 md:grid-cols-2">
+              {secondary.map((f, i) => {
+                const Icon = f.icon;
                 return (
-                  <div
-                    key={feature.id}
-                    id={feature.id}
-                    className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${
-                      isEven ? "" : "lg:flex-row-reverse"
-                    }`}
-                  >
-                    <div className={`space-y-6 ${isEven ? "" : "lg:order-2"}`}>
-                      <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient}`}>
-                        <Icon className="h-8 w-8 text-white" />
-                      </div>
-                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">{feature.title}</h2>
-                      <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed">
-                        {feature.description}
-                      </p>
-                      <ul className="space-y-3">
-                        {feature.details.map((detail, idx) => (
-                          <li key={idx} className="flex items-start space-x-3">
-                            <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-br ${feature.gradient} mt-2.5 flex-shrink-0`}></div>
-                            <span className="text-sm sm:text-base text-gray-700">{detail}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className={isEven ? "" : "lg:order-1"}>
-                      <Card className="border-2 hover:shadow-xl transition-shadow duration-300">
-                        <CardContent className="p-8">
-                          <div className={`aspect-square rounded-xl bg-gradient-to-br ${feature.gradient} opacity-10 flex items-center justify-center`}>
-                            {feature.id === "gamana-coins" ? (
-                              <GamanaCoinIcon className="h-32 w-32 opacity-30" aria-hidden />
-                            ) : (
-                              <Icon className={`h-32 w-32 bg-gradient-to-br ${feature.gradient} bg-clip-text text-transparent opacity-30`} />
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
+                  <Reveal key={f.slug} delay={i * 80} className="h-full">
+                    <Link
+                      id={f.slug}
+                      href={featureHref(f.slug)}
+                      className="focus-ring group relative flex h-full min-h-[14rem] scroll-mt-24 flex-col justify-end overflow-hidden rounded-3xl bg-ink p-7 text-white shadow-card transition-all duration-500 ease-out-expo hover:-translate-y-1 hover:shadow-lift"
+                    >
+                      <Image
+                        src={f.image}
+                        alt=""
+                        fill
+                        sizes="(min-width: 768px) 50vw, 100vw"
+                        className="object-cover opacity-45 transition-transform duration-700 ease-out-expo group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-transparent" aria-hidden />
+                      <span className="relative mb-auto grid h-12 w-12 place-items-center rounded-2xl bg-white/15 backdrop-blur transition-transform duration-500 ease-spring group-hover:-rotate-6 group-hover:scale-110">
+                        <Icon className="h-6 w-6" />
+                      </span>
+                      <h3 className="relative mt-8 font-display text-2xl font-bold">{f.title}</h3>
+                      <p className="relative mt-2 max-w-md text-white/80">{f.description}</p>
+                      <span className="relative mt-4 inline-flex items-center gap-1.5 text-sm font-semibold">
+                        Explore More
+                        <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+                      </span>
+                    </Link>
+                  </Reveal>
                 );
               })}
             </div>
-          </div>
-        </section>
 
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-                And There's More
-              </h2>
-              <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                Additional benefits that make Gamana your perfect travel companion
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {additionalBenefits.map((benefit, index) => {
-                const Icon = benefit.icon;
+            <ul className="mt-5 grid gap-5 md:grid-cols-3">
+              {additionalBenefits.map((b, i) => {
+                const Icon = b.icon;
                 return (
-                  <Card key={index} className="border-2 hover:border-[#37B8AF] transition-all duration-300">
-                    <CardContent className="p-8 text-center space-y-4">
-                      <div className="bg-gradient-to-br from-[#159895]/10 to-[#57C5B6]/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
-                        <Icon className="h-8 w-8 text-[#2C7A89]" />
-                      </div>
-                      <h3 className="text-xl sm:text-2xl font-semibold">{benefit.title}</h3>
-                      <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{benefit.description}</p>
-                    </CardContent>
-                  </Card>
+                  <Reveal as="li" key={b.title} delay={i * 80} className="group rounded-3xl border border-ink/5 bg-sand-50 p-7 transition-all duration-500 ease-out-expo hover:-translate-y-1 hover:bg-white hover:shadow-card">
+                    <IconTile icon={Icon} tone={toneFor(i)} className="transition-transform duration-500 ease-spring group-hover:scale-110" />
+                    <h3 className="text-h3 mt-5 text-ink">{b.title}</h3>
+                    <p className="mt-2 leading-relaxed text-ink-soft">{b.description}</p>
+                  </Reveal>
                 );
               })}
-            </div>
+            </ul>
           </div>
         </section>
 
-        <section className="py-20 bg-gradient-to-br from-[#2C7A89] to-[#37B8AF] text-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto text-center space-y-8">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
-                Ready to Experience These Features?
-              </h2>
-              <p className="text-base sm:text-lg md:text-xl text-white">
-                Download Gamana and start exploring with narrated audio tours
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <a href="https://play.google.com/store/apps/details?id=com.agent.gamana.ai" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" variant="secondary" className="bg-white text-emerald-700 hover:bg-emerald-50 text-lg px-8 py-6 h-auto">
-                    Get on Google Play
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </a>
-                <Link href="/contact">
-                  <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-6 h-auto">
-                    Contact Us
-                  </Button>
+        <div className="pb-20">
+          <DownloadBand
+            title="Ready to Experience These Features?"
+            lead="Download Gamana and start exploring with narrated audio tours"
+            source="features_closing"
+            keyword="audio tour app"
+            aside={
+              <div className="flex lg:justify-end">
+                <Link
+                  href="/contact/"
+                  className="focus-ring inline-flex items-center justify-center rounded-full border-2 border-white/50 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/20 active:scale-95"
+                >
+                  Contact Us
                 </Link>
               </div>
-            </div>
-          </div>
-        </section>
+            }
+          />
+        </div>
       </main>
       <Footer />
     </>

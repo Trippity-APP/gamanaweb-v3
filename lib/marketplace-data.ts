@@ -40,6 +40,47 @@ export interface Tour {
   isRecommended?: boolean;
 }
 
+/** Fields the hero search reads; keeps the serialized home-page catalog small. */
+export type SearchTour = Pick<
+  Tour,
+  | 'id'
+  | 'title'
+  | 'description'
+  | 'location'
+  | 'narrator'
+  | 'category'
+  | 'searchTerms'
+  | 'contentKind'
+  | 'isRecommended'
+  | 'image'
+  | 'slug'
+  | 'duration'
+  | 'price'
+>;
+
+/** Matching only needs the start of the description; the full text would double the catalog size. */
+const SEARCH_DESCRIPTION_LIMIT = 160;
+
+export function toSearchTour(tour: Tour): SearchTour {
+  const { id, title, description, location, narrator, category, searchTerms, contentKind, isRecommended, image, slug, duration, price } =
+    tour;
+  return {
+    id,
+    title,
+    description: description.length > SEARCH_DESCRIPTION_LIMIT ? description.slice(0, SEARCH_DESCRIPTION_LIMIT) : description,
+    location,
+    narrator,
+    category,
+    searchTerms,
+    contentKind,
+    isRecommended,
+    image,
+    slug,
+    duration,
+    price,
+  };
+}
+
 export interface TourStop {
   id: string;
   position: number;

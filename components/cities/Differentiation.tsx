@@ -1,5 +1,6 @@
-import { Headphones, Route, Sparkles, MapPin } from "lucide-react";
+import { Headphones, Route, Sparkles, MapPin } from "@/components/icons";
 
+import { IconTile, toneFor, type TileIcon } from "@/components/icons/IconTile";
 const features = [
     {
         icon: Headphones,
@@ -36,9 +37,7 @@ export const Differentiation = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                     {features.map((feature, index) => (
                         <div key={index} className="flex flex-col items-center text-center group">
-                            <div className="w-14 h-14 rounded-full bg-[#159895]/20 flex items-center justify-center mb-5 text-[#57C5B6] group-hover:bg-[#159895]/30 transition-colors duration-300">
-                                <feature.icon className="w-7 h-7" strokeWidth={2} />
-                            </div>
+                            <IconTile icon={feature.icon} tone={toneFor(index)} size="lg" className="mb-5 transition-transform duration-300 ease-spring group-hover:scale-110" />
                             <h3 className="text-lg font-bold mb-2 text-white">{feature.title}</h3>
                             <p className="text-white/80 leading-relaxed text-sm">
                                 {feature.description}

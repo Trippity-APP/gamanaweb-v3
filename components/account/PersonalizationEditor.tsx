@@ -29,7 +29,7 @@ import {
   walkingToleranceOptions,
   dietaryOptions,
 } from "@/lib/personalization";
-import { Plus, X, Calendar as CalendarIcon, Pencil, Sparkles } from "lucide-react";
+import { Plus, X, Calendar as CalendarIcon, Pencil, Sparkles } from "@/components/icons";
 
 interface Draft {
   homeLocation: string;

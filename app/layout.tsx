@@ -1,13 +1,21 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter, Caveat } from 'next/font/google';
+import { Inter, Caveat, Plus_Jakarta_Sans } from 'next/font/google';
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import SideRail from "@/components/side-rail";
+import { SkipLink } from "@/components/site/SkipLink";
 import { CartProvider } from "@/lib/cart-context";
 import { AccountProvider } from "@/lib/account-context";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+// Display face for headings on redesigned pages, reached via Tailwind's `font-display`.
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['600', '700', '800'],
+  variable: '--font-display',
+  display: 'swap',
+});
 // Casual cursive script, used sparingly as a signature-style accent (e.g. "with Gamana"
 // under hero headlines) — exposed as a CSS variable so it can be reached via Tailwind's
 // font-script utility (see tailwind.config.ts) without becoming the site's body font.
@@ -99,9 +107,12 @@ export default function RootLayout({
         <link rel="icon" type="image/png" href="/favicon-gamana.png" />
         <link rel="apple-touch-icon" href="/favicon-gamana.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#10b981" />
+        <meta name="theme-color" content="#159895" />
+        {/* Scroll-reveal styles only apply under `.js`, so content is fully visible
+            to crawlers and no-JS visitors. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
-      <body className={`${inter.className} ${caveat.variable}`} suppressHydrationWarning>
+      <body className={`${inter.className} ${inter.variable} ${caveat.variable} ${jakarta.variable}`} suppressHydrationWarning>
         {/* Google Tag Manager (noscript) */}
         <noscript>
           <iframe
@@ -112,6 +123,7 @@ export default function RootLayout({
           />
         </noscript>
         {/* End Google Tag Manager (noscript) */}
+        <SkipLink />
         <AccountProvider>
           <CartProvider>
             {children}

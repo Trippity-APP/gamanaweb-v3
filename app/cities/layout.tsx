@@ -1,23 +1,26 @@
 import type { Metadata } from 'next';
+import { OG_IMAGE } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'Cities Covered by Gamana – Your AI Audio Travel Guide',
-  description: 'Explore cities through immersive, location-aware audio stories. No reading. No planning. Just walk and listen. Check our coverage of 50+ cities and 700+ audio stories worldwide.',
+  title: { absolute: "Travel Destinations & Cities to Explore | Gamana" },
+  description: "Explore travel destinations and cities around the world with Gamana. Discover city stories, local experiences, landmarks, and audio tours as you explore.",
   alternates: {
     canonical: 'https://www.gamana.app/cities/',
   },
   openGraph: {
-    title: 'Cities Covered by Gamana | AI Audio Travel Guide',
-    description: 'Explore cities through immersive, location-aware audio stories. No reading. No planning. Just walk and listen. Check our coverage of 50+ cities and 700+ audio stories worldwide.',
+    title: "Travel Destinations & Cities to Explore | Gamana",
+    description: "Explore travel destinations and cities around the world with Gamana. Discover city stories, local experiences, landmarks, and audio tours as you explore.",
     url: 'https://www.gamana.app/cities/',
     siteName: 'Gamana',
     type: 'website',
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Cities Covered by Gamana | AI Audio Travel Guide',
-    description: 'Explore cities through immersive, location-aware audio stories. No reading. No planning. Just walk and listen. Check our coverage of 50+ cities and 700+ audio stories worldwide.',
+    title: "Travel Destinations & Cities to Explore | Gamana",
+    description: "Explore travel destinations and cities around the world with Gamana. Discover city stories, local experiences, landmarks, and audio tours as you explore.",
+    images: [OG_IMAGE.url],
   },
 };
 

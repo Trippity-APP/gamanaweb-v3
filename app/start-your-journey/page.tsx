@@ -25,7 +25,7 @@ import {
   LogIn,
   Calendar as CalendarIcon,
   User,
-} from "lucide-react";
+} from "@/components/icons";
 import SiteHeader from "@/components/navigation/site-header";
 import Footer from "@/components/navigation/footer";
 import { OptionCard } from "@/components/personalization/OptionCard";
@@ -117,9 +117,9 @@ function StepShell({
 }) {
   return (
     <div className="max-w-2xl mx-auto">
-      <p className="text-sm font-semibold text-[#159895] uppercase tracking-wider mb-2">{eyebrow}</p>
-      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{title}</h2>
-      {subtitle && <p className="text-gray-600 mb-8">{subtitle}</p>}
+      <p className="text-sm font-semibold text-brand-600 uppercase tracking-wider mb-2">{eyebrow}</p>
+      <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink mb-2 text-balance">{title}</h2>
+      {subtitle && <p className="text-ink-soft mb-8">{subtitle}</p>}
       <div className="space-y-4">{children}</div>
     </div>
   );
@@ -306,38 +306,54 @@ export default function StartYourJourneyPage() {
     !saveBanner.saved;
 
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col">
+    <main className="min-h-screen bg-sand-50 flex flex-col">
       <SiteHeader variant="solid" />
 
       <div className="flex-1 py-16 md:py-24 px-4">
         <div className="container mx-auto max-w-3xl">
           {step > 0 && step < TOTAL_STEPS && (
-            <div className="max-w-2xl mx-auto mb-6 flex items-center gap-3">
-              <div className="flex-1 h-1 rounded-full bg-gray-200 overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-[#159895] to-[#1A5F7A] transition-all duration-300"
-                  style={{ width: `${(step / (TOTAL_STEPS - 1)) * 100}%` }}
-                />
+            <div className="max-w-2xl mx-auto mb-8 flex items-center gap-4">
+              <div className="relative flex-1">
+                <div className="h-1.5 rounded-full bg-ink/10 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-brand-500 to-sunset-400 transition-[width] duration-700 ease-out-expo"
+                    style={{ width: `${((step - 1) / (TOTAL_STEPS - 2)) * 100}%` }}
+                  />
+                </div>
+                <ol className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-between" aria-hidden>
+                  {Array.from({ length: TOTAL_STEPS - 1 }, (_, i) => i + 1).map((n) => (
+                    <li
+                      key={n}
+                      className={`h-3 w-3 rounded-full border-2 transition-all duration-500 ease-spring ${
+                        n < step
+                          ? "border-brand-600 bg-brand-600"
+                          : n === step
+                          ? "scale-125 border-brand-600 bg-white ring-4 ring-brand-600/20"
+                          : "border-ink/15 bg-white"
+                      }`}
+                    />
+                  ))}
+                </ol>
               </div>
-              <span className="text-xs text-gray-500 whitespace-nowrap">
+              <span className="text-xs font-semibold text-ink-soft whitespace-nowrap" aria-live="polite">
                 Step {step} of {TOTAL_STEPS - 1}
               </span>
             </div>
           )}
 
           {showSaveBanner && (
-            <div className="max-w-2xl mx-auto mb-6 bg-white border border-[#159895]/30 rounded-2xl p-5 shadow-sm relative">
+            <div className="max-w-2xl mx-auto mb-6 bg-white border border-brand-600/30 rounded-2xl p-5 shadow-sm relative">
               <button
                 type="button"
                 aria-label="Dismiss"
                 onClick={() => setSaveBanner((prev) => ({ ...prev, dismissed: true }))}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                className="absolute top-4 right-4 text-ink-muted hover:text-ink-soft"
               >
                 <X className="h-4 w-4" />
               </button>
 
-              <p className="text-sm font-semibold text-gray-900 pr-6">Don&apos;t lose this, save your progress</p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-sm font-semibold text-ink pr-6">Don&apos;t lose this, save your progress</p>
+              <p className="text-xs text-ink-muted mt-1">
                 We&apos;ll keep everything you&apos;ve told us so far, tied to your Gamana account.
               </p>
 
@@ -347,8 +363,8 @@ export default function StartYourJourneyPage() {
                   onClick={() => setSaveBanner((prev) => ({ ...prev, mode: "new" }))}
                   className={`pb-1 border-b-2 transition-colors ${
                     saveBanner.mode === "new"
-                      ? "text-[#159895] border-[#159895]"
-                      : "text-gray-400 border-transparent hover:text-gray-600"
+                      ? "text-brand-600 border-brand-600"
+                      : "text-ink-muted border-transparent hover:text-ink-soft"
                   }`}
                 >
                   Create a new account
@@ -358,8 +374,8 @@ export default function StartYourJourneyPage() {
                   onClick={() => setSaveBanner((prev) => ({ ...prev, mode: "existing" }))}
                   className={`pb-1 border-b-2 transition-colors ${
                     saveBanner.mode === "existing"
-                      ? "text-[#159895] border-[#159895]"
-                      : "text-gray-400 border-transparent hover:text-gray-600"
+                      ? "text-brand-600 border-brand-600"
+                      : "text-ink-muted border-transparent hover:text-ink-soft"
                   }`}
                 >
                   Log into an existing account
@@ -399,9 +415,9 @@ export default function StartYourJourneyPage() {
                     Continue with Apple
                   </Button>
                   <div className="flex items-center gap-2 py-1">
-                    <div className="flex-1 h-px bg-gray-200" />
-                    <span className="text-[10px] text-gray-400 uppercase tracking-wider">or use email</span>
-                    <div className="flex-1 h-px bg-gray-200" />
+                    <div className="flex-1 h-px bg-ink/10" />
+                    <span className="text-[10px] text-ink-muted uppercase tracking-wider">or use email</span>
+                    <div className="flex-1 h-px bg-ink/10" />
                   </div>
                 </div>
               )}
@@ -433,33 +449,34 @@ export default function StartYourJourneyPage() {
                   updateJourney(buildJourneyPayload());
                   setSaveBanner((prev) => ({ ...prev, saved: true }));
                 }}
-                className="w-full mt-4 bg-[#159895] hover:bg-[#128a86]"
+                className="w-full mt-4 bg-brand-700 hover:bg-brand-800"
               >
                 Save Progress
               </Button>
 
-              <p className="text-[11px] text-gray-400 mt-2">
+              <p className="text-[11px] text-ink-muted mt-2">
                 Prototype note: neither path creates a real account or verifies a password yet.
               </p>
             </div>
           )}
 
           {saveBanner.saved && step > STEP_TRAVELERS && step <= STEP_PRACTICALITIES && (
-            <div className="max-w-2xl mx-auto mb-6 text-xs text-[#159895] font-medium flex items-center gap-1">
+            <div className="max-w-2xl mx-auto mb-6 text-xs text-brand-600 font-medium flex items-center gap-1">
               <Check className="h-3.5 w-3.5" /> Progress saved to {saveBanner.email}
             </div>
           )}
 
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-12">
+          <div className="bg-white rounded-4xl shadow-card border border-ink/5 p-8 md:p-12">
+            <div key={step} className="animate-fade-in">
             {step === STEP_WELCOME && (
               <div className="max-w-2xl mx-auto text-center space-y-6">
-                <p className="text-sm font-semibold text-[#159895] uppercase tracking-wider">
+                <p className="text-sm font-semibold text-brand-600 uppercase tracking-wider">
                   Design concept, not live
                 </p>
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                <h1 className="text-display text-ink text-balance">
                   Let&apos;s shape your Gamana journey
                 </h1>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-ink-soft leading-relaxed">
                   A few honest questions, who you&apos;re traveling as, what pulls you in, which kind of guide
                   you&apos;d want beside you. Share as much or as little as you like, nothing here is shared or
                   sold; it exists only to make what you see, on the web and later in the app, feel like it was
@@ -468,7 +485,7 @@ export default function StartYourJourneyPage() {
                 <Button
                   size="lg"
                   onClick={next}
-                  className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] hover:from-[#159895] hover:to-[#1A5F7A] rounded-full px-8"
+                  className="bg-brand-700 hover:bg-brand-800 transition-all duration-300 ease-spring hover:-translate-y-0.5 active:scale-95 rounded-full px-8"
                 >
                   Begin
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -518,16 +535,16 @@ export default function StartYourJourneyPage() {
                     )
                   )}
                 </div>
-                <label className="flex items-center gap-3 pt-4 text-sm text-gray-700">
+                <label className="flex items-center gap-3 pt-4 text-sm text-ink-soft">
                   <input
                     type="checkbox"
                     checked={answers.travelingWithKidsOrElders}
                     onChange={(e) => update("travelingWithKidsOrElders", e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 accent-[#159895]"
+                    className="h-4 w-4 rounded border-ink/20 accent-brand-600"
                   />
                   Traveling with young children or elders who&apos;ll need a gentler pace
                 </label>
-                <p className="text-xs text-gray-400 pt-2">
+                <p className="text-xs text-ink-muted pt-2">
                   We only ask this to shape pacing and safety tips, never shared, never sold.
                 </p>
               </StepShell>
@@ -549,7 +566,7 @@ export default function StartYourJourneyPage() {
                             variant="outline"
                             className="flex-1 justify-start text-left font-normal h-11"
                           >
-                            <CalendarIcon className="mr-2 h-4 w-4 text-gray-400 shrink-0" />
+                            <CalendarIcon className="mr-2 h-4 w-4 text-ink-muted shrink-0" />
                             {w?.from ? (
                               w.to ? (
                                 <span>
@@ -559,7 +576,7 @@ export default function StartYourJourneyPage() {
                                 <span>{format(w.from, "MMM d, yyyy")} – pick an end date</span>
                               )
                             ) : (
-                              <span className="text-gray-400">Pick a date range (optional)</span>
+                              <span className="text-ink-muted">Pick a date range (optional)</span>
                             )}
                           </Button>
                         </PopoverTrigger>
@@ -580,7 +597,7 @@ export default function StartYourJourneyPage() {
                           type="button"
                           aria-label="Remove this window"
                           onClick={() => removeWindow(i)}
-                          className="text-gray-400 hover:text-red-500 shrink-0"
+                          className="text-ink-muted hover:text-red-500 shrink-0"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -592,7 +609,7 @@ export default function StartYourJourneyPage() {
                   <button
                     type="button"
                     onClick={addWindow}
-                    className="inline-flex items-center gap-1 text-sm font-semibold text-[#159895] hover:text-[#128a86] pt-1"
+                    className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-800 pt-1"
                   >
                     <Plus className="h-4 w-4" /> Add another window
                   </button>
@@ -608,10 +625,10 @@ export default function StartYourJourneyPage() {
               >
                 <div className="space-y-4">
                   {answers.travelerProfiles.map((profile, i) => (
-                    <div key={i} className="rounded-xl border-2 border-gray-200 p-4 space-y-3">
+                    <div key={i} className="rounded-xl border-2 border-ink/10 p-4 space-y-3">
                       <div className="flex items-center gap-2">
                         {i === 0 ? (
-                          <p className="flex-1 text-sm font-semibold text-gray-900 py-2">
+                          <p className="flex-1 text-sm font-semibold text-ink py-2">
                             You
                           </p>
                         ) : (
@@ -626,7 +643,7 @@ export default function StartYourJourneyPage() {
                             type="button"
                             aria-label="Remove this traveler"
                             onClick={() => removeProfile(i)}
-                            className="text-gray-400 hover:text-red-500 shrink-0"
+                            className="text-ink-muted hover:text-red-500 shrink-0"
                           >
                             <X className="h-4 w-4" />
                           </button>
@@ -646,13 +663,13 @@ export default function StartYourJourneyPage() {
                       </div>
 
                       {profile.interests.length > 0 && (
-                        <div className="space-y-3 pt-1 pl-3 border-l-2 border-[#159895]/20">
+                        <div className="space-y-3 pt-1 pl-3 border-l-2 border-brand-600/20">
                           {profile.interests.map((catId) => {
                             const cat = interestCategoryOptions.find((c) => c.id === catId);
                             const subs = subInterestOptions[catId] || [];
                             return (
                               <div key={catId} className="space-y-1.5">
-                                <p className="text-xs font-semibold text-gray-500">
+                                <p className="text-xs font-semibold text-ink-muted">
                                   {cat?.label}, fine-tune (optional)
                                 </p>
                                 <div className="flex flex-wrap gap-1.5">
@@ -672,7 +689,7 @@ export default function StartYourJourneyPage() {
                         </div>
                       )}
 
-                      <p className="text-xs text-gray-400">{profile.interests.length}/5 interests selected</p>
+                      <p className="text-xs text-ink-muted">{profile.interests.length}/5 interests selected</p>
                     </div>
                   ))}
                 </div>
@@ -680,7 +697,7 @@ export default function StartYourJourneyPage() {
                   <button
                     type="button"
                     onClick={addProfile}
-                    className="inline-flex items-center gap-1 text-sm font-semibold text-[#159895] hover:text-[#128a86] pt-1"
+                    className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-800 pt-1"
                   >
                     <Plus className="h-4 w-4" /> Add another traveler
                   </button>
@@ -718,12 +735,12 @@ export default function StartYourJourneyPage() {
                     )
                   )}
                 </div>
-                <label className="flex items-center gap-3 pt-4 text-sm text-gray-700">
+                <label className="flex items-center gap-3 pt-4 text-sm text-ink-soft">
                   <input
                     type="checkbox"
                     checked={answers.heatSensitive}
                     onChange={(e) => update("heatSensitive", e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 accent-[#159895]"
+                    className="h-4 w-4 rounded border-ink/20 accent-brand-600"
                   />
                   I'd like heat and hydration reminders in warmer destinations
                 </label>
@@ -737,22 +754,24 @@ export default function StartYourJourneyPage() {
                 subtitle={
                   groupInterestIds.length > 0
                     ? "Based on what you shared, these are the closest fits, you'll get to pick a narrator once you're in the app."
-                    : "Sixteen narrator personalities live in the app, here's a preview. No need to choose one now."
+                    : "Here's a preview of six of the narrator personalities in the app. No need to choose one now."
                 }
               >
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {rankedNarrators.map((n) => (
                     <div
                       key={n.name}
-                      className="rounded-xl border-2 border-gray-200 p-4 text-center"
+                      className={`rounded-2xl border-2 p-4 text-center transition-all duration-500 ease-out-expo hover:-translate-y-1 hover:shadow-card ${
+                        n.matches.length > 0 ? "border-brand-400 bg-brand-50/60" : "border-ink/10"
+                      }`}
                     >
                       <div className="relative w-16 h-16 mx-auto mb-2">
                         <Image src={n.image} alt={n.name} fill className="rounded-full object-cover" />
                       </div>
-                      <p className="font-semibold text-sm text-gray-900">{n.name}</p>
-                      <p className="text-xs text-gray-500">{n.role}</p>
+                      <p className="font-semibold text-sm text-ink">{n.name}</p>
+                      <p className="text-xs text-ink-muted">{n.role}</p>
                       {n.matches.length > 0 && (
-                        <span className="mt-1 inline-block text-[10px] font-semibold text-[#159895] bg-[#159895]/10 rounded-full px-2 py-0.5">
+                        <span className="mt-1 inline-block text-[10px] font-semibold text-brand-600 bg-brand-600/10 rounded-full px-2 py-0.5">
                           Recommended for you
                         </span>
                       )}
@@ -769,18 +788,18 @@ export default function StartYourJourneyPage() {
                 subtitle="A few details per traveler help us keep recommendations safe and comfortable, all optional."
               >
                 {answers.groupType && answers.groupType !== "Just me" && answers.travelerProfiles.length === 1 && (
-                  <p className="text-xs text-[#159895] bg-[#159895]/5 border border-[#159895]/20 rounded-lg px-3 py-2">
+                  <p className="text-xs text-brand-600 bg-brand-600/5 border border-brand-600/20 rounded-lg px-3 py-2">
                     You mentioned traveling as &ldquo;{answers.groupType}&rdquo;, want to add the others below too?
                   </p>
                 )}
                 <div className="space-y-4">
                   {answers.travelerProfiles.map((profile, i) => (
-                    <div key={i} className="rounded-xl border-2 border-gray-200 p-4 space-y-3">
-                      <p className="text-sm font-semibold text-gray-800">
+                    <div key={i} className="rounded-xl border-2 border-ink/10 p-4 space-y-3">
+                      <p className="text-sm font-semibold text-ink">
                         {profile.name.trim() || (i === 0 ? "You" : `Traveler ${i + 1}`)}
                       </p>
                       <div className="space-y-1.5">
-                        <Label className="text-xs text-gray-500">Dietary preference</Label>
+                        <Label className="text-xs text-ink-muted">Dietary preference</Label>
                         <div className="flex flex-wrap gap-2">
                           {dietaryOptions.map((d) => (
                             <Chip
@@ -795,7 +814,7 @@ export default function StartYourJourneyPage() {
                       </div>
                       <div className="grid sm:grid-cols-2 gap-3">
                         <div className="space-y-1.5">
-                          <Label htmlFor={`religious-${i}`} className="text-xs text-gray-500">
+                          <Label htmlFor={`religious-${i}`} className="text-xs text-ink-muted">
                             Religious or cultural observance
                           </Label>
                           <Input
@@ -806,7 +825,7 @@ export default function StartYourJourneyPage() {
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <Label htmlFor={`allergies-${i}`} className="text-xs text-gray-500">
+                          <Label htmlFor={`allergies-${i}`} className="text-xs text-ink-muted">
                             Allergies or restrictions
                           </Label>
                           <Input
@@ -824,7 +843,7 @@ export default function StartYourJourneyPage() {
                   <button
                     type="button"
                     onClick={addProfile}
-                    className="inline-flex items-center gap-1 text-sm font-semibold text-[#159895] hover:text-[#128a86]"
+                    className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-800"
                   >
                     <Plus className="h-4 w-4" /> Add another traveler
                   </button>
@@ -853,7 +872,7 @@ export default function StartYourJourneyPage() {
                     type="button"
                     variant="outline"
                     onClick={() => update("authMethod", "google")}
-                    className={`justify-start gap-3 h-12 ${answers.authMethod === "google" ? "border-[#159895] bg-[#159895]/5" : ""}`}
+                    className={`justify-start gap-3 h-12 ${answers.authMethod === "google" ? "border-brand-600 bg-brand-600/5" : ""}`}
                   >
                     <span className="w-5 h-5 rounded-full bg-[#4285F4] text-white text-[11px] font-bold flex items-center justify-center">
                       G
@@ -864,7 +883,7 @@ export default function StartYourJourneyPage() {
                     type="button"
                     variant="outline"
                     onClick={() => update("authMethod", "apple")}
-                    className={`justify-start gap-3 h-12 ${answers.authMethod === "apple" ? "border-[#159895] bg-[#159895]/5" : ""}`}
+                    className={`justify-start gap-3 h-12 ${answers.authMethod === "apple" ? "border-brand-600 bg-brand-600/5" : ""}`}
                   >
                     <span className="w-5 h-5 rounded-full bg-black text-white text-[11px] font-bold flex items-center justify-center">
                       A
@@ -874,15 +893,15 @@ export default function StartYourJourneyPage() {
                 </div>
 
                 <div className="flex items-center gap-3 py-2">
-                  <div className="flex-1 h-px bg-gray-200" />
-                  <span className="text-xs text-gray-400 uppercase tracking-wider">or</span>
-                  <div className="flex-1 h-px bg-gray-200" />
+                  <div className="flex-1 h-px bg-ink/10" />
+                  <span className="text-xs text-ink-muted uppercase tracking-wider">or</span>
+                  <div className="flex-1 h-px bg-ink/10" />
                 </div>
 
                 <button
                   type="button"
                   onClick={() => update("authMethod", "email")}
-                  className="text-sm font-semibold text-[#159895] hover:text-[#128a86] flex items-center gap-1"
+                  className="text-sm font-semibold text-brand-600 hover:text-brand-800 flex items-center gap-1"
                 >
                   <LogIn className="h-4 w-4" /> Continue with email instead
                 </button>
@@ -892,7 +911,7 @@ export default function StartYourJourneyPage() {
                     <div className="space-y-2">
                       <Label htmlFor="fullName">Full name</Label>
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted" />
                         <Input
                           id="fullName"
                           type="text"
@@ -906,7 +925,7 @@ export default function StartYourJourneyPage() {
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted" />
                         <Input
                           id="email"
                           type="email"
@@ -920,14 +939,14 @@ export default function StartYourJourneyPage() {
                     <div className="space-y-2">
                       <Label htmlFor="password">Create a password</Label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted" />
                         <Input id="password" type="password" placeholder="••••••••" className="pl-9" />
                       </div>
                     </div>
                   </div>
                 )}
 
-                <p className="text-xs text-gray-400 pt-2">
+                <p className="text-xs text-ink-muted pt-2">
                   Prototype note: this step doesn&apos;t create a real account or OAuth session yet, it&apos;s
                   here to show where account creation fits in the flow.
                 </p>
@@ -936,16 +955,16 @@ export default function StartYourJourneyPage() {
 
             {step === STEP_CONFIRMATION && (
               <div className="max-w-xl mx-auto text-center space-y-6">
-                <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-                  <Check className="h-8 w-8 text-green-600" />
+                <div className="w-16 h-16 rounded-full bg-brand-600 shadow-lift flex items-center justify-center mx-auto animate-pop">
+                  <Check className="h-8 w-8 text-white" />
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Your journey is taking shape</h2>
-                <p className="text-gray-600">
+                <h2 className="text-2xl sm:text-3xl font-bold text-ink">Your journey is taking shape</h2>
+                <p className="text-ink-soft">
                   Here&apos;s what you told us. In the app, this is what starts shaping your recommendations.
                 </p>
-                <div className="bg-gray-50 rounded-2xl p-6 text-left space-y-2 text-sm text-gray-700">
+                <div className="bg-sand-50 rounded-2xl p-6 text-left space-y-2 text-sm text-ink-soft">
                   <p className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-[#159895]" />
+                    <MapPin className="h-4 w-4 text-brand-600" weight="fill" />
                     {answers.homeLocation || "—"} ·{" "}
                     {answers.corridor === "inbound"
                       ? "Coming to India"
@@ -1009,28 +1028,29 @@ export default function StartYourJourneyPage() {
                   {answers.additionalNotes.trim() && <p>Anything else: {answers.additionalNotes.trim()}</p>}
                   <p>Account: {answers.authMethod ? `Signed up via ${answers.authMethod}` : "Not created yet"}</p>
                 </div>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-ink-muted">
                   This is just the start, explore your marketplace now, or download the Gamana app to keep
                   going in person.
                 </p>
                 <Link href="/marketplace">
-                  <Button className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] hover:from-[#159895] hover:to-[#1A5F7A] rounded-full px-8">
+                  <Button className="bg-brand-700 hover:bg-brand-800 transition-all duration-300 ease-spring hover:-translate-y-0.5 active:scale-95 rounded-full px-8">
                     Start Exploring
                   </Button>
                 </Link>
               </div>
             )}
+            </div>
 
             {step > 0 && step < TOTAL_STEPS && (
-              <div className="max-w-2xl mx-auto flex items-center justify-between pt-10 mt-6 border-t border-gray-100">
-                <Button variant="ghost" onClick={back} className="text-gray-500">
+              <div className="max-w-2xl mx-auto flex items-center justify-between pt-10 mt-6 border-t border-ink/5">
+                <Button variant="ghost" onClick={back} className="text-ink-muted">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back
                 </Button>
                 <Button
                   onClick={next}
                   disabled={!canContinue}
-                  className="bg-gradient-to-r from-[#159895] to-[#1A5F7A] hover:from-[#159895] hover:to-[#1A5F7A] rounded-full px-6"
+                  className="bg-brand-700 hover:bg-brand-800 transition-all duration-300 ease-spring hover:-translate-y-0.5 active:scale-95 rounded-full px-6"
                 >
                   Continue
                   <ArrowRight className="ml-2 h-4 w-4" />

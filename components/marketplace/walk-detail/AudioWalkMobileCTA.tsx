@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CirclePlay } from 'lucide-react';
+import { CirclePlay } from '@/components/icons';
 import { DownloadAppDialog } from '@/components/DownloadAppDialog';
 import { Button } from '@/components/ui/button';
 
@@ -15,7 +15,7 @@ export function AudioWalkMobileCTA() {
         <Button
           type="button"
           onClick={() => setDownloadOpen(true)}
-          className="h-12 w-full rounded-xl bg-[#1A5F7A] text-base font-semibold text-white hover:bg-[#164e63]"
+          className="h-12 w-full rounded-full bg-gradient-to-r from-sunset-400 to-sunset-500 text-base font-semibold text-white hover:from-sunset-500 hover:to-sunset-500"
         >
           <CirclePlay className="mr-2 h-5 w-5" />
           Start Walking Tour

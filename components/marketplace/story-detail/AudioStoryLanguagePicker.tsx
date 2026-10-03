@@ -11,8 +11,8 @@ export function AudioStoryLanguagePicker({ story }: AudioStoryLanguagePickerProp
   if (languages.length === 0) return null;
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
-      <h2 className="text-lg font-semibold text-gray-900">Language</h2>
+    <section className="rounded-3xl bg-white p-6 shadow-card sm:p-8">
+      <h2 className="text-lg font-semibold text-ink">Language</h2>
       <div className="mt-4 flex flex-wrap gap-2">
         {languages.map((lang) => {
           const label = lang.nativeLabel ?? lang.label;

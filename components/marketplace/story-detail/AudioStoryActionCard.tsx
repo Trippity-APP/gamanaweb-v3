@@ -11,10 +11,11 @@ import {
   Share2,
   Smartphone,
   User,
-} from 'lucide-react';
+} from '@/components/icons';
 import { DownloadAppDialog } from '@/components/DownloadAppDialog';
 import { GamanaCoinIcon } from '@/components/GamanaCoinIcon';
 import { Button } from '@/components/ui/button';
+import { StoreBadges } from '@/components/site/StoreBadges';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatStoryDurationLabel } from '@/lib/marketplace-api';
 import type { StoryDetail } from '@/lib/marketplace-data';
@@ -76,8 +77,9 @@ export function AudioStoryActionCard({
 
   return (
     <>
-      <Card className={`border-gray-200 shadow-sm ${className}`}>
+      <Card className={`rounded-3xl border-0 shadow-card ${className}`}>
         <CardContent className="space-y-5 p-5 sm:p-6">
+          <p className="eyebrow">Listen in the app</p>
           <div className="space-y-1">
             {unlockState === 'free' ? (
               <p className="text-sm font-semibold text-emerald-700">Free to listen</p>
@@ -94,10 +96,10 @@ export function AudioStoryActionCard({
             ) : (
               <div className="flex items-center gap-2">
                 <GamanaCoinIcon className="h-5 w-5" aria-hidden />
-                <p className="text-xl font-bold text-gray-900">{story.price} Coins</p>
+                <p className="text-xl font-bold text-ink">{story.price} Coins</p>
               </div>
             )}
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-ink-muted">
               {unlockState === 'locked'
                 ? 'Unlock in the Gamana app with the same account.'
                 : 'Open in the Gamana app to play and listen offline.'}
@@ -107,7 +109,7 @@ export function AudioStoryActionCard({
           <Button
             type="button"
             onClick={openDownload}
-            className="h-12 w-full rounded-xl bg-[#1A5F7A] text-base font-semibold text-white hover:bg-[#164e63]"
+            className="h-12 w-full rounded-full bg-gradient-to-r from-sunset-400 to-sunset-500 text-base font-semibold text-white shadow-card hover:from-sunset-500 hover:to-sunset-500"
           >
             <CirclePlay className="mr-2 h-5 w-5" />
             Play
@@ -119,7 +121,7 @@ export function AudioStoryActionCard({
               onClick={openDownload}
               className="flex flex-col items-center gap-1.5 rounded-xl border border-gray-200 py-3 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50"
             >
-              <Bookmark className="h-5 w-5 text-[#159895]" />
+              <Bookmark className="h-5 w-5 text-brand-600" />
               Save
             </button>
             <a
@@ -128,7 +130,7 @@ export function AudioStoryActionCard({
               rel="noopener noreferrer"
               className="flex flex-col items-center gap-1.5 rounded-xl border border-gray-200 py-3 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50"
             >
-              <Navigation className="h-5 w-5 text-[#159895]" />
+              <Navigation className="h-5 w-5 text-brand-600" />
               Directions
             </a>
             <button
@@ -136,44 +138,46 @@ export function AudioStoryActionCard({
               onClick={() => void handleShare()}
               className="flex flex-col items-center gap-1.5 rounded-xl border border-gray-200 py-3 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50"
             >
-              <Share2 className="h-5 w-5 text-[#159895]" />
+              <Share2 className="h-5 w-5 text-brand-600" />
               Share
             </button>
           </div>
 
-          <dl className="space-y-3 border-t border-gray-100 pt-4 text-sm">
+          <dl className="space-y-3 border-t border-ink/5 pt-4 text-sm">
             <div className="flex items-center justify-between gap-3">
-              <dt className="flex items-center gap-2 text-gray-500">
-                <MapPin className="h-4 w-4 shrink-0 text-[#159895]" />
+              <dt className="flex items-center gap-2 text-ink-muted">
+                <MapPin className="h-4 w-4 shrink-0 text-brand-600" weight="fill" />
                 Location
               </dt>
-              <dd className="text-right font-medium text-gray-900">{story.location}</dd>
+              <dd className="text-right font-medium text-ink">{story.location}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="flex items-center gap-2 text-gray-500">
-                <Clock className="h-4 w-4 shrink-0 text-[#159895]" />
+              <dt className="flex items-center gap-2 text-ink-muted">
+                <Clock className="h-4 w-4 shrink-0 text-brand-600" weight="fill" />
                 Duration
               </dt>
-              <dd className="font-medium text-gray-900">{durationLabel}</dd>
+              <dd className="font-medium text-ink">{durationLabel}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="flex items-center gap-2 text-gray-500">
-                <Globe className="h-4 w-4 shrink-0 text-[#159895]" />
+              <dt className="flex items-center gap-2 text-ink-muted">
+                <Globe className="h-4 w-4 shrink-0 text-brand-600" weight="fill" />
                 Language
               </dt>
-              <dd className="font-medium text-gray-900">{activeLanguageLabel(story)}</dd>
+              <dd className="font-medium text-ink">{activeLanguageLabel(story)}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="flex items-center gap-2 text-gray-500">
-                <User className="h-4 w-4 shrink-0 text-[#159895]" />
+              <dt className="flex items-center gap-2 text-ink-muted">
+                <User className="h-4 w-4 shrink-0 text-brand-600" weight="fill" />
                 Organized by
               </dt>
-              <dd className="text-right font-medium text-gray-900">Gamana</dd>
+              <dd className="text-right font-medium text-ink">Gamana</dd>
             </div>
           </dl>
 
-          <p className="flex items-start gap-2 border-t border-gray-100 pt-4 text-xs text-gray-500">
-            <Smartphone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#159895]" />
+          <StoreBadges source="audio_story_detail" keyword="audio tour app" className="gap-2 [&_img]:h-10 [&_img]:w-auto" />
+
+          <p className="flex items-start gap-2 border-t border-ink/5 pt-4 text-xs text-ink-muted">
+            <Smartphone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-600" />
             Audio stories play in the Gamana app. Download once and listen with no signal.
           </p>
         </CardContent>

@@ -1,68 +1,44 @@
 import { Metadata } from 'next';
-import { Headphones, Eye, Hand, MapPin, Smartphone, Navigation, Radio } from 'lucide-react';
+import { Headphones, Eye, Hand, MapPin, Smartphone, Navigation, Radio } from '@/components/icons';
 import EnhancedPageLayout from '@/components/enhanced-page-layout';
+import { JsonLd } from '@/components/site/JsonLd';
+import { OG_IMAGE, organizationJsonLd } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'Truly Immersive Travel Experiences',
-  description: 'Step into truly immersive travel experiences with rich soundscapes, storytelling, and atmosphere that make every destination feel alive with Gamana.',
+  title: { absolute: "Hands-Free GPS Audio Tours for Walking | Gamana" },
+  description: "Explore hands-free with GPS-triggered audio tours that play automatically as you walk, so you can stay present and enjoy your surroundings.",
   alternates: {
     canonical: 'https://www.gamana.app/features/truly-immersive/',
   },
   openGraph: {
-    title: 'Truly Immersive Travel Experiences | Gamana',
-    description: 'Step into truly immersive travel experiences with rich soundscapes, storytelling, and atmosphere that make every destination feel alive with Gamana.',
+    title: "Hands-Free GPS Audio Tours for Walking | Gamana",
+    description: "Explore hands-free with GPS-triggered audio tours that play automatically as you walk, so you can stay present and enjoy your surroundings.",
     url: 'https://www.gamana.app/features/truly-immersive/',
     siteName: 'Gamana',
     type: 'website',
-    images: [
-      {
-        url: '/gamana-logo.svg',
-        alt: 'Gamana Logo',
-        width: 1200,
-        height: 630,
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Truly Immersive Travel Experiences | Gamana',
-    description: 'Step into truly immersive travel experiences with rich soundscapes, storytelling, and atmosphere that make every destination feel alive with Gamana.',
-    images: ['/gamana-logo.svg'],
+    title: "Hands-Free GPS Audio Tours for Walking | Gamana",
+    description: "Explore hands-free with GPS-triggered audio tours that play automatically as you walk, so you can stay present and enjoy your surroundings.",
+    images: [OG_IMAGE.url],
   },
 };
 
 export default function TrulyImmersivePage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "Gamana",
-            "url": "https://www.gamana.app",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://www.gamana.app/gamana-logo.svg",
-              "name": "Gamana Logo",
-              "caption": "Gamana Logo"
-            },
-            "sameAs": [
-              "https://www.facebook.com/gamanaapp",
-              "https://twitter.com/gamanaapp",
-              "https://www.instagram.com/gamanaapp"
-            ]
-          })
-        }}
-      />
+      <JsonLd data={organizationJsonLd()} />
       <EnhancedPageLayout
       icon={Headphones}
       title="Truly Immersive"
-      subtitle="Hands-free, eyes-up exploration that keeps you fully engaged with your surroundings"
-      gradient="from-[#159895] via-[#1A5F7A] to-[#57C5B6]"
-      heroImage="/solo-traveller-cobblestone-street-audio-guide-hands-free-exploration.png"
+      subtitle="Keep your eyes up and your phone away while GPS-triggered stories play automatically as you reach points of interest, helping you experience each destination naturally."
+      slug="truly-immersive"
+      heading="Hands-Free Audio Tours for More Immersive Exploration"
+      heroAlt="Gamana hands-free GPS audio tours with location-triggered stories"
+      heroTitle="Gamana hands-free GPS audio tours"
       introTitle="Experience Travel the Way It Should Be"
       introText={[
         'Put away your phone and guidebook. With Gamana, you can explore freely with your eyes up and hands free, fully present in the moment. Our GPS-triggered audio narratives play automatically as you walk, eliminating the need to constantly check your device.',

@@ -1,11 +1,17 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import HeroHeader from '@/components/navigation/hero-header';
+import SiteHeader from '@/components/navigation/site-header';
+import { JsonLd } from '@/components/site/JsonLd';
+import { DownloadBand } from '@/components/site/DownloadBand';
+import { RelatedRail } from '@/components/marketplace/detail/RelatedRail';
+import { breadcrumbJsonLd } from '@/lib/seo';
+import type { Tour } from '@/lib/marketplace-data';
 import Footer from '@/components/navigation/footer';
 import { ExploreStoryDetailClient } from '@/components/marketplace/ExploreStoryDetailClient';
 import {
   clearMarketplaceCache,
   fetchPublicStoryDetailById,
+  tourMatchesCity,
 } from '@/lib/marketplace-api';
 import { fetchPublicStoriesCatalog } from '@/lib/places-api';
 import { STATIC_SPA_PARAM, isStaticSpaParam } from '@/lib/static-spa';
@@ -70,18 +76,48 @@ export default async function ExploreStoryPage({
 
   const story = storyId ? await fetchPublicStoryDetailById(storyId) : null;
 
+  const city = story?.location.split(',')[0]?.trim() ?? '';
+  let related: Tour[] = [];
+  if (story && city) {
+    try {
+      const stories = await fetchPublicStoriesCatalog();
+      related = stories.filter((item) => item.id !== story.id && tourMatchesCity(item, city)).slice(0, 10);
+    } catch {
+      related = [];
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <HeroHeader />
-      <Suspense
-        fallback={
-          <div className="max-w-7xl mx-auto px-4 py-16 text-center text-gray-500 sm:px-6 lg:px-8">
-            Loading...
-          </div>
-        }
-      >
-        <ExploreStoryDetailClient storyId={id} story={story} />
-      </Suspense>
+    <div className="min-h-screen bg-sand-50">
+      <SiteHeader variant="solid" />
+      <main>
+        {story && (
+          <JsonLd
+            data={breadcrumbJsonLd([
+              { name: 'Home', path: '/' },
+              { name: 'Explore', path: '/marketplace/' },
+              { name: 'Audio Stories', path: '/marketplace/story/' },
+              { name: story.title, path: `/marketplace/story/${id}/` },
+            ])}
+          />
+        )}
+        <Suspense
+          fallback={
+            <div className="container-site py-16 text-center text-ink-muted">
+              Loading...
+            </div>
+          }
+        >
+          <ExploreStoryDetailClient storyId={id} story={story} />
+        </Suspense>
+        <RelatedRail title={city ? `More audio stories in ${city}` : 'More audio stories'} tours={related} />
+        <DownloadBand
+          title="Hear every story in the Gamana app"
+          lead="Download once, then listen offline as you explore, with narration in the language you prefer."
+          source="audio_story_detail_band"
+          keyword="audio tour app"
+        />
+      </main>
       <Footer />
     </div>
   );

@@ -1,228 +1,137 @@
 import Link from "next/link";
-import { Facebook, Instagram, Linkedin, Mail, Youtube } from "lucide-react";
-// Sourced from nav-config so the footer's Features list can never drift from the nav
-// dropdown — it previously kept its own hardcoded copy, which still listed two features
-// (On-Demand Personalization, Discounts & Offers) that had been hidden from the nav.
-import { featureItems } from "@/lib/data/nav-config";
+import { Building2, Facebook, Instagram, Linkedin, Mail, MapPin, Youtube } from "@/components/icons";
+// Sourced from nav-config so the footer's lists can never drift from the nav dropdown.
+import { featureItems, footerCompanyLinks } from "@/lib/data/nav-config";
+import { COMPANY } from "@/lib/data/company";
+import { StoreBadges } from "@/components/site/StoreBadges";
+import { TrustBar } from "@/components/site/TrustBar";
+
+const XIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+  </svg>
+);
+
+const SOCIALS = [
+  { href: "https://www.facebook.com/gamanaapp", label: "Facebook", Icon: Facebook },
+  { href: "https://x.com/gamanaapp", label: "X", Icon: XIcon },
+  { href: "https://www.instagram.com/gamanaapp", label: "Instagram", Icon: Instagram },
+  { href: "https://www.linkedin.com/company/gamanaapp/", label: "LinkedIn", Icon: Linkedin },
+  { href: "https://www.tiktok.com/@gamanaapp", label: "TikTok", Icon: TikTokIcon },
+  { href: "https://www.youtube.com/@gamanaapp", label: "YouTube", Icon: Youtube },
+];
+
+const LEGAL_LINKS = [
+  { name: "Privacy Policy", href: "/privacy-policy" },
+  { name: "Terms of Service", href: "/terms-of-service" },
+  { name: "Cookie Policy", href: "/cookie-policy" },
+  { name: "FAQ", href: "/faq" },
+];
+
+const linkClass =
+  "focus-ring inline-flex items-center gap-2 rounded text-sm text-white/65 transition-colors duration-200 hover:text-white";
+
+function FooterColumn({ title, links }: { title: string; links: readonly { name: string; href: string }[] }) {
+  return (
+    <div>
+      <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-white">{title}</h3>
+      <ul className="space-y-3">
+        {links.map((l) => (
+          <li key={l.href}>
+            <Link href={l.href} className={linkClass}>
+              {l.name}
+              {l.href === "/blog" && (
+                <span className="rounded-full bg-brand-400/20 px-2 py-0.5 text-[10px] uppercase tracking-wide text-brand-300">
+                  New
+                </span>
+              )}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 text-gray-300 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-[#159895] rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#1A5F7A] rounded-full blur-3xl"></div>
-      </div>
+    <footer className="relative isolate overflow-hidden bg-ink text-white/70">
+      <div className="absolute -left-40 top-0 -z-10 h-96 w-96 rounded-full bg-brand-600/20 blur-3xl" aria-hidden />
+      <div className="absolute -right-40 bottom-0 -z-10 h-96 w-96 rounded-full bg-sunset-500/10 blur-3xl" aria-hidden />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
-        {/* Trust Badges */}
-        <div className="flex flex-wrap justify-center gap-6 mb-12 pb-8 border-b border-gray-800">
-          <div className="flex items-center gap-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700 hover:border-[#57C5B6] transition-colors">
-            <span className="text-xl">🛡️</span>
-            <span className="text-sm font-semibold text-white">SOC 2 Compliant</span>
-          </div>
-          <div className="flex items-center gap-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700 hover:border-[#57C5B6] transition-colors">
-            <span className="text-xl">🔒</span>
-            <span className="text-sm font-semibold text-white">GDPR Ready</span>
-          </div>
-          <div className="flex items-center gap-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700 hover:border-[#57C5B6] transition-colors">
-            <span className="text-xl">⚡</span>
-            <span className="text-sm font-semibold text-white">99.9% Uptime</span>
-          </div>
-        </div>
+      <div className="container-site pt-16 pb-10">
+        <TrustBar className="mb-14 border-b border-white/10 pb-10 text-white/75 [&_svg]:text-brand-300" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          <div className="space-y-4">
-            <Link href="/" className="inline-block" aria-label="Gamana home">
-              <img
-                src="/gamana-logo.svg"
-                alt="Gamana Logo"
-                title="Gamana Logo"
-                className="h-8 w-auto brightness-0 invert"
-              />
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-4 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
+          <div className="col-span-2 space-y-5 md:col-span-4 lg:col-span-1">
+            <Link href="/" className="focus-ring inline-block rounded" aria-label="Gamana home">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/gamana-logo.svg" alt="Gamana Logo" title="Gamana Logo" className="h-8 w-auto brightness-0 invert" />
             </Link>
-            <p className="text-sm leading-relaxed text-gray-400">
-              Walk with audio tours that work offline, tell you what you're looking at, and don't need you to stare at your phone.
+            <p className="max-w-sm text-sm leading-relaxed text-white/65">
+              Walk with audio tours that work offline, tell you what you&apos;re looking at, and don&apos;t need you to stare at your phone.
             </p>
-            {/* Social Links */}
-            <div className="flex space-x-4 pt-2">
-              <a
-                href="https://www.facebook.com/gamanaapp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[#57C5B6] transition-colors p-2 hover:bg-gray-800 rounded-lg"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a
-                href="https://x.com/gamanaapp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[#57C5B6] transition-colors p-2 hover:bg-gray-800 rounded-lg"
-                aria-label="X"
-              >
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-              </a>
-              <a
-                href="https://www.instagram.com/gamanaapp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[#57C5B6] transition-colors p-2 hover:bg-gray-800 rounded-lg"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a
-                href="https://www.linkedin.com/company/gamanaapp/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[#57C5B6] transition-colors p-2 hover:bg-gray-800 rounded-lg"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a
-                href="https://www.tiktok.com/@gamanaapp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[#57C5B6] transition-colors p-2 hover:bg-gray-800 rounded-lg"
-                aria-label="TikTok"
-              >
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                </svg>
-              </a>
-              <a
-                href="https://www.youtube.com/@gamanaapp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[#57C5B6] transition-colors p-2 hover:bg-gray-800 rounded-lg"
-                aria-label="YouTube"
-              >
-                <Youtube className="h-5 w-5" />
-              </a>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-white font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/" className="hover:text-[#57C5B6] transition-colors text-sm">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/cities" className="hover:text-[#57C5B6] transition-colors text-sm">
-                  Cities
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog" className="hover:text-[#57C5B6] transition-colors text-sm flex items-center gap-2">
-                  Blog Stories
-                  <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#57C5B6]/20 text-[#57C5B6]">
-                    New
-                  </span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/ecosystem" className="hover:text-[#57C5B6] transition-colors text-sm">
-                  Ecosystem
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="hover:text-[#57C5B6] transition-colors text-sm">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="hover:text-[#57C5B6] transition-colors text-sm">
-                  Pricing
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-white font-semibold mb-4">Features</h3>
-            <ul className="space-y-2">
-              {featureItems.map((feature) => (
-                <li key={feature.name}>
-                  <Link href={feature.href} className="hover:text-[#57C5B6] transition-colors text-sm">
-                    {feature.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-white font-semibold mb-4">Legal & Support</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/privacy-policy" className="hover:text-[#57C5B6] transition-colors text-sm">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms-of-service" className="hover:text-[#57C5B6] transition-colors text-sm">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link href="/cookie-policy" className="hover:text-[#57C5B6] transition-colors text-sm">
-                  Cookie Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="hover:text-[#57C5B6] transition-colors text-sm">
-                  FAQ
-                </Link>
-              </li>
-            </ul>
-            <div className="space-y-2 mt-4 pt-4 border-t border-gray-800">
-              <div className="flex items-center space-x-2 text-sm">
-                <Mail className="h-4 w-4" />
-                <a href="mailto:support@gamana.app" className="hover:text-[#57C5B6] transition-colors">
-                  support@gamana.app
+            <StoreBadges source="footer" keyword="travel guide app" />
+            <div className="flex flex-wrap gap-2 pt-1">
+              {SOCIALS.map(({ href, label, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="focus-ring grid h-10 w-10 place-items-center rounded-full border border-white/10 text-white/70 transition-all duration-300 ease-spring hover:-translate-y-0.5 hover:border-brand-400 hover:bg-brand-600/20 hover:text-white"
+                >
+                  <Icon className="h-4 w-4" />
                 </a>
-              </div>
-              <p className="text-sm text-gray-400">New Canaan, CT, USA</p>
-              <p className="text-sm text-gray-400">Bengaluru, KA, IND</p>
+              ))}
             </div>
+          </div>
+
+          <FooterColumn title="Explore" links={footerCompanyLinks} />
+          <FooterColumn title="Features" links={featureItems} />
+
+          <div className="col-span-2 md:col-span-2 lg:col-span-1">
+            <FooterColumn title="Legal & Support" links={LEGAL_LINKS} />
+            <ul className="mt-6 space-y-3 border-t border-white/10 pt-6 text-sm">
+              <li>
+                <a href={`mailto:${COMPANY.email}`} className={linkClass}>
+                  <Mail className="h-4 w-4 shrink-0" aria-hidden />
+                  {COMPANY.email}
+                </a>
+              </li>
+              <li className="flex items-start gap-2 text-white/65">
+                <Building2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                <span>
+                  <span className="text-white/85">{COMPANY.parent.name}</span>
+                  <br />
+                  {COMPANY.parent.short}
+                </span>
+              </li>
+              <li className="flex items-start gap-2 text-white/65">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                <span>
+                  <span className="text-white/85">{COMPANY.india.name}</span>
+                  <br />
+                  {COMPANY.india.short}
+                </span>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <p className="text-gray-400">
-              © {currentYear} Gamana India LLP. All rights reserved. Made with <span className="text-red-500">❤️</span> for travelers worldwide.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center items-center">
-              <a
-                href="https://apps.apple.com/in/app/gamana-ai/id6748155654"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[#57C5B6] transition-colors text-xs"
-              >
-                Download iOS App
-              </a>
-              <span className="text-gray-600">•</span>
-              <a
-                href="https://play.google.com/store/apps/details?id=com.agent.gamana.ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[#57C5B6] transition-colors text-xs"
-              >
-                Download Android App
-              </a>
-            </div>
-          </div>
+        <div className="mt-14 border-t border-white/10 pt-8 text-xs text-white/50">
+          <p>
+            © {currentYear} {COMPANY.parent.name}. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

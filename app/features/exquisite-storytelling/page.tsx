@@ -1,68 +1,44 @@
 import { Metadata } from 'next';
-import { BookOpen, Sparkles, Users, Globe2, BookMarked, Lightbulb, Heart } from 'lucide-react';
+import { BookOpen, Sparkles, Users, Globe2, BookMarked, Lightbulb, Heart } from '@/components/icons';
 import EnhancedPageLayout from '@/components/enhanced-page-layout';
+import { JsonLd } from '@/components/site/JsonLd';
+import { OG_IMAGE, organizationJsonLd } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'Exquisite Storytelling: Immersive Audio Guides',
-  description: 'Experience exquisite storytelling through immersive audio guides and travel stories. Discover culture, history, and hidden insights with Gamana.',
+  title: { absolute: "Immersive Audio Storytelling for Travel | Gamana" },
+  description: "Experience immersive audio storytelling with researched history, local legends, and cultural stories that bring landmarks and destinations to life.",
   alternates: {
     canonical: 'https://www.gamana.app/features/exquisite-storytelling/',
   },
   openGraph: {
-    title: 'Exquisite Storytelling: Immersive Audio Guides | Gamana',
-    description: 'Experience exquisite storytelling through immersive audio guides and travel stories. Discover culture, history, and hidden insights with Gamana.',
+    title: "Immersive Audio Storytelling for Travel | Gamana",
+    description: "Experience immersive audio storytelling with researched history, local legends, and cultural stories that bring landmarks and destinations to life.",
     url: 'https://www.gamana.app/features/exquisite-storytelling/',
     siteName: 'Gamana',
     type: 'website',
-    images: [
-      {
-        url: '/gamana-logo.svg',
-        alt: 'Gamana Logo',
-        width: 1200,
-        height: 630,
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Exquisite Storytelling: Immersive Audio Guides | Gamana',
-    description: 'Experience exquisite storytelling through immersive audio guides and travel stories. Discover culture, history, and hidden insights with Gamana.',
-    images: ['/gamana-logo.svg'],
+    title: "Immersive Audio Storytelling for Travel | Gamana",
+    description: "Experience immersive audio storytelling with researched history, local legends, and cultural stories that bring landmarks and destinations to life.",
+    images: [OG_IMAGE.url],
   },
 };
 
 export default function ExquisiteStorytellingPage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "Gamana",
-            "url": "https://www.gamana.app",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://www.gamana.app/gamana-logo.svg",
-              "name": "Gamana Logo",
-              "caption": "Gamana Logo"
-            },
-            "sameAs": [
-              "https://www.facebook.com/gamanaapp",
-              "https://twitter.com/gamanaapp",
-              "https://www.instagram.com/gamanaapp"
-            ]
-          })
-        }}
-      />
+      <JsonLd data={organizationJsonLd()} />
       <EnhancedPageLayout
       icon={BookOpen}
       title="Exquisite Storytelling"
-      subtitle="History and culture told like a good podcast: researched, written, and voiced to keep you listening."
-      gradient="from-[#159895] via-[#1A5F7A] to-[#57C5B6]"
-      heroImage="/varanasi ghats golden hour river boats temple spires panoramic view.jpg"
+      subtitle="Explore history, culture, and local legends through carefully researched audio stories that make every landmark, street, and destination more meaningful."
+      slug="exquisite-storytelling"
+      heading="Immersive Audio Storytelling That Brings Places to Life"
+      heroAlt="Gamana immersive audio storytelling for travel and destination exploration"
+      heroTitle="Gamana immersive audio storytelling for travel"
       introTitle="Every Destination Has a Story Worth Telling"
       introText={[
         'Each tour mixes history, culture, and local detail so a street or monument actually makes sense when you are standing there. Stories are researched, written, and voiced to keep you listening.',

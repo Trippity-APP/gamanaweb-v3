@@ -2,20 +2,39 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ChevronRight } from '@/components/icons';
 import { getExploreBackHref } from '@/lib/explore-search';
 
-export function ExploreDetailBreadcrumb() {
+/** Visible trail for tour and story pages; the matching BreadcrumbList JSON-LD is emitted by the route. */
+export function ExploreDetailBreadcrumb({ title }: { title?: string }) {
   const pathname = usePathname();
-  const href = getExploreBackHref(pathname);
+  const listHref = getExploreBackHref(pathname);
+  const listLabel =
+    listHref === '/marketplace/tours' ? 'Audio Walks' : listHref === '/marketplace/story' ? 'Audio Stories' : null;
+
+  const crumbs = [
+    { label: 'Home', href: '/' },
+    { label: 'Explore', href: '/marketplace/' },
+    ...(listLabel ? [{ label: listLabel, href: `${listHref}/` }] : []),
+  ];
 
   return (
-    <Link
-      href={href}
-      className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[#159895] transition-colors hover:text-[#128a86]"
-    >
-      <ArrowLeft className="h-4 w-4" />
-      Back to explore
-    </Link>
+    <nav aria-label="Breadcrumb" className="mb-5">
+      <ol className="flex flex-wrap items-center gap-1.5 text-sm text-ink-muted">
+        {crumbs.map((c) => (
+          <li key={c.href} className="flex items-center gap-1.5">
+            <Link href={c.href} className="focus-ring rounded transition-colors hover:text-brand-700">
+              {c.label}
+            </Link>
+            <ChevronRight className="h-3.5 w-3.5 text-ink/30" aria-hidden />
+          </li>
+        ))}
+        {title && (
+          <li aria-current="page" className="max-w-[16rem] truncate font-medium text-ink sm:max-w-md">
+            {title}
+          </li>
+        )}
+      </ol>
+    </nav>
   );
 }

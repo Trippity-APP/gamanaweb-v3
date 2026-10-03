@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search } from "lucide-react";
+import { Search } from "@/components/icons";
 
 import { GOOGLE_MAPS_API_KEY } from "@/lib/googleMaps";
 

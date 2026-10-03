@@ -1,6 +1,6 @@
 'use client';
 
-import { Headphones } from 'lucide-react';
+import { Headphones } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatAudioDuration } from '@/lib/marketplace-api';
@@ -14,7 +14,7 @@ type TourRouteTimelineProps = {
 export function TourRouteTimeline({ stops, loading = false }: TourRouteTimelineProps) {
   if (loading) {
     return (
-      <Card className="border-gray-200 shadow-sm">
+      <Card className="rounded-3xl border-0 shadow-card">
         <CardHeader>
           <Skeleton className="h-5 w-32" />
         </CardHeader>
@@ -35,12 +35,12 @@ export function TourRouteTimeline({ stops, loading = false }: TourRouteTimelineP
   }
 
   return (
-    <Card className="border-gray-200 shadow-sm">
+    <Card className="rounded-3xl border-0 shadow-card">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-bold uppercase tracking-wider text-[#1A5F7A]">
           Tour route
         </CardTitle>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-ink-muted">
           {stops.length > 0
             ? `${stops.length} stops in order — follow the path in the app as you walk.`
             : 'Follow the path in the app as you walk.'}
@@ -49,7 +49,7 @@ export function TourRouteTimeline({ stops, loading = false }: TourRouteTimelineP
 
       <CardContent>
         {stops.length === 0 ? (
-          <p className="text-sm text-gray-500">Stop details are not available for this walk yet.</p>
+          <p className="text-sm text-ink-muted">Stop details are not available for this walk yet.</p>
         ) : (
           <ol className="relative space-y-0">
             {stops.map((stop, index) => {
@@ -83,22 +83,22 @@ export function TourRouteTimeline({ stops, loading = false }: TourRouteTimelineP
                           className="h-36 w-full shrink-0 rounded-xl object-cover sm:h-24 sm:w-32 lg:h-28 lg:w-36"
                         />
                       ) : (
-                        <div className="flex h-36 w-full shrink-0 items-center justify-center rounded-xl bg-[#F0FBFA] text-lg font-bold text-[#159895] sm:h-24 sm:w-32 lg:h-28 lg:w-36">
+                        <div className="flex h-36 w-full shrink-0 items-center justify-center rounded-xl bg-brand-50 text-lg font-bold text-brand-600 sm:h-24 sm:w-32 lg:h-28 lg:w-36">
                           {index + 1}
                         </div>
                       )}
 
                       <div className="min-w-0 flex-1 space-y-2">
                         <p className="text-lg font-semibold text-[#1A5F7A] sm:text-xl">
-                          <span className="text-[#159895]">{index + 1}.</span> {stop.name}
+                          <span className="text-brand-600">{index + 1}.</span> {stop.name}
                         </p>
                         {stop.description && (
-                          <p className="text-sm leading-relaxed text-gray-600 sm:text-base">
+                          <p className="text-sm leading-relaxed text-ink-soft sm:text-base">
                             {stop.description}
                           </p>
                         )}
                         {audioLabel && (
-                          <p className="inline-flex items-center gap-1.5 text-sm font-medium text-[#159895]">
+                          <p className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600">
                             <Headphones className="h-4 w-4" />
                             {audioLabel}
                           </p>

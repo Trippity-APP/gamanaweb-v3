@@ -14,6 +14,8 @@ type MarketplaceCoverImageProps = {
   height?: number;
   /** When false, failed remote loads show empty (parent bg) instead of a shared placeholder. */
   useDefaultFallback?: boolean;
+  /** Replaces the shared tour placeholder when the image fails to load. */
+  fallbackSrc?: string;
 };
 
 function isRemoteSrc(src: string) {
@@ -29,6 +31,7 @@ export function MarketplaceCoverImage({
   width,
   height,
   useDefaultFallback = true,
+  fallbackSrc = DEFAULT_TOUR_IMAGE,
 }: MarketplaceCoverImageProps) {
   const [currentSrc, setCurrentSrc] = useState(src);
   const [failed, setFailed] = useState(false);
@@ -40,15 +43,15 @@ export function MarketplaceCoverImage({
 
   const handleError = () => {
     if (failed) return;
-    if (useDefaultFallback && currentSrc !== DEFAULT_TOUR_IMAGE) {
-      setCurrentSrc(DEFAULT_TOUR_IMAGE);
+    if (useDefaultFallback && currentSrc !== fallbackSrc) {
+      setCurrentSrc(fallbackSrc);
       setFailed(true);
       return;
     }
     setFailed(true);
   };
 
-  if (failed && (!useDefaultFallback || currentSrc === DEFAULT_TOUR_IMAGE)) {
+  if (failed && (!useDefaultFallback || currentSrc === fallbackSrc)) {
     return null;
   }
 

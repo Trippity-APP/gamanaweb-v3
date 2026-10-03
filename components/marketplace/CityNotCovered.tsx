@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MapPinOff, Check, ArrowRight } from 'lucide-react';
+import { MapPinOff, Check, ArrowRight } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAccount } from '@/lib/account-context';

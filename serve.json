@@ -51,6 +51,16 @@
       "permanent": true
     },
     {
+      "source": "/subscription",
+      "destination": "/pricing/",
+      "type": 301
+    },
+    {
+      "source": "/marketplace-redesign",
+      "destination": "/marketplace/",
+      "type": 301
+    },
+    {
       "source": "/explore",
       "destination": "/marketplace/",
       "permanent": true

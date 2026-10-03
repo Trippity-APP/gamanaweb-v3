@@ -1,4 +1,4 @@
-import type { Tour, TourStop, WalkDetail, StoryDetail } from "@/lib/marketplace-data";
+import type { SearchTour, Tour, TourStop, WalkDetail, StoryDetail } from "@/lib/marketplace-data";
 import { getCatalogFetchInit, getMarketplaceApiBaseUrl } from "@/lib/api-base-url";
 import { mergeStoryDetailPlaceholders } from "@/lib/story-detail-placeholders";
 import {
@@ -571,14 +571,13 @@ export function formatWalkDurationLabel(
   return walk.duration;
 }
 
-export function tourMatchesCity(tour: Tour, cityQuery: string): boolean {
+export function tourMatchesCity(tour: Pick<Tour, 'searchTerms' | 'location' | 'title'>, cityQuery: string): boolean {
   const query = normalizeText(cityQuery);
   if (!query) return true;
 
-  const terms = tour.searchTerms ?? [
-    normalizeText(tour.location),
-    normalizeText(tour.title),
-  ];
+  const terms = (tour.searchTerms ?? [normalizeText(tour.location), normalizeText(tour.title)]).filter(
+    (term) => term.length >= 3
+  );
 
   if (terms.some((term) => term.includes(query) || query.includes(term))) {
     return true;
@@ -592,7 +591,7 @@ export function getExploreSearchQuery(params: URLSearchParams | { get(name: stri
   return (params.get("q") ?? params.get("city") ?? "").trim();
 }
 
-export function tourMatchesSearch(tour: Tour, query: string): boolean {
+export function tourMatchesSearch(tour: SearchTour, query: string): boolean {
   const q = normalizeText(query);
   if (!q) return true;
 

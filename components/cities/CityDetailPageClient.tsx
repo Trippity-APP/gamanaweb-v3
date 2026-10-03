@@ -37,6 +37,20 @@ export function CityDetailPageClient({
         initialCity ? null : isStaticSpaParam(paramCityId) ? null : "This city is not available."
     );
 
+    // Pre-rendered pages carry image URLs signed at build time, which expire after 24h.
+    useEffect(() => {
+        if (!initialCity) return;
+        let cancelled = false;
+        void fetchCityById(initialCity.id).then((fresh) => {
+            if (!cancelled && fresh?.images?.length) {
+                setCity((current) => (current ? { ...current, images: fresh.images } : current));
+            }
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [initialCity]);
+
     useEffect(() => {
         if (initialCity || !isStaticSpaParam(paramCityId)) return;
 
@@ -58,7 +72,7 @@ export function CityDetailPageClient({
 
                 const allTours = await fetchPublicTours();
                 setCity(detail);
-                setTours(allTours.filter((tour) => tourMatchesCity(tour, detail.name)).slice(0, 6));
+                setTours(allTours.filter((tour) => tourMatchesCity(tour, detail.name)).slice(0, 12));
                 setRelatedCities([]);
             } catch {
                 setCity(null);
@@ -73,7 +87,7 @@ export function CityDetailPageClient({
 
     if (loading) {
         return (
-            <div className="max-w-5xl mx-auto px-4 py-16 text-center text-gray-500">
+            <div className="container-site py-24 text-center text-ink-muted" role="status">
                 Loading city...
             </div>
         );
@@ -81,9 +95,9 @@ export function CityDetailPageClient({
 
     if (error || !city) {
         return (
-            <div className="max-w-5xl mx-auto px-4 py-16 text-center space-y-4">
-                <p className="text-gray-500">{error ?? "City not found."}</p>
-                <Button asChild variant="outline">
+            <div className="container-site space-y-4 py-24 text-center">
+                <p className="text-ink-soft">{error ?? "City not found."}</p>
+                <Button asChild variant="outline" className="rounded-full border-ink/15">
                     <Link href="/cities">Back to all cities</Link>
                 </Button>
             </div>

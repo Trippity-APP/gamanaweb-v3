@@ -42,6 +42,18 @@ export interface FetchCitiesParams {
 
 const DEFAULT_API_URL = "https://apidev.gamana.app/api/v1";
 
+/**
+ * City images are signed URLs that expire after 24h, so the browser must never reuse
+ * an old response. Static export builds still need a cacheable fetch; the build script
+ * clears `.next/cache/fetch-cache` first so each deploy starts from fresh data.
+ */
+function cityFetchInit(): RequestInit {
+    if (typeof window !== "undefined" || process.env.NODE_ENV === "development") {
+        return { cache: "no-store" };
+    }
+    return { cache: "force-cache" };
+}
+
 export function getCityApiBaseUrl(): string {
     return (
         process.env.NEXT_PUBLIC_MARKETPLACE_API_URL ||
@@ -73,7 +85,7 @@ export const fetchCities = async (params: FetchCitiesParams = {}): Promise<CityR
         headers: {
             accept: "application/json",
         },
-        cache: "force-cache",
+        ...cityFetchInit(),
     });
 
     if (!response.ok) {
@@ -89,7 +101,7 @@ export async function fetchCityById(id: string): Promise<ApiCity | null> {
     try {
         const response = await fetch(`${baseUrl}/locations/cities/${id}`, {
             headers: { accept: "application/json" },
-            cache: "force-cache",
+            ...cityFetchInit(),
         });
 
         if (!response.ok) return null;

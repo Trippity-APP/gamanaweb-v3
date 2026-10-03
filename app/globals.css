@@ -2,33 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Gamana Brand Colors - Based on logo */
-:root {
-  --gamana-primary: #1A5F7A;
-  --gamana-cyan: #37B8AF;
-  --gamana-blue: #3B82F6;
-  --gamana-purple: #A855F7;
-  --gamana-pink: #EC4899;
-  --gamana-green: #10B981;
-  --gamana-emerald: #059669;
-  --gamana-red: #EF4444;
-  --gamana-rose: #F43F5E;
-}
-
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -112,6 +85,103 @@ html {
 
 .logo-white {
   filter: brightness(0) invert(1);
+}
+
+/* Cross-document view transitions (progressive enhancement; ignored where unsupported). */
+@view-transition {
+  navigation: auto;
+}
+
+/* Scroll reveal. Gated on `.js` (set inline in app/layout.tsx) so content is never
+   hidden for crawlers or visitors without JavaScript. */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.js [data-reveal='fade'] {
+  transform: none;
+}
+.js [data-reveal='scale'] {
+  transform: scale(0.96);
+}
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@layer components {
+  /* Subtle film grain for gradient heroes. */
+  .bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+  .text-display {
+    @apply font-display font-extrabold tracking-tight;
+    font-size: clamp(2.25rem, 1.4rem + 3.6vw, 4.25rem);
+    line-height: 1.05;
+  }
+  .text-display-title {
+    @apply font-display font-extrabold tracking-tight;
+    font-size: clamp(1.875rem, 1.3rem + 2.2vw, 3.25rem);
+    line-height: 1.1;
+  }
+  .text-h2 {
+    @apply font-display font-extrabold tracking-tight;
+    font-size: clamp(1.875rem, 1.3rem + 2.2vw, 3.25rem);
+    line-height: 1.1;
+  }
+  .text-h3 {
+    @apply font-display font-bold tracking-tight;
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+    line-height: 1.25;
+  }
+  .text-lead {
+    font-size: clamp(1.0625rem, 0.98rem + 0.4vw, 1.3125rem);
+    line-height: 1.6;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-700;
+  }
+  .section {
+    @apply py-20 sm:py-24 lg:py-28;
+  }
+  .section-tight {
+    @apply py-14 sm:py-16;
+  }
+  .container-site {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Elements that start at opacity-0 and rely on an entrance animation must still end visible. */
+  .animate-fade-in,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  @view-transition {
+    navigation: none;
+  }
 }
 
 @layer base {

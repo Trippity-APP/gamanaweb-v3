@@ -4,18 +4,19 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import {
-  MapPin, Heart,
+  MapPin,
   Check as CheckIcon, Sparkles, Lock, AlertCircle, LogIn,
   Smartphone, Search,
-} from 'lucide-react';
+} from '@/components/icons';
 import { GamanaCoinIcon } from '@/components/GamanaCoinIcon';
 import { ExploreTrustPanel, ExploreMobileAppNotice } from '@/components/marketplace/ExploreTrustPanel';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CityNotCovered } from '@/components/marketplace/CityNotCovered';
+import { cn } from '@/lib/utils';
 import { MarketplaceCoverImage, isPlaceholderTourImage } from '@/components/marketplace/marketplace-cover-image';
 import { DownloadAppDialog } from '@/components/DownloadAppDialog';
 import { TourGridSkeleton } from '@/components/ui/list-skeletons';
@@ -51,6 +52,9 @@ function matchesAccessFilter(tour: Tour, filter: AccessFilter): boolean {
 }
 
 const TOURS_INITIAL_VISIBLE = 9;
+
+/** Place-API types too broad to be useful as a filter. */
+const GENERIC_CATEGORIES = new Set(['story', 'walk', 'point of interest', 'premise', 'establishment', 'tourist attraction']);
 
 /**
  * The full Tours / Combos / Experiences / Buy Coins / Special Offers browsing surface,
@@ -96,6 +100,7 @@ export function MarketplaceBrowser({
   const searchQuery = controlledSearchQuery ?? internalSearchQuery;
   const setSearchQuery = onSearchQueryChange ?? setInternalSearchQuery;
   const [accessFilter, setAccessFilter] = useState<AccessFilter>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const { account, journey, login, coinBalance, unlockItem, isUnlocked } = useAccount();
 
   const clearSearchFilter = () => {
@@ -300,7 +305,41 @@ export function MarketplaceBrowser({
 
   useEffect(() => {
     setVisibleTourCount(TOURS_INITIAL_VISIBLE);
-  }, [searchQuery, accessFilter, searchFromUrl, activeTab]);
+  }, [searchQuery, accessFilter, categoryFilter, searchFromUrl, activeTab]);
+
+  useEffect(() => {
+    setCategoryFilter(null);
+  }, [activeTab]);
+
+  // City and category chips are drawn from the tab's own catalog, most-covered first.
+  const chipKind: 'story' | 'walk' | null =
+    activeTab === 'walks' ? 'walk' : activeTab === 'stories' ? 'story' : null;
+  const { cityChips, categoryChips } = useMemo(() => {
+    if (!chipKind) return { cityChips: [] as string[], categoryChips: [] as string[] };
+    const cities = new Map<string, number>();
+    const categories = new Map<string, number>();
+    for (const t of tours) {
+      if ((t.contentKind ?? 'walk') !== chipKind || !isWalkCatalogVisible(t)) continue;
+      const city = t.location.split(',')[0]?.trim();
+      if (city) cities.set(city, (cities.get(city) ?? 0) + 1);
+      if (t.category && !GENERIC_CATEGORIES.has(t.category.toLowerCase())) categories.set(t.category, (categories.get(t.category) ?? 0) + 1);
+    }
+    const ranked = (m: Map<string, number>, max: number) =>
+      Array.from(m.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, max).map(([k]) => k);
+    return { cityChips: ranked(cities, 8), categoryChips: categories.size > 1 ? ranked(categories, 6) : [] };
+  }, [tours, chipKind]);
+
+  const selectCity = (city: string) => {
+    const active = searchFromUrl.trim().toLowerCase() === city.toLowerCase();
+    setSearchQuery(active ? '' : city);
+    router.replace(active ? pathname : `${pathname}?q=${encodeURIComponent(city)}`, { scroll: false });
+  };
+
+  const chipClass = (active: boolean) =>
+    cn(
+      'focus-ring inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors duration-200',
+      active ? 'border-ink bg-ink text-white' : 'border-ink/10 bg-white text-ink hover:border-ink/30'
+    );
 
   const buildFilteredTours = (kind: 'story' | 'walk') =>
     tours
@@ -309,7 +348,8 @@ export function MarketplaceBrowser({
       .filter((tour) => {
         const matchesSearch = tourMatchesSearch(tour, searchQuery);
         const matchesAccess = matchesAccessFilter(tour, accessFilter);
-        return matchesSearch && matchesAccess;
+        const matchesCategory = !categoryFilter || tour.category === categoryFilter;
+        return matchesSearch && matchesAccess && matchesCategory;
       })
       .sort((a, b) => (active ? Number(tourMatches(b)) - Number(tourMatches(a)) : 0));
 
@@ -346,24 +386,15 @@ export function MarketplaceBrowser({
     ).length;
 
     return (
-      <TabsContent value={kind === 'story' ? 'stories' : 'walks'} className="space-y-6">
-        <div className="flex flex-wrap gap-2">
-          <Button variant={accessFilter === 'all' ? 'default' : 'outline'} onClick={() => setAccessFilter('all')} size="sm">
-            All Tiers
-          </Button>
-          <Button variant={accessFilter === 'free' ? 'default' : 'outline'} onClick={() => setAccessFilter('free')} size="sm">
-            Free
-          </Button>
-          <Button variant={accessFilter === 'premium' ? 'default' : 'outline'} onClick={() => setAccessFilter('premium')} size="sm">
-            Premium
-          </Button>
-        </div>
-
+      <TabsContent value={kind === 'story' ? 'stories' : 'walks'} className="mt-0 space-y-6">
         {toursLoading ? (
           <TourGridSkeleton count={TOURS_INITIAL_VISIBLE} />
         ) : filteredTours.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <p className="text-sm text-ink-muted" aria-live="polite">
+              {filteredTours.length} {filteredTours.length === 1 ? labelPlural.replace(/s$/, '').toLowerCase() : labelPlural.toLowerCase()}
+            </p>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {visibleTours.map((tour, index) =>
                 tourCard(tour, index, active && tourMatches(tour), kind),
               )}
@@ -373,7 +404,7 @@ export function MarketplaceBrowser({
                 <Button
                   variant="outline"
                   onClick={() => setVisibleTourCount((count) => count + TOURS_INITIAL_VISIBLE)}
-                  className="min-w-40"
+                  className="min-w-40 rounded-full"
                 >
                   View more
                 </Button>
@@ -406,8 +437,8 @@ export function MarketplaceBrowser({
 
     if (showView) {
       return (
-        <Button asChild variant="outline" size="sm">
-          <Link href={getTourHref(tour)}>View</Link>
+        <Button asChild variant="outline" size="sm" className="rounded-full px-4">
+          <Link href={getTourHref(tour)} aria-label={`View ${tour.title}`}>View</Link>
         </Button>
       );
     }
@@ -418,7 +449,7 @@ export function MarketplaceBrowser({
         <Button
           size="sm"
           onClick={() => setDownloadDialogOpen(true)}
-          className="bg-gray-900 hover:bg-black text-white"
+          className="rounded-full bg-ink px-4 text-white hover:bg-black"
         >
           <Lock className="mr-1.5 h-3.5 w-3.5" />
           Unlock
@@ -430,7 +461,7 @@ export function MarketplaceBrowser({
       <Button
         size="sm"
         onClick={() => attemptUnlock(target)}
-        className="bg-gray-900 hover:bg-black text-white"
+        className="rounded-full bg-ink px-4 text-white hover:bg-black"
       >
         <Lock className="mr-1.5 h-3.5 w-3.5" />
         Unlock
@@ -444,78 +475,65 @@ export function MarketplaceBrowser({
     recommended = false,
     catalogKind: 'story' | 'walk' = 'story',
   ) => (
-    <Card key={tour.id} className="overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow duration-200 bg-white group">
-      <Link href={getTourHref(tour)} className="block">
-        <div className="relative h-40 overflow-hidden bg-gray-100">
+    <article
+      key={tour.id}
+      className="group flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-card transition-all duration-500 ease-out-expo hover:-translate-y-1 hover:shadow-lift motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+    >
+      <Link href={getTourHref(tour)} className="focus-ring flex flex-1 flex-col rounded-t-3xl">
+        <div className="relative aspect-[4/3] overflow-hidden bg-sand-100">
           {catalogKind === 'walk' && isPlaceholderTourImage(tour.image) ? (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#1A5F7A]/15 via-[#159895]/10 to-gray-100" />
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-700/15 via-brand-500/10 to-sand-100" />
           ) : (
             <MarketplaceCoverImage
               src={tour.image}
               alt={tour.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105 motion-reduce:transition-none"
               priority={index < 3}
               useDefaultFallback={catalogKind !== 'walk'}
             />
           )}
           <span
-            className={`absolute top-2 left-2 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded ${getCatalogAccessBadgeClass(tour)}`}
+            className={`absolute left-4 top-4 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${getCatalogAccessBadgeClass(tour)}`}
           >
-            {tour.price > 0 && (
-              <GamanaCoinIcon className="h-3 w-3" aria-hidden />
-            )}
+            {tour.price > 0 && <GamanaCoinIcon className="h-3 w-3" aria-hidden />}
             {getCatalogAccessBadgeText(tour)}
           </span>
-          <button
-            type="button"
-            aria-label="Save"
-            onClick={(e) => e.preventDefault()}
-            className="absolute top-2 right-2 h-7 w-7 rounded-full bg-white/90 flex items-center justify-center text-gray-500 hover:text-red-500"
-          >
-            <Heart className="h-3.5 w-3.5" />
-          </button>
         </div>
 
-        <CardHeader className="p-3 pb-0 space-y-1">
+        <div className="flex flex-1 flex-col p-5 pb-3">
           {recommended && (
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#0B6E4F]">Recommended for you</p>
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-brand-700">Recommended for you</p>
           )}
           {!recommended && tour.discount && (
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-red-600">Special offer</p>
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-red-700">Special offer</p>
           )}
-          <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">{tour.title}</h3>
-          <p className="text-xs text-gray-500 flex items-center gap-1">
-            <MapPin className="h-3 w-3" /> {tour.location} · {tour.duration}
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brand-700">
+            <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span className="truncate">{tour.location}</span>
           </p>
-        </CardHeader>
-
-        <CardContent className="p-3 pt-2 space-y-1.5">
-          {catalogKind === 'walk' ? (
-            <p className="text-xs text-gray-500">Organized by: Gamana</p>
-          ) : (
-            <p className="text-xs text-gray-500">Narrated by {tour.narrator}</p>
-          )}
-        </CardContent>
+          <h3 className="mt-2 line-clamp-2 font-display text-lg font-bold leading-snug text-ink">{tour.title}</h3>
+          <p className="mt-1.5 text-sm text-ink-muted">
+            {tour.duration}
+            {' · '}
+            {catalogKind === 'walk' ? 'Organized by Gamana' : `Narrated by ${tour.narrator}`}
+          </p>
+        </div>
       </Link>
 
-      <CardFooter className="p-3 pt-0 flex items-center justify-between">
-        <div>
-          {tour.price === 0 ? (
-            <p className="text-base font-bold text-emerald-700">Free</p>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              <GamanaCoinIcon className="h-3.5 w-3.5" aria-hidden />
-              <p className="text-base font-bold text-gray-900">{tour.price}</p>
-              <span className="text-sm font-normal text-gray-500">
-                {tour.price === 1 ? 'coin' : 'coins'}
-              </span>
-              {tour.originalPrice && <p className="text-xs text-gray-400 line-through">{tour.originalPrice}</p>}
-            </div>
-          )}
-        </div>
+      <div className="flex items-center justify-between gap-3 border-t border-ink/5 px-5 py-3.5">
+        {tour.price === 0 ? (
+          <p className="text-base font-bold text-emerald-700">Free</p>
+        ) : (
+          <div className="flex items-center gap-1.5">
+            <GamanaCoinIcon className="h-4 w-4" aria-hidden />
+            <p className="text-base font-bold text-ink">{tour.price}</p>
+            <span className="text-sm text-ink-muted">{tour.price === 1 ? 'coin' : 'coins'}</span>
+            {tour.originalPrice && <p className="text-xs text-ink-muted line-through">{tour.originalPrice}</p>}
+          </div>
+        )}
         {catalogActionButton(tour, catalogKind)}
-      </CardFooter>
-    </Card>
+      </div>
+    </article>
   );
 
   const coinBundleCard = (bundle: CoinBundle) => {
@@ -570,52 +588,37 @@ export function MarketplaceBrowser({
         source="explore-walk-unlock"
       />
 
-      <div className="relative z-10 -mt-10 sm:-mt-12 max-w-7xl mx-auto px-4 pb-10">
-        {searchFromUrl && (
-          <div className="mb-4 flex w-fit shrink-0 items-center gap-2 rounded-full border border-[#159895]/30 bg-[#F0FBFA] px-4 py-2 text-sm font-semibold text-[#0B6E4F]">
-            <Search className="h-4 w-4" />
-            Results for {searchFromUrl}
-            <button
-              type="button"
-              onClick={clearSearchFilter}
-              aria-label="Clear search"
-              className="ml-1 text-[#159895] hover:text-[#128a86]"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-
-        <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:items-start lg:gap-6">
+      <div className="container-site pb-16 pt-8 sm:pt-10">
+        <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:items-start lg:gap-8">
           <div className="min-w-0">
-            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-lg sm:p-5">
-              <Tabs value={activeTab} onValueChange={selectCatalogTab} className="w-full">
-                <div className="mb-4 flex flex-wrap items-center gap-3">
-                  <TabsList className={`grid ${hasRecommendations ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            <Tabs value={activeTab} onValueChange={selectCatalogTab} className="w-full">
+              <div className="sticky top-14 z-30 -mx-4 mb-6 space-y-3 border-b border-ink/5 bg-sand-50/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:top-16 lg:mx-0 lg:px-0">
+                <div className="flex flex-wrap items-center gap-3">
+                  <TabsList className="h-11 rounded-full bg-white p-1 shadow-card">
                     {hasRecommendations && (
                       <TabsTrigger
                         value="recommended"
-                        className="gap-1.5 bg-[#159895]/10 font-semibold text-[#0B6E4F] data-[state=active]:bg-[#159895] data-[state=active]:text-white"
+                        className="h-9 gap-1.5 rounded-full px-4 font-semibold text-brand-700 data-[state=active]:bg-brand-600 data-[state=active]:text-white"
                       >
-                        <Sparkles className="h-3.5 w-3.5" /> For You
+                        <Sparkles className="h-3.5 w-3.5" aria-hidden /> For You
                       </TabsTrigger>
                     )}
-                    <TabsTrigger value="stories">
+                    <TabsTrigger value="stories" className="h-9 rounded-full px-4 data-[state=active]:bg-ink data-[state=active]:text-white">
                       Audio Stories{searchFromUrl ? ` (${storySearchCount})` : ''}
                     </TabsTrigger>
-                    <TabsTrigger value="walks">
+                    <TabsTrigger value="walks" className="h-9 rounded-full px-4 data-[state=active]:bg-ink data-[state=active]:text-white">
                       Audio Walks{searchFromUrl ? ` (${walkSearchCount})` : ''}
                     </TabsTrigger>
                   </TabsList>
 
                   {account && (
-                    <div className="flex w-fit shrink-0 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700">
+                    <div className="flex w-fit shrink-0 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">
                       <GamanaCoinIcon className="h-4 w-4" aria-hidden />
                       {coinBalance.toLocaleString()} Coins
                       <button
                         type="button"
                         onClick={() => setBuyCoinsOpen(true)}
-                        className="ml-1 font-semibold text-[#159895] underline underline-offset-2 hover:text-[#128a86]"
+                        className="focus-ring ml-1 rounded font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800"
                       >
                         Buy more
                       </button>
@@ -623,20 +626,72 @@ export function MarketplaceBrowser({
                   )}
                 </div>
 
-                <ExploreMobileAppNotice />
-
-                <details className="group mb-4 rounded-xl border border-gray-100 bg-gray-50/80 open:bg-white lg:hidden">
-                  <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-gray-900 marker:content-none [&::-webkit-details-marker]:hidden">
-                    <span className="flex items-center justify-between gap-2">
-                      Why Gamana?
-                      <span className="text-xs font-normal text-gray-500 group-open:hidden">Show</span>
-                      <span className="hidden text-xs font-normal text-gray-500 group-open:inline">Hide</span>
-                    </span>
-                  </summary>
-                  <div className="border-t border-gray-100 px-4 pb-4">
-                    <ExploreTrustPanel variant="compact" showAppNotice={false} />
+                {chipKind && (
+                  <div
+                    role="group"
+                    aria-label="Filter the catalog"
+                    className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden"
+                  >
+                    {(['all', 'free', 'premium'] as const).map((f) => (
+                      <button key={f} type="button" aria-pressed={accessFilter === f} onClick={() => setAccessFilter(f)} className={chipClass(accessFilter === f)}>
+                        {f === 'all' ? 'All tiers' : f === 'free' ? 'Free' : 'Premium'}
+                      </button>
+                    ))}
+                    {cityChips.length > 0 && <span aria-hidden className="mx-1 my-1.5 w-px shrink-0 bg-ink/10" />}
+                    {cityChips.map((city) => {
+                      const active = searchFromUrl.trim().toLowerCase() === city.toLowerCase();
+                      return (
+                        <button key={city} type="button" aria-pressed={active} onClick={() => selectCity(city)} className={chipClass(active)}>
+                          <MapPin className="h-3.5 w-3.5" aria-hidden />
+                          {city}
+                        </button>
+                      );
+                    })}
+                    {categoryChips.length > 0 && <span aria-hidden className="mx-1 my-1.5 w-px shrink-0 bg-ink/10" />}
+                    {categoryChips.map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        aria-pressed={categoryFilter === cat}
+                        onClick={() => setCategoryFilter((c) => (c === cat ? null : cat))}
+                        className={chipClass(categoryFilter === cat)}
+                      >
+                        {cat}
+                      </button>
+                    ))}
                   </div>
-                </details>
+                )}
+              </div>
+
+              {searchFromUrl && (
+                <div className="mb-4 flex w-fit items-center gap-2 rounded-full border border-brand-500/30 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-800">
+                  <Search className="h-4 w-4" aria-hidden />
+                  Results for {searchFromUrl}
+                  <button
+                    type="button"
+                    onClick={clearSearchFilter}
+                    aria-label="Clear search"
+                    className="focus-ring ml-1 rounded-full text-brand-700 hover:text-brand-900"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              <ExploreMobileAppNotice />
+
+              <details className="group mb-6 rounded-2xl bg-white shadow-card lg:hidden">
+                <summary className="focus-ring cursor-pointer list-none rounded-2xl px-5 py-3.5 text-sm font-semibold text-ink marker:content-none [&::-webkit-details-marker]:hidden">
+                  <span className="flex items-center justify-between gap-2">
+                    Why Gamana?
+                    <span className="text-xs font-normal text-ink-muted group-open:hidden">Show</span>
+                    <span className="hidden text-xs font-normal text-ink-muted group-open:inline">Hide</span>
+                  </span>
+                </summary>
+                <div className="border-t border-ink/5 px-5 pb-5">
+                  <ExploreTrustPanel variant="compact" showAppNotice={false} />
+                </div>
+              </details>
 
           {hasRecommendations && (
             <TabsContent value="recommended" className="space-y-8">
@@ -674,14 +729,13 @@ export function MarketplaceBrowser({
           )}
 
           {renderCatalogTab('story', 'Audio Stories')}
-          {renderCatalogTab('walk', 'Audio Walks')}
-              </Tabs>
-            </div>
+              {renderCatalogTab('walk', 'Audio Walks')}
+            </Tabs>
           </div>
 
-          <aside className="hidden lg:block lg:sticky lg:top-20 lg:self-start">
-            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-lg">
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">Why Gamana</h2>
+          <aside className="hidden lg:sticky lg:top-32 lg:block lg:self-start">
+            <div className="rounded-3xl bg-white p-6 shadow-card">
+              <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-ink-muted">Why Gamana</h2>
               <ExploreTrustPanel />
             </div>
           </aside>

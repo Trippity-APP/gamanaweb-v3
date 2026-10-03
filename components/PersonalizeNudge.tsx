@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, LogIn, Check } from "lucide-react";
+import { Sparkles, LogIn, Check } from "@/components/icons";
 import { useAccount } from "@/lib/account-context";
 
 /**

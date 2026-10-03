@@ -1,12 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { Mail, MapPin, Phone, Send, CheckCircle2, Clock, Loader2 } from "@/components/icons";
 import {
   Select,
   SelectContent,
@@ -14,43 +9,129 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Mail,
-  MapPin,
-  Phone,
-  Send,
-  CheckCircle2,
-  MessageSquare,
-  Headphones,
-  Clock,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import HeroHeader from "@/components/navigation/hero-header";
 import Footer from "@/components/navigation/footer";
+import { PageHero } from "@/components/site/PageHero";
+import { StoreBadges } from "@/components/site/StoreBadges";
+import { HERITAGE_BADGE_LABELS } from "@/lib/data/nav-config";
 import { useToast } from "@/hooks/use-toast";
-import { HeroSlideshow } from "@/components/HeroSlideshow";
 import { submitContactForm } from "@/lib/contact-api";
+import { getPhoto } from "@/lib/images";
+import { cn } from "@/lib/utils";
+
+import { IconTile, toneFor } from "@/components/icons/IconTile";
+type FormData = {
+  name: string;
+  email: string;
+  subject: string;
+  inquiryType: string;
+  message: string;
+};
+type Field = keyof FormData;
+
+const EMPTY: FormData = { name: "", email: "", subject: "", inquiryType: "", message: "" };
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validate(data: FormData): Partial<Record<Field, string>> {
+  const errors: Partial<Record<Field, string>> = {};
+  if (!data.name.trim()) errors.name = "Please tell us your name.";
+  if (!data.email.trim()) errors.email = "We need an email to reply to.";
+  else if (!EMAIL_RE.test(data.email.trim())) errors.email = "That email doesn't look quite right.";
+  if (!data.inquiryType) errors.inquiryType = "Please select an inquiry type.";
+  if (!data.subject.trim()) errors.subject = "Add a short subject.";
+  if (!data.message.trim()) errors.message = "Tell us a little about your inquiry.";
+  return errors;
+}
+
+const contactInfo = [
+  {
+    icon: Mail,
+    title: "Email Us",
+    content: "support@gamana.app",
+    link: "mailto:support@gamana.app",
+  },
+  {
+    icon: Phone,
+    title: "Call Us",
+    content: "+1 (203) 405-0700",
+    link: "tel:+12034050700",
+  },
+  {
+    icon: MapPin,
+    title: "Visit Us",
+    content: "48, Church St, Haridevpur, Shanthala Nagar, Ashok Nagar, Bengaluru, Karnataka 560001",
+    link: "https://www.google.com/maps/search/?api=1&query=48+Church+St+Ashok+Nagar+Bengaluru+Karnataka+560001",
+    external: true,
+  },
+];
+
+function FloatingField({
+  id,
+  label,
+  error,
+  children,
+}: {
+  id: Field;
+  label: string;
+  error?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div>
+      <div className="relative">
+        {children}
+        <label
+          htmlFor={id}
+          className={cn(
+            "pointer-events-none absolute left-4 top-1/2 origin-left -translate-y-1/2 text-ink-muted transition-all duration-300 ease-out-expo",
+            "peer-focus:top-3 peer-focus:translate-y-0 peer-focus:scale-[0.8] peer-focus:text-brand-700",
+            "peer-[:not(:placeholder-shown)]:top-3 peer-[:not(:placeholder-shown)]:translate-y-0 peer-[:not(:placeholder-shown)]:scale-[0.8]",
+            id === "message" && "top-6",
+            error && "text-red-600 peer-focus:text-red-600"
+          )}
+        >
+          {label} <span aria-hidden>*</span>
+        </label>
+      </div>
+      <p
+        id={`${id}-error`}
+        role={error ? "alert" : undefined}
+        className={cn(
+          "grid text-sm text-red-600 transition-[grid-template-rows,opacity] duration-300",
+          error ? "mt-1.5 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        )}
+      >
+        <span className="overflow-hidden">{error}</span>
+      </p>
+    </div>
+  );
+}
+
+const inputClass = (error?: string) =>
+  cn(
+    "peer block w-full rounded-2xl border bg-white px-4 pb-2.5 pt-6 text-ink outline-none transition-all duration-300 placeholder:text-transparent",
+    "focus:border-brand-600 focus:ring-4 focus:ring-brand-600/15",
+    error ? "border-red-400 focus:border-red-500 focus:ring-red-500/15" : "border-ink/15 hover:border-ink/30"
+  );
 
 export default function ContactPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    inquiryType: "",
-    message: "",
-  });
+  const [formData, setFormData] = useState<FormData>(EMPTY);
+  const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const errors = validate(formData);
+  const showError = (field: Field) => (touched[field] ? errors[field] : undefined);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!formData.inquiryType) {
-      toast({
-        title: "Please select an inquiry type",
-        variant: "destructive",
-      });
+    if (Object.keys(errors).length) {
+      setTouched({ name: true, email: true, subject: true, inquiryType: true, message: true });
+      if (errors.inquiryType) {
+        toast({ title: "Please select an inquiry type", variant: "destructive" });
+      }
       return;
     }
 
@@ -64,21 +145,13 @@ export default function ContactPage() {
         description: result.message,
       });
 
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        inquiryType: "",
-        message: "",
-      });
+      setFormData(EMPTY);
+      setTouched({});
       setIsSubmitted(true);
     } catch (error) {
       toast({
         title: "Could not send message",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Please email support@gamana.app directly.",
+        description: error instanceof Error ? error.message : "Please email support@gamana.app directly.",
         variant: "destructive",
       });
     } finally {
@@ -86,294 +159,201 @@ export default function ContactPage() {
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const contactInfo = [
-    {
-      icon: Mail,
-      title: "Email Us",
-      content: "support@gamana.app",
-      link: "mailto:support@gamana.app",
-    },
-    {
-      icon: Phone,
-      title: "Call Us",
-      content: "+1 (203) 405-0700",
-      link: "tel:+12034050700",
-    },
-    {
-      icon: MapPin,
-      title: "Visit Us",
-      content: "48, Church St, Haridevpur, Shanthala Nagar, Ashok Nagar, Bengaluru, Karnataka 560001",
-      link: "#",
-    },
-  ];
+  const blur = (field: Field) => () => setTouched((t) => ({ ...t, [field]: true }));
+
+  const fieldProps = (field: Field) => ({
+    id: field,
+    name: field,
+    value: formData[field],
+    onChange: handleChange,
+    onBlur: blur(field),
+    placeholder: " ",
+    required: true,
+    "aria-invalid": Boolean(showError(field)),
+    "aria-describedby": `${field}-error`,
+    className: inputClass(showError(field)),
+  });
 
   return (
     <>
-      <main className="min-h-screen">
-        <section className="relative h-[62vh] sm:h-[68vh] flex flex-col overflow-hidden">
-          {/* Photo behind the brand gradient, matching /marketplace-redesign, /cities,
-              /ecosystem, and /about, a flat gradient here was the odd one out. */}
-          <div className="absolute inset-0">
-            <HeroSlideshow
-              images={[
-                "/mumbai-marine-drive-dusk-queens-necklace-arabian-sea.jpg",
-                "/mumbai-csmt-victorian-gothic-heritage-walk.jpg",
-                "/kerala-alleppey-houseboat-backwaters-golden-hour.jpg",
-              ]}
-            />
-            <div className="absolute inset-0 bg-gradient-to-br from-[#159895]/25 via-[#1A5F7A]/22 to-[#57C5B6]/20"></div>
-            <div className="absolute inset-0 bg-black/20"></div>
+      <HeroHeader transparent />
+      <main>
+        <PageHero
+          className="pb-28 sm:pb-32"
+          image={getPhoto("hero-contact")}
+          imageAlt=""
+          breadcrumbs={[{ label: "Contact", href: "/contact/" }]}
+          heading="Get in Touch"
+          subtitle="Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible."
+        >
+          <StoreBadges source="contact_hero" labels={HERITAGE_BADGE_LABELS} size="lg" priority />
+        </PageHero>
+
+        <section className="relative z-10 -mt-16 sm:-mt-20">
+          <div className="container-site">
+            <ul className="grid gap-4 rounded-4xl border border-ink/5 bg-white p-4 shadow-lift sm:grid-cols-3 sm:p-5">
+              {contactInfo.map((info, i) => {
+                const Icon = info.icon;
+                return (
+                  <li key={info.title}>
+                    <a
+                      href={info.link}
+                      {...(info.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      className="focus-ring group flex h-full items-start gap-4 rounded-3xl p-4 transition-colors duration-300 hover:bg-sand-50"
+                    >
+                      <IconTile icon={Icon} tone={toneFor(i)} className="transition-all duration-500 ease-spring group-hover:-rotate-6 group-hover:scale-110" />
+                      <span>
+                        <span className="block font-semibold text-ink">{info.title}</span>
+                        <span className="mt-0.5 block text-sm leading-snug text-ink-soft">{info.content}</span>
+                      </span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
+        </section>
 
-          <HeroHeader transparent={true} />
-
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-20 right-10 w-64 h-64 bg-white rounded-full blur-3xl"></div>
-            <div className="absolute bottom-20 left-10 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-            <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-white/50 rounded-full blur-3xl"></div>
-          </div>
-
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex-1 flex flex-col justify-start pt-28 pb-16">
-            <div className="max-w-5xl mx-auto text-center space-y-8">
-              <div className="space-y-4">
-                <div className="inline-block w-fit">
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight mb-2 animate-fade-in">
-                    Get in Touch
-                  </h1>
-                  <div className="h-2 bg-white/60 rounded-full opacity-0 animate-fade-in" style={{ animationDelay: "150ms" }}></div>
-                </div>
-                <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/95 leading-relaxed max-w-3xl mx-auto opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
-                  Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+        <section className="section bg-sand-50/60">
+          <div className="container-site grid gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-14">
+            <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
+              <div className="rounded-4xl bg-gradient-to-br from-brand-800 via-brand-700 to-brand-600 p-8 text-white shadow-lift">
+                <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white/15">
+                  <CheckCircle2 className="h-7 w-7" aria-hidden />
+                </span>
+                <h3 className="text-h3 mt-6">What happens next?</h3>
+                <p className="mt-3 leading-relaxed text-white/85">
+                  Once you submit your message, our team will review it and get back to you within 24 hours. For urgent
+                  matters, please call us directly at the number listed above.
                 </p>
               </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 opacity-0 animate-fade-in" style={{ animationDelay: "450ms" }}>
-                <a
-                  href="https://play.google.com/store/apps/details?id=com.agent.gamana.ai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:scale-105 transition-transform"
-                >
-                  <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
-                    alt="Download Gamana Heritage Travel App with Personalized Audio Tours on Android"
-                    title="Get Gamana - Heritage Travel App with Personalized Audio Tours on Android"
-                    className="h-14 w-auto"
-                  />
-                </a>
-                <a
-                  href="https://apps.apple.com/in/app/gamana-ai/id6748155654"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:scale-105 transition-transform"
-                >
-                  <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg"
-                    alt="Download Gamana Heritage Travel App with Personalized Audio Tours on iOS"
-                    title="Get Gamana - Heritage Travel App with Personalized Audio Tours on iPhone & iPad"
-                    className="h-14 w-auto"
-                  />
-                </a>
+              <div className="flex items-center gap-4 rounded-3xl border border-ink/5 bg-white p-6 shadow-card">
+                <IconTile icon={Clock} tone="sunset" />
+                <p className="text-sm leading-relaxed text-ink-soft">
+                  Prefer email? Write to{" "}
+                  <a href="mailto:support@gamana.app" className="font-semibold text-brand-700 hover:underline">
+                    support@gamana.app
+                  </a>
+                  .
+                </p>
               </div>
-            </div>
-          </div>
+            </aside>
 
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent"></div>
-        </section>
-
-        {/* Contact snapshot, floated up over the hero photo in the same overlapping-card
-            pattern used across /marketplace-redesign, /cities, and /ecosystem. */}
-        <section className="relative z-10 -mt-14 sm:-mt-16">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-gray-100 bg-white shadow-lg p-5 sm:p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
-                {contactInfo.map((info, index) => {
-                  const Icon = info.icon;
-                  return (
-                    <a
-                      key={index}
-                      href={info.link}
-                      className="flex items-start gap-3 rounded-xl p-2 -m-2 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#159895]/10">
-                        <Icon className="h-4 w-4 text-[#159895]" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">{info.title}</p>
-                        <p className="text-xs leading-snug text-gray-500">{info.content}</p>
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="pt-14 pb-20 bg-gray-50">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto">
-              <Card className="border-2">
-                <CardContent className="p-8">
-                  <h2 className="text-3xl font-bold mb-6 text-center">
-                    Send Us a Message
-                  </h2>
-                  {isSubmitted ? (
-                    <div className="text-center space-y-4 py-6">
-                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#159895]/10">
-                        <CheckCircle2 className="h-8 w-8 text-[#159895]" />
-                      </div>
-                      <p className="text-gray-700">
-                        Thanks for reaching out. Our team at{" "}
-                        <a
-                          href="mailto:support@gamana.app"
-                          className="font-medium text-[#159895] hover:underline"
-                        >
-                          support@gamana.app
-                        </a>{" "}
-                        will reply within 24 hours.
-                      </p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setIsSubmitted(false)}
-                      >
-                        Send another message
-                      </Button>
-                    </div>
-                  ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Full Name *</Label>
-                        <Input
-                          id="name"
-                          name="name"
-                          type="text"
-                          placeholder="John Doe"
-                          value={formData.name}
-                          onChange={handleChange}
-                          required
-                          className="h-12"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email Address *</Label>
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          placeholder="john@example.com"
-                          value={formData.email}
-                          onChange={handleChange}
-                          required
-                          className="h-12"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="inquiryType">Inquiry Type *</Label>
-                      <Select
-                        value={formData.inquiryType}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, inquiryType: value })
-                        }
-                        required
-                      >
-                        <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Select inquiry type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="general">General Inquiry</SelectItem>
-                          <SelectItem value="partner">Become a Partner</SelectItem>
-                          <SelectItem value="support">Technical Support</SelectItem>
-                          <SelectItem value="press">Press & Media</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="subject">Subject *</Label>
-                      <Input
-                        id="subject"
-                        name="subject"
-                        type="text"
-                        placeholder="How can we help you?"
-                        value={formData.subject}
-                        onChange={handleChange}
-                        required
-                        className="h-12"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="message">Message *</Label>
-                      <Textarea
-                        id="message"
-                        name="message"
-                        placeholder="Tell us more about your inquiry..."
-                        value={formData.message}
-                        onChange={handleChange}
-                        required
-                        rows={6}
-                        className="resize-none"
-                      />
-                    </div>
-
-                    <Button
-                      type="submit"
-                      size="lg"
-                      disabled={isSubmitting}
-                      className="w-full bg-gradient-to-r from-[#159895] to-[#1A5F7A] hover:from-[#1A5F7A] hover:to-[#159895] text-white text-lg py-6 h-auto shadow-xl font-semibold"
-                    >
-                      {isSubmitting ? (
-                        "Sending..."
-                      ) : (
-                        <>
-                          Send Message
-                          <Send className="ml-2 h-5 w-5" />
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              <Card className="border-0 bg-gradient-to-br from-[#159895]/10 via-[#1A5F7A]/10 to-[#57C5B6]/10 shadow-xl">
-                <CardContent className="p-8">
-                  <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                    <div className="bg-gradient-to-br from-[#159895] to-[#1A5F7A] p-4 rounded-2xl flex-shrink-0 shadow-lg">
-                      <CheckCircle2 className="h-8 w-8 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                        What happens next?
-                      </h3>
-                      <p className="text-gray-700 leading-relaxed">
-                        Once you submit your message, our team will review it and get back to you within 24 hours. For urgent matters, please call us directly at the number listed above.
-                      </p>
-                    </div>
+            <div className="rounded-4xl border border-ink/5 bg-white p-6 shadow-card sm:p-10">
+              <h2 className="text-h2 text-ink">Send Us a Message</h2>
+              {isSubmitted ? (
+                <div className="flex flex-col items-center py-12 text-center" role="status">
+                  <span className="relative grid h-20 w-20 place-items-center">
+                    <span className="absolute inset-0 animate-ping rounded-full bg-brand-400/30 [animation-iteration-count:2]" aria-hidden />
+                    <span className="relative grid h-20 w-20 animate-pop place-items-center rounded-full bg-brand-600 text-white shadow-lift">
+                      <CheckCircle2 className="h-10 w-10" aria-hidden />
+                    </span>
+                  </span>
+                  <p className="mt-8 max-w-md text-lg text-ink-soft">
+                    Thanks for reaching out. Our team at{" "}
+                    <a href="mailto:support@gamana.app" className="font-semibold text-brand-700 hover:underline">
+                      support@gamana.app
+                    </a>{" "}
+                    will reply within 24 hours.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setIsSubmitted(false)}
+                    className="focus-ring mt-8 rounded-full border border-ink/15 px-6 py-3 font-semibold text-ink transition-colors duration-300 hover:border-brand-600 hover:text-brand-700"
+                  >
+                    Send another message
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <FloatingField id="name" label="Full Name" error={showError("name")}>
+                      <input type="text" autoComplete="name" {...fieldProps("name")} />
+                    </FloatingField>
+                    <FloatingField id="email" label="Email Address" error={showError("email")}>
+                      <input type="email" autoComplete="email" {...fieldProps("email")} />
+                    </FloatingField>
                   </div>
-                </CardContent>
-              </Card>
+
+                  <div>
+                    <Select
+                      value={formData.inquiryType}
+                      onValueChange={(value) => {
+                        setFormData({ ...formData, inquiryType: value });
+                        setTouched((t) => ({ ...t, inquiryType: true }));
+                      }}
+                      required
+                    >
+                      <SelectTrigger
+                        id="inquiryType"
+                        aria-label="Inquiry Type"
+                        aria-invalid={Boolean(showError("inquiryType"))}
+                        aria-describedby="inquiryType-error"
+                        onBlur={blur("inquiryType")}
+                        className={cn(
+                          "relative h-auto rounded-2xl bg-white px-4 pb-2.5 pt-7 text-left text-base text-ink transition-all duration-300 focus:ring-4 focus:ring-brand-600/15 focus:ring-offset-0",
+                          showError("inquiryType") ? "border-red-400" : "border-ink/15 hover:border-ink/30 focus:border-brand-600"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "pointer-events-none absolute left-4 top-2 origin-left scale-[0.8] text-ink-muted",
+                            showError("inquiryType") && "text-red-600"
+                          )}
+                          aria-hidden
+                        >
+                          Inquiry Type *
+                        </span>
+                        <SelectValue placeholder="Select inquiry type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="general">General Inquiry</SelectItem>
+                        <SelectItem value="partner">Become a Partner</SelectItem>
+                        <SelectItem value="support">Technical Support</SelectItem>
+                        <SelectItem value="press">Press & Media</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p
+                      id="inquiryType-error"
+                      role={showError("inquiryType") ? "alert" : undefined}
+                      className={cn("text-sm text-red-600", showError("inquiryType") ? "mt-1.5" : "sr-only")}
+                    >
+                      {showError("inquiryType")}
+                    </p>
+                  </div>
+
+                  <FloatingField id="subject" label="Subject" error={showError("subject")}>
+                    <input type="text" {...fieldProps("subject")} />
+                  </FloatingField>
+
+                  <FloatingField id="message" label="Message" error={showError("message")}>
+                    <textarea rows={6} {...fieldProps("message")} className={cn(fieldProps("message").className, "resize-none pt-8")} />
+                  </FloatingField>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="focus-ring group inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-600 px-8 py-4 text-lg font-semibold text-white shadow-lift transition-all duration-300 ease-spring hover:-translate-y-0.5 hover:bg-brand-700 active:scale-[0.98] disabled:translate-y-0 disabled:opacity-80"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        Send Message
+                        <Send className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-1" aria-hidden />
+                      </>
+                    )}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </section>

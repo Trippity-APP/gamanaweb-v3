@@ -13,6 +13,7 @@
  * every currently published CMS post (so new articles are indexed immediately).
  */
 import http from "node:http";
+import https from "node:https";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -25,6 +26,43 @@ const PORT = Number(process.env.PORT || 8080);
 const SPA_HTML = path.join(OUT, "blog", "__spa__", "index.html");
 
 const require = createRequire(import.meta.url);
+
+// Same target as the /api/v1 rewrite in next.config.js. The browser calls the
+// API same-origin (lib/api-base-url.ts) to avoid CORS, so production must proxy it too.
+const API_PROXY_TARGET = new URL(
+  process.env.API_PROXY_TARGET ||
+    process.env.NEXT_PUBLIC_MARKETPLACE_API_URL?.replace(/\/api\/v1\/?$/, "") ||
+    process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, "") ||
+    "https://apidev.gamana.app"
+);
+
+function proxyApi(request, response) {
+  const client = API_PROXY_TARGET.protocol === "http:" ? http : https;
+  const headers = { ...request.headers, host: API_PROXY_TARGET.host };
+  delete headers.connection;
+  const upstream = client.request(
+    {
+      protocol: API_PROXY_TARGET.protocol,
+      hostname: API_PROXY_TARGET.hostname,
+      port: API_PROXY_TARGET.port || undefined,
+      method: request.method,
+      path: request.url,
+      headers,
+    },
+    (upstreamResponse) => {
+      response.writeHead(upstreamResponse.statusCode || 502, upstreamResponse.headers);
+      upstreamResponse.pipe(response);
+    }
+  );
+  upstream.on("error", (err) => {
+    console.error("[api proxy]", err.message);
+    if (!response.headersSent) {
+      response.writeHead(502, { "Content-Type": "application/json" });
+    }
+    response.end(JSON.stringify({ success: false, error: "Upstream unavailable" }));
+  });
+  request.pipe(upstream);
+}
 
 async function loadHandler() {
   try {
@@ -295,6 +333,29 @@ async function materializeBlogPage(slug) {
   return blogIndexPath(slug);
 }
 
+/**
+ * serve.json rewrites every /cities/:id, /marketplace/{tours,story}/:id (and the
+ * legacy /explore/... aliases) to a `__spa__` shell, and serve-handler applies
+ * rewrites before looking for real files. Pages pre-rendered at build time have
+ * their own title, canonical and JSON-LD, so serve those directly and leave the
+ * shell for IDs published after the last deploy.
+ */
+const PRERENDERED_DETAIL_ROUTE = /^\/(cities|marketplace\/tours|marketplace\/story)\/([^/]+)\/?$/;
+
+function prerenderedDetailPath(pathname) {
+  const match = pathname.match(PRERENDERED_DETAIL_ROUTE);
+  if (!match) return null;
+  let id;
+  try {
+    id = decodeURIComponent(match[2]);
+  } catch {
+    return null;
+  }
+  if (!id || id === "__spa__" || id.includes("..") || id.includes("/")) return null;
+  const file = path.join(OUT, match[1], id, "index.html");
+  return fs.existsSync(file) ? file : null;
+}
+
 function sendHtml(response, html) {
   const body = Buffer.from(html, "utf8");
   response.writeHead(200, {
@@ -320,6 +381,11 @@ const server = http.createServer(async (request, response) => {
     const url = new URL(request.url || "/", `http://${host}`);
     const pathname = url.pathname.replace(/\/+$/, "") || "/";
 
+    if (url.pathname.startsWith("/api/v1/")) {
+      proxyApi(request, response);
+      return;
+    }
+
     // Always serve a live sitemap so newly published CMS posts are indexed
     // without waiting for the next Railway build.
     if (pathname === "/sitemap.xml") {
@@ -331,6 +397,17 @@ const server = http.createServer(async (request, response) => {
         console.error("[sitemap] live build failed:", err);
         // Fall through to static file if present.
       }
+    }
+
+    const detailFile = prerenderedDetailPath(url.pathname);
+    if (detailFile) {
+      if (!url.pathname.endsWith("/")) {
+        response.writeHead(301, { Location: `${url.pathname}/${url.search}` });
+        response.end();
+        return;
+      }
+      sendHtml(response, fs.readFileSync(detailFile, "utf8"));
+      return;
     }
 
     const slug = blogSlugFromPathname(url.pathname);

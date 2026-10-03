@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Globe, Headphones, Map, Compass } from "lucide-react";
+import { Globe, Headphones, Map, Compass } from "@/components/icons";
 
 const links = [
   { label: "Explore all cities", href: "/cities", icon: Globe },

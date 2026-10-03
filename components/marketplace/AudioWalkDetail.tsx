@@ -121,7 +121,7 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
   if (error || !walk) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
-        <p className="text-gray-500">{error ?? 'Walk not found.'}</p>
+        <p className="text-ink-muted">{error ?? 'Walk not found.'}</p>
         <div className="mt-4 flex items-center justify-center gap-3">
           <Button variant="outline" onClick={retry}>
             Try again
@@ -136,8 +136,8 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
 
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 py-8 pb-28 sm:px-6 lg:px-8 lg:pb-16">
-        <ExploreDetailBreadcrumb />
+      <div className="container-site pb-28 pt-6 sm:pt-8 lg:pb-12">
+        <ExploreDetailBreadcrumb title={walk.title} />
 
         <AudioWalkHero walk={walk} unlockState={unlockState} daysLeft={daysLeft} />
 
@@ -150,10 +150,10 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
           />
         </div>
 
-        <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10">
+        <div className="mt-10 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
           <TourRouteTimeline stops={walk.stops} />
 
-          <aside className="hidden lg:block lg:sticky lg:top-24">
+          <aside className="hidden lg:sticky lg:top-32 lg:block">
             <AudioWalkActionCard
               walk={walk}
               unlockState={unlockState}

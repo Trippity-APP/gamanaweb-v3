@@ -1,4 +1,4 @@
-import type { Article, ArticleBlock } from "@/content/blog/articles";
+import type { Article, ArticleBlock } from "@/content/blog/types";
 import {
   fetchAllPublishedPosts,
   fetchPublishedPostBySlug,
@@ -6,7 +6,7 @@ import {
 } from "@/lib/blog-api";
 
 export type { Article, ArticleBlock };
-export type { ArticleRegion, ArticleTripType } from "@/content/blog/articles";
+export type { ArticleRegion, ArticleTripType } from "@/content/blog/types";
 
 const WORDS_PER_MINUTE = 200;
 

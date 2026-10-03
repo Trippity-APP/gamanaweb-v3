@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Account',
+  alternates: { canonical: 'https://www.gamana.app/account/' },
   robots: {
     index: false,
     follow: false,

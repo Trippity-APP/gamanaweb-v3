@@ -11,7 +11,7 @@ import {
   MapPin,
   Smartphone,
   Star,
-} from "lucide-react";
+} from "@/components/icons";
 import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -160,7 +160,7 @@ export function MarketplaceTourDetail({
 
         <div className="p-6 sm:p-8 space-y-6">
           <div className="space-y-3">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{tour.title}</h1>
+            <h1 className="text-display-title text-balance text-ink">{tour.title}</h1>
             <p className="text-sm text-gray-500 flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               {tour.location} · {tour.duration}

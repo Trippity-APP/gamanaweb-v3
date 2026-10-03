@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { X } from "@/components/icons";
 
 export default function StickyDownloadCTA() {
   const [visible, setVisible] = useState(false);

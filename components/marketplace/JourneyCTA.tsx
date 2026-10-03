@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Sparkles } from "@/components/icons";
 import { useAccount } from "@/lib/account-context";
 
 /**

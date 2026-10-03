@@ -1,144 +1,171 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Play, Star } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { MarketplaceCoverImage } from "@/components/marketplace/marketplace-cover-image";
-import { getTourHref } from "@/lib/marketplace-api";
+import { ChevronRight, Headphones, Languages, MapPin, Play, WifiOff } from "@/components/icons";
+import { ResponsiveImage } from "@/components/site/ResponsiveImage";
+import { CardRail } from "@/components/site/CardRail";
+import { DownloadBand } from "@/components/site/DownloadBand";
+import { RelatedRail } from "@/components/marketplace/detail/RelatedRail";
+import { CityCard } from "@/components/cities/CityCard";
 import type { Tour } from "@/lib/marketplace-data";
 import type { ApiCity } from "@/lib/services/cityService";
-import { getCityHref } from "@/lib/services/cityService";
+import { getApiCityImageUrl, getCuratedCityImage, type CityImage } from "@/lib/city-image";
+import { NEUTRAL_CITY_WIDE_IMAGE, getDestinationImage } from "@/lib/data/destination-images";
 
-const FALLBACK_IMAGE =
-    "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&q=80&fit=crop";
-
+import { IconTile, toneFor } from "@/components/icons/IconTile";
 type CityDetailProps = {
     city: ApiCity;
     tours: Tour[];
     relatedCities?: ApiCity[];
 };
 
+/** Wide curated photo first, then the city's own API photo, then a neutral wide travel photo. */
+function useHeroImage(city: ApiCity): { image: CityImage; onError: () => void } {
+    const [failed, setFailed] = useState(false);
+    const curatedWide = getDestinationImage(city.id)?.wide;
+    const api = getApiCityImageUrl(city);
+    const fallback = getCuratedCityImage(city) ?? NEUTRAL_CITY_WIDE_IMAGE;
+    const image: CityImage =
+        curatedWide ??
+        (api && !failed ? { src: api, alt: `${city.name} skyline and landmarks, explored with Gamana audio tours` } : fallback);
+    return { image, onError: () => setFailed(true) };
+}
+
 export function CityDetail({ city, tours, relatedCities = [] }: CityDetailProps) {
-    const imageUrl = city.images?.[0] ?? FALLBACK_IMAGE;
+    const { image, onError } = useHeroImage(city);
     const locationLabel = [city.state_name, city.country_name].filter(Boolean).join(", ");
+    const exploreHref = `/marketplace/?q=${encodeURIComponent(city.name)}`;
 
     return (
-        <div className="max-w-5xl mx-auto px-4 pb-16">
-            <div className="pt-6">
-                <Link
-                    href="/cities"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-[#159895] hover:text-[#128a86]"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                    Back to all cities
-                </Link>
-            </div>
-
-            <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                <div className="relative h-56 sm:h-80 bg-gray-100">
-                    <MarketplaceCoverImage
-                        src={imageUrl}
-                        alt={city.name}
+        <>
+            <section className="relative isolate flex min-h-[420px] items-end overflow-hidden bg-ink sm:min-h-[480px] lg:min-h-[540px]">
+                {image.photo ? (
+                    <ResponsiveImage
+                        image={image.photo}
+                        alt={image.alt}
+                        title={image.title}
                         fill
                         priority
-                        className="object-cover"
+                        sizes="100vw"
+                        className="-z-20"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    <div className="absolute bottom-6 left-6 right-6 text-white">
-                        <div className="flex flex-wrap items-center gap-2 mb-2">
-                            {city.is_new && (
-                                <Badge className="bg-gradient-to-r from-[#1A5F7A] to-[#159895] text-white border-0">
-                                    NEW
-                                </Badge>
-                            )}
-                            {city.is_popular && (
-                                <Badge className="bg-[#0B6E4F] text-white border-0">POPULAR</Badge>
-                            )}
-                        </div>
-                        <h1 className="text-3xl sm:text-4xl font-bold drop-shadow-md">{city.name}</h1>
-                        <p className="mt-2 text-sm sm:text-base text-white/90 flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
+                ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={image.src}
+                        alt={image.alt}
+                        fetchPriority="high"
+                        onError={onError}
+                        className="absolute inset-0 -z-20 h-full w-full object-cover"
+                    />
+                )}
+                <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/90 via-ink/40 to-ink/10" aria-hidden />
+
+                <div className="container-site w-full pb-10 pt-24 sm:pb-14">
+                    <nav aria-label="Breadcrumb" className="mb-5">
+                        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-white/80">
+                            <li>
+                                <Link href="/" className="focus-ring rounded hover:text-white">Home</Link>
+                            </li>
+                            <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                            <li>
+                                <Link href="/cities" className="focus-ring rounded hover:text-white">Cities</Link>
+                            </li>
+                            <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                            <li aria-current="page" className="font-semibold text-white">{city.name}</li>
+                        </ol>
+                    </nav>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        {city.is_popular && (
+                            <span className="rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-ink">Popular</span>
+                        )}
+                        {city.is_new && (
+                            <span className="rounded-full bg-sunset-500 px-3 py-1 text-xs font-bold text-white">New</span>
+                        )}
+                    </div>
+                    <h1 className="text-display mt-3 text-balance text-white drop-shadow-sm">
+                        {city.name}
+                    </h1>
+                    {locationLabel && (
+                        <p className="mt-3 flex items-center gap-2 text-base text-white/85 sm:text-lg">
+                            <MapPin className="h-4 w-4" aria-hidden />
                             {locationLabel}
                         </p>
+                    )}
+                    <div className="mt-6 flex flex-wrap gap-3">
+                        <Link
+                            href={exploreHref}
+                            className="focus-ring inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-sunset-400 to-sunset-500 px-6 text-sm font-semibold text-white shadow-lift transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transform-none"
+                        >
+                            <Play className="h-4 w-4 fill-current" aria-hidden />
+                            Browse tours in {city.name}
+                        </Link>
                     </div>
                 </div>
+            </section>
 
-                <div className="p-6 sm:p-8 space-y-6">
-                    <div className="space-y-3">
-                        <h2 className="text-lg font-semibold text-gray-900">Explore {city.name} with Gamana</h2>
-                        <p className="text-gray-600 leading-relaxed">
+            <section className="section-tight">
+                <div className="container-site grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-center">
+                    <div>
+                        <p className="eyebrow mb-3">Self-guided audio</p>
+                        <h2 className="text-h2 text-ink">Explore {city.name} with Gamana</h2>
+                        <p className="text-lead mt-4 max-w-2xl text-ink-soft">
                             Walk {city.name} at your own pace with location-aware audio stories. No tour groups,
                             no rigid schedules, just open the app, arrive at a landmark, and listen.
                         </p>
                     </div>
-
-                    <Button
-                        asChild
-                        className="w-full sm:w-auto bg-gradient-to-r from-[#1A5F7A] to-[#159895] text-white hover:opacity-90 shadow-md rounded-xl"
-                    >
-                        <Link href={`/marketplace?city=${encodeURIComponent(city.name)}`}>
-                            <Play className="mr-2 h-4 w-4 fill-current" />
-                            Browse tours in {city.name}
-                        </Link>
-                    </Button>
-                </div>
-            </div>
-
-            <div className="mt-10 space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900">
-                    {tours.length > 0 ? `Audio tours in ${city.name}` : `Tours coming soon in ${city.name}`}
-                </h2>
-
-                {tours.length > 0 ? (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {tours.slice(0, 6).map((tour) => (
-                            <Link
-                                key={tour.id}
-                                href={getTourHref(tour)}
-                                className="overflow-hidden rounded-xl border border-gray-200 bg-white hover:shadow-md transition-shadow"
-                            >
-                                <div className="relative h-36 bg-gray-100">
-                                    <MarketplaceCoverImage
-                                        src={tour.image}
-                                        alt={tour.title}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
-                                <div className="p-4 space-y-2">
-                                    <p className="text-sm font-semibold text-gray-900 line-clamp-2">{tour.title}</p>
-                                    <p className="text-xs text-gray-500">{tour.duration}</p>
-                                    <div className="flex items-center gap-1 text-xs">
-                                        <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-                                        <span className="font-semibold text-gray-900">{tour.rating}</span>
-                                    </div>
-                                </div>
-                            </Link>
+                    <ul className="grid grid-cols-3 gap-3 rounded-4xl border border-ink/5 bg-white p-5 shadow-card">
+                        {[
+                            { icon: Headphones, value: tours.length >= 12 ? "12+" : tours.length > 0 ? String(tours.length) : "Soon", label: "Audio tours" },
+                            { icon: Languages, value: "7", label: "Languages" },
+                            { icon: WifiOff, value: "Offline", label: "Ready" },
+                        ].map(({ icon: Icon, value, label }, i) => (
+                            <li key={label} className="text-center">
+                                <IconTile icon={Icon} tone={toneFor(i)} size="sm" className="mx-auto mb-2 h-10 w-10" />
+                                <p className="font-display text-lg font-bold text-ink">{value}</p>
+                                <p className="text-xs text-ink-muted">{label}</p>
+                            </li>
                         ))}
+                    </ul>
+                </div>
+            </section>
+
+            {tours.length > 0 ? (
+                <RelatedRail title={`Audio tours in ${city.name}`} tours={tours} />
+            ) : (
+                <section className="section-tight border-t border-ink/5 bg-white">
+                    <div className="container-site">
+                        <h2 className="text-h3 text-ink">Tours coming soon in {city.name}</h2>
+                        <p className="mt-3 max-w-2xl text-ink-soft">
+                            We&apos;re adding audio tours for {city.name}. Check back soon or explore nearby cities below.
+                        </p>
                     </div>
-                ) : (
-                    <p className="text-sm text-muted-foreground">
-                        We&apos;re adding audio tours for {city.name}. Check back soon or explore nearby cities below.
-                    </p>
-                )}
-            </div>
+                </section>
+            )}
 
             {relatedCities.length > 0 && (
-                <div className="mt-10 space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-900">More in {city.country_name}</h2>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        {relatedCities.map((related) => (
-                            <Link
-                                key={related.id}
-                                href={getCityHref(related)}
-                                className="rounded-xl border border-gray-200 bg-white p-4 hover:shadow-md transition-shadow"
-                            >
-                                <p className="text-sm font-semibold text-gray-900">{related.name}</p>
-                                <p className="text-xs text-gray-500 mt-1">{related.state_name}</p>
-                            </Link>
-                        ))}
+                <section className="section-tight">
+                    <div className="container-site">
+                        <h2 className="text-h3 mb-6 text-ink">More cities in {city.country_name}</h2>
+                        <CardRail label={`More cities in ${city.country_name}`}>
+                            {relatedCities.map((related) => (
+                                <div key={related.id} className="w-[15rem] sm:w-[17rem]">
+                                    <CityCard city={related} />
+                                </div>
+                            ))}
+                        </CardRail>
                     </div>
-                </div>
+                </section>
             )}
-        </div>
+
+            <DownloadBand
+                title={<>Hear {city.name} come alive in the Gamana app</>}
+                lead="Download free, pick a walk, and let the stories play as you reach each landmark."
+                source="city_detail"
+                keyword="city audio guide app"
+            />
+        </>
     );
 }

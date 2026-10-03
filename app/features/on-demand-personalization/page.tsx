@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
-import { Sparkles, Brain, Wand2, Target, Zap, Cpu, TrendingUp } from 'lucide-react';
+import { Sparkles, Brain, Wand2, Target, Zap, Cpu, TrendingUp } from '@/components/icons';
 import EnhancedPageLayout from '@/components/enhanced-page-layout';
+import { JsonLd } from '@/components/site/JsonLd';
+import { OG_IMAGE, organizationJsonLd } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
@@ -15,53 +17,25 @@ export const metadata: Metadata = {
     url: 'https://www.gamana.app/features/on-demand-personalization/',
     siteName: 'Gamana',
     type: 'website',
-    images: [
-      {
-        url: '/gamana-logo.svg',
-        alt: 'Gamana Logo',
-        width: 1200,
-        height: 630,
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'On-Demand Personalization with Travel AI | Gamana',
     description: 'On-demand personalization powered by Travel AI tailors stories and experiences to your interests, pace, and style for smarter, more meaningful journeys.',
-    images: ['/gamana-logo.svg'],
+    images: [OG_IMAGE.url],
   },
 };
 
 export default function OnDemandPersonalizationPage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "Gamana",
-            "url": "https://www.gamana.app",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://www.gamana.app/gamana-logo.svg",
-              "name": "Gamana Logo",
-              "caption": "Gamana Logo"
-            },
-            "sameAs": [
-              "https://www.facebook.com/gamanaapp",
-              "https://twitter.com/gamanaapp",
-              "https://www.instagram.com/gamanaapp"
-            ]
-          })
-        }}
-      />
+      <JsonLd data={organizationJsonLd()} />
       <EnhancedPageLayout
       icon={Sparkles}
       title="On-Demand Personalization"
       subtitle="Stories and experiences that adapt to your unique preferences and interests"
-      gradient="from-[#159895] via-[#1A5F7A] to-[#57C5B6]"
+      slug="on-demand-personalization"
       introTitle="Tours That Match How You Travel"
       introText={[
         'Every traveler is unique, and your tour should be too. Gamana learns from your preferences, interests, and travel style to deliver stories and stops that fit your interests.',

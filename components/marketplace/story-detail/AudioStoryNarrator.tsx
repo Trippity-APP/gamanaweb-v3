@@ -1,6 +1,6 @@
 'use client';
 
-import { Mic } from 'lucide-react';
+import { Mic } from '@/components/icons';
 import type { StoryDetail } from '@/lib/marketplace-data';
 
 type AudioStoryNarratorProps = {
@@ -17,8 +17,8 @@ export function AudioStoryNarrator({ story, onTryAnotherLens }: AudioStoryNarrat
     : story.duration;
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
-      <h2 className="text-lg font-semibold text-gray-900">Your Narrator</h2>
+    <section className="rounded-3xl bg-white p-6 shadow-card sm:p-8">
+      <h2 className="text-lg font-semibold text-ink">Your Narrator</h2>
 
       <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50/50 p-5">
         <div className="flex gap-4">
@@ -27,18 +27,18 @@ export function AudioStoryNarrator({ story, onTryAnotherLens }: AudioStoryNarrat
           </div>
           <div className="min-w-0 flex-1 space-y-2">
             <div>
-              <p className="font-semibold text-gray-900">
+              <p className="font-semibold text-ink">
                 {primary.name}
-                <span className="font-normal text-gray-500"> · {primary.title}</span>
+                <span className="font-normal text-ink-muted"> · {primary.title}</span>
               </p>
-              <p className="mt-1 text-sm leading-relaxed text-gray-600">{primary.description}</p>
+              <p className="mt-1 text-sm leading-relaxed text-ink-soft">{primary.description}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-sm">
-              <span className="text-gray-500">{durationLabel}</span>
+              <span className="text-ink-muted">{durationLabel}</span>
               <button
                 type="button"
                 onClick={onTryAnotherLens}
-                className="font-medium text-[#159895] hover:text-[#128a86]"
+                className="font-medium text-brand-600 hover:text-[#128a86]"
               >
                 Try another lens
               </button>
@@ -48,7 +48,7 @@ export function AudioStoryNarrator({ story, onTryAnotherLens }: AudioStoryNarrat
       </div>
 
       {story.lensesAvailableCount != null && story.lensesAvailableCount > 1 && (
-        <p className="mt-3 text-xs text-gray-500">
+        <p className="mt-3 text-xs text-ink-muted">
           {story.lensesAvailableCount} lenses available in this language
         </p>
       )}

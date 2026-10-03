@@ -16,7 +16,7 @@ import {
   Headphones,
   Briefcase,
   Pencil,
-} from "lucide-react";
+} from "@/components/icons";
 import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import { useAccount } from "@/lib/account-context";
 import { PersonalizationEditor } from "@/components/account/PersonalizationEditor";

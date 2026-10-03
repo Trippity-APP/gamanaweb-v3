@@ -36,7 +36,7 @@ export function DownloadAppDialog({
             className="transition-transform hover:scale-105"
           >
             <img
-              src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+              src="/badges/google-play-badge.svg"
               alt="Get Gamana on Google Play"
               className="h-12 w-auto"
             />
@@ -49,7 +49,7 @@ export function DownloadAppDialog({
             className="transition-transform hover:scale-105"
           >
             <img
-              src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg"
+              src="/badges/app-store-badge.svg"
               alt="Download Gamana on the App Store"
               className="h-12 w-auto"
             />

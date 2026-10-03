@@ -15,7 +15,7 @@ import {
   ArrowRight,
   RefreshCw,
   Globe
-} from "lucide-react";
+} from "@/components/icons";
 
 interface StorylistRedirectPageClientProps {
   id: string;
@@ -192,7 +192,7 @@ export default function StorylistRedirectPageClient({ id }: StorylistRedirectPag
         <div className="container mx-auto max-w-5xl relative z-10 flex flex-col items-center">
           {/* Logo */}
           <Link href="/" className="mb-12 hover:scale-105 transition-transform duration-300">
-            <img src="/gamana-logo.svg" alt="Gamana Logo" className="logo-white h-12 w-auto drop-shadow-2xl" />
+            <img src="/gamana-logo.svg" alt="Gamana Logo" title="Gamana Logo" className="logo-white h-12 w-auto drop-shadow-2xl" />
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
@@ -202,7 +202,7 @@ export default function StorylistRedirectPageClient({ id }: StorylistRedirectPag
                 <Compass className="h-4 w-4 text-[#57C5B6] animate-spin" style={{ animationDuration: "8s" }} />
                 <span>Mobile Audio Exploration</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight">
+              <h1 className="text-display-title text-balance text-white">
                 Gamana is a <span className="bg-gradient-to-r from-[#57C5B6] to-[#159895] bg-clip-text text-transparent">Mobile-Only Experience</span>
               </h1>
               <p className="text-gray-300 text-base sm:text-lg max-w-xl leading-relaxed font-medium">
@@ -212,10 +212,10 @@ export default function StorylistRedirectPageClient({ id }: StorylistRedirectPag
               {/* Store links */}
               <div className="flex gap-4 pt-4 flex-wrap justify-center lg:justify-start">
                 <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform duration-300">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" className="h-14 w-auto drop-shadow-xl" />
+                  <img src="/badges/google-play-badge.svg" alt="Google Play" className="h-14 w-auto drop-shadow-xl" />
                 </a>
                 <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform duration-300">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" className="h-14 w-auto drop-shadow-xl" />
+                  <img src="/badges/app-store-badge.svg" alt="App Store" className="h-14 w-auto drop-shadow-xl" />
                 </a>
               </div>
 

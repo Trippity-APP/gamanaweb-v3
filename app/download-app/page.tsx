@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   description:
     "GPS-triggered audio tours that turn any walk into a story. No guide, no wifi, no planning. Download Gamana free on iOS and Android.",
   robots: { index: false, follow: true },
+  alternates: { canonical: "https://www.gamana.app/download-app/" },
 };
 
 export default function LandingPage() {

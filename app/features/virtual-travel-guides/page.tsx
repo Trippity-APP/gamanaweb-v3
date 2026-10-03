@@ -1,68 +1,44 @@
 import { Metadata } from 'next';
-import { User, MessageCircle, Mic, Stars, Users, Bot, Award } from 'lucide-react';
+import { User, MessageCircle, Mic, Stars, Users, Bot, Award } from '@/components/icons';
 import EnhancedPageLayout from '@/components/enhanced-page-layout';
+import { JsonLd } from '@/components/site/JsonLd';
+import { OG_IMAGE, organizationJsonLd } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'Virtual Travel Guides for Smart Exploration',
-  description: 'Explore destinations from anywhere with virtual travel guides that offer interactive tours, insights, and immersive storytelling. Discover more with Gamana!',
+  title: { absolute: "Virtual Travel Guides for Personalized Tours | Gamana" },
+  description: "Choose a virtual travel guide with a distinct voice and personality. Explore with knowledgeable narration shaped by history, culture, and local context.",
   alternates: {
     canonical: 'https://www.gamana.app/features/virtual-travel-guides/',
   },
   openGraph: {
-    title: 'Virtual Travel Guides for Smart Exploration | Gamana',
-    description: 'Explore destinations from anywhere with virtual travel guides that offer interactive tours, insights, and immersive storytelling. Discover more with Gamana!',
+    title: "Virtual Travel Guides for Personalized Tours | Gamana",
+    description: "Choose a virtual travel guide with a distinct voice and personality. Explore with knowledgeable narration shaped by history, culture, and local context.",
     url: 'https://www.gamana.app/features/virtual-travel-guides/',
     siteName: 'Gamana',
     type: 'website',
-    images: [
-      {
-        url: '/gamana-logo.svg',
-        alt: 'Gamana Logo',
-        width: 1200,
-        height: 630,
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Virtual Travel Guides for Smart Exploration | Gamana',
-    description: 'Explore destinations from anywhere with virtual travel guides that offer interactive tours, insights, and immersive storytelling. Discover more with Gamana!',
-    images: ['/gamana-logo.svg'],
+    title: "Virtual Travel Guides for Personalized Tours | Gamana",
+    description: "Choose a virtual travel guide with a distinct voice and personality. Explore with knowledgeable narration shaped by history, culture, and local context.",
+    images: [OG_IMAGE.url],
   },
 };
 
 export default function VirtualTravelGuidesPage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "Gamana",
-            "url": "https://www.gamana.app",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://www.gamana.app/gamana-logo.svg",
-              "name": "Gamana Logo",
-              "caption": "Gamana Logo"
-            },
-            "sameAs": [
-              "https://www.facebook.com/gamanaapp",
-              "https://twitter.com/gamanaapp",
-              "https://www.instagram.com/gamanaapp"
-            ]
-          })
-        }}
-      />
+      <JsonLd data={organizationJsonLd()} />
       <EnhancedPageLayout
       icon={User}
       title="Virtual Travel Guides"
-      subtitle="Knowledgeable narrator companions with distinct personalities: historian, comedian, local guide"
-      gradient="from-[#159895] via-[#1A5F7A] to-[#57C5B6]"
-      heroImage="/solo-woman-traveler-mehrangarh-fort-jodhpur-golden-hour.jpg"
+      subtitle="Choose a narrator whose voice and personality match your style, then explore with engaging guidance informed by history, culture, and local knowledge."
+      slug="virtual-travel-guides"
+      heading="Your Personal Virtual Travel Guide for Every Journey"
+      heroAlt="Gamana virtual travel guide with personalized audio narration for exploring destinations"
+      heroTitle="Gamana virtual travel guides for personalized tours"
       introTitle="Your Personal Tour Guide"
       introText={[
         "Pick a narrator (historian, comedian, or local guide) whose voice you'd want for the walk.",
