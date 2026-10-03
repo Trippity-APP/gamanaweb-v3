@@ -55,28 +55,37 @@ function destinationPhoto(cityId: string): CityImage {
   return match.image;
 }
 
+export type FeaturedCity = { id: string; name: string; country: string; tagline: string; image: CityImage };
+
 // City IDs verified against the live catalogue (each has published audio tours).
-export const FEATURED_CITIES: readonly { id: string; name: string; tagline: string; image: CityImage }[] = [
-  { id: "134327", name: "Varanasi", tagline: "Ghats & Ganga Aarti", image: destinationPhoto("134327") },
-  { id: "131679", name: "Delhi", tagline: "Mughal lanes & bazaars", image: destinationPhoto("131679") },
-  { id: "6a6129112b3d15826864654c", name: "Goa", tagline: "Forts, churches & coast", image: destinationPhoto("6a6129112b3d15826864654c") },
-  { id: "57933", name: "Bengaluru", tagline: "Gardens & heritage", image: destinationPhoto("57933") },
-  { id: "57601", name: "Agra", tagline: "Taj Mahal & Mughal forts", image: destinationPhoto("57601") },
-  { id: "132201", name: "Jaipur", tagline: "The Pink City", image: destinationPhoto("132201") },
-  { id: "133024", name: "Mumbai", tagline: "Sea face & Art Deco", image: destinationPhoto("133024") },
-  { id: "131517", name: "Chennai", tagline: "Marina & temples", image: destinationPhoto("131517") },
+// Interleaved so any leading slice (header menu, search suggestions, chips) stays global.
+export const FEATURED_CITIES: readonly FeaturedCity[] = [
+  { id: "134327", name: "Varanasi", country: "India", tagline: "Ghats & Ganga Aarti", image: destinationPhoto("134327") },
+  { id: "32", name: "Dubai", country: "United Arab Emirates", tagline: "Skyline & old souks", image: destinationPhoto("32") },
+  { id: "131679", name: "Delhi", country: "India", tagline: "Mughal lanes & bazaars", image: destinationPhoto("131679") },
+  { id: "6a5e89efa9c8e6bff50dc94b", name: "València", country: "Spain", tagline: "Old town & modern marvels", image: destinationPhoto("6a5e89efa9c8e6bff50dc94b") },
+  { id: "132201", name: "Jaipur", country: "India", tagline: "The Pink City", image: destinationPhoto("132201") },
+  { id: "104057", name: "Singapore", country: "Singapore", tagline: "Little India & Marina Bay", image: destinationPhoto("104057") },
+  { id: "6a6129112b3d15826864654c", name: "Goa", country: "India", tagline: "Forts, churches & coast", image: destinationPhoto("6a6129112b3d15826864654c") },
+  { id: "122756", name: "New Orleans", country: "United States", tagline: "French Quarter & jazz", image: destinationPhoto("122756") },
+  { id: "57601", name: "Agra", country: "India", tagline: "Taj Mahal & Mughal forts", image: destinationPhoto("57601") },
+  { id: "57933", name: "Bengaluru", country: "India", tagline: "Gardens & heritage", image: destinationPhoto("57933") },
+  { id: "133024", name: "Mumbai", country: "India", tagline: "Sea face & Art Deco", image: destinationPhoto("133024") },
+  { id: "131517", name: "Chennai", country: "India", tagline: "Marina & temples", image: destinationPhoto("131517") },
 ];
 
-export type HeroSlide = { photo: PhotoKey; cityId: string; place: string; caption: string };
+export type HeroSlide = { photo: PhotoKey; href: string; place: string; caption: string };
 
-/** Home banner slides; the first is the LCP image. */
+/** Home banner slides; the first is the LCP image. New York and Rome link to their tours (no city page yet). */
 export const HERO_SLIDES: HeroSlide[] = [
-  { photo: "slide-varanasi", cityId: "134327", place: "Varanasi, India", caption: "Ganga Aarti on the ghats" },
-  { photo: "slide-jaipur", cityId: "132201", place: "Jaipur, India", caption: "Hawa Mahal, the Palace of Winds" },
-  { photo: "slide-goa", cityId: "6a6129112b3d15826864654c", place: "Old Goa, India", caption: "Basilica of Bom Jesus" },
-  { photo: "slide-delhi", cityId: "131679", place: "Delhi, India", caption: "Humayun's Tomb" },
+  { photo: "slide-varanasi", href: "/cities/134327/", place: "Varanasi, India", caption: "Ganga Aarti on the ghats" },
+  { photo: "slide-rome", href: "/marketplace/tours/6a42deaef6d2d0bb9ee04d11/", place: "Rome, Italy", caption: "The Colosseum & Roman Forum" },
+  { photo: "slide-dubai", href: "/cities/32/", place: "Dubai, UAE", caption: "Burj Khalifa & Downtown" },
+  { photo: "slide-jaipur", href: "/cities/132201/", place: "Jaipur, India", caption: "Hawa Mahal, the Palace of Winds" },
+  { photo: "slide-new-york", href: "/marketplace/tours/6a3c378e7671acdddafe04bb/", place: "New York, USA", caption: "Midtown & the Chrysler Building" },
+  { photo: "slide-valencia", href: "/cities/6a5e89efa9c8e6bff50dc94b/", place: "València, Spain", caption: "City of Arts and Sciences" },
 ];
 
 export const HERO_CITY_CHIPS = FEATURED_CITIES.filter((c) =>
-  ["Varanasi", "Delhi", "Goa", "Jaipur", "Bengaluru"].includes(c.name)
+  ["Varanasi", "Dubai", "València", "Delhi", "Singapore"].includes(c.name)
 );

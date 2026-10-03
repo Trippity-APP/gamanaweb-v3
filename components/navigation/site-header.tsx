@@ -40,7 +40,7 @@ const FEATURE_ICONS: Record<string, TileIcon> = {
   "/features/local-languages": Languages,
 };
 
-const DESTINATIONS = FEATURED_CITIES.map((c) => ({
+const DESTINATIONS = FEATURED_CITIES.slice(0, 8).map((c) => ({
   ...c,
   href: `/cities/${c.id}/`,
   thumb: c.image.photo?.srcSet[0].src ?? c.image.src,

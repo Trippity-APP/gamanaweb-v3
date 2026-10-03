@@ -141,7 +141,7 @@ export function HomeHero() {
 
           <div className="flex items-center gap-2">
             <Link
-              href={`/cities/${active.cityId}/`}
+              href={active.href}
               className="focus-ring group hidden items-center gap-2 rounded-full bg-white/15 py-1.5 pl-3 pr-2 text-sm backdrop-blur-md transition-colors hover:bg-white hover:text-ink sm:inline-flex"
               aria-live="polite"
             >

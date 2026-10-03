@@ -345,7 +345,7 @@ export default function LandingContent() {
             />
             <CardRail label="Featured cities">
               {FEATURED_CITIES.map((c) => (
-                <CityTile key={c.id} href={`/cities/${c.id}/`} name={c.name} country="India" meta={c.tagline} image={c.image} />
+                <CityTile key={c.id} href={`/cities/${c.id}/`} name={c.name} country={c.country} meta={c.tagline} image={c.image} />
               ))}
             </CardRail>
 

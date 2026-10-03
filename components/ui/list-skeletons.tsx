@@ -20,7 +20,7 @@ export function TourCardSkeleton() {
 
 export function TourGridSkeleton({ count = 6 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" role="status" aria-label="Loading tours">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" role="status" aria-label="Loading tours">
       {Array.from({ length: count }).map((_, index) => (
         <TourCardSkeleton key={index} />
       ))}

@@ -3,14 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "@/components/icons";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 
 import Footer from "@/components/navigation/footer";
 import SiteHeader from "@/components/navigation/site-header";
 import { DownloadBand } from "@/components/site/DownloadBand";
 import { JsonLd } from "@/components/site/JsonLd";
 import { StoreBadges } from "@/components/site/StoreBadges";
-import { ReadingProgress, TableOfContents } from "@/components/blog/reading-aids";
+import { ReadingProgress, TableOfContents, withHeadingIds } from "@/components/blog/reading-aids";
 import { absoluteUrl, breadcrumbJsonLd } from "@/lib/seo";
 import { BlogCoverImage } from "@/components/blog/blog-cover-image";
 import { getRouteCTAByRegion } from "@/lib/data/route-ctas";
@@ -103,12 +103,13 @@ const processLinks = (html: string) => {
 };
 
 const articleHtmlClassName =
-  "blog-article-html [&_p]:text-base sm:[&_p]:text-lg [&_p]:text-ink-soft [&_p]:leading-[1.8] [&_p]:mb-6 [&_a]:text-brand-700 [&_a]:font-medium [&_a]:underline hover:[&_a]:text-[#1A5F7A] [&_h2]:mt-12 [&_h2]:mb-4 [&_h2]:text-xl sm:[&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:font-display [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:text-ink [&_h3]:mt-8 [&_h3]:mb-3 [&_h3]:text-lg sm:[&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:font-display [&_h3]:font-semibold [&_h3]:text-ink [&_h4]:mt-6 [&_h4]:mb-3 [&_h4]:text-base sm:[&_h4]:text-lg md:[&_h4]:text-xl [&_h4]:font-semibold [&_h4]:text-gray-800 [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-3 [&_ul]:mb-8 [&_ul]:text-ink-soft [&_ol]:list-decimal [&_ol]:list-inside [&_ol]:space-y-3 [&_ol]:mb-8 [&_ol]:text-ink-soft [&_blockquote]:border-l-4 [&_blockquote]:border-[#159895] [&_blockquote]:pl-4 sm:[&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-ink-soft [&_blockquote]:text-base sm:[&_blockquote]:text-lg md:[&_blockquote]:text-xl [&_blockquote]:mb-8 [&_figure]:mb-10 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-3xl [&_hr]:my-12";
+  "blog-article-html [&_p]:text-base sm:[&_p]:text-lg [&_p]:text-ink-soft [&_p]:leading-[1.8] [&_p]:mb-6 [&_a]:text-brand-700 [&_a]:font-medium [&_a]:underline hover:[&_a]:text-[#1A5F7A] [&_h2]:mt-12 [&_h2]:mb-4 [&_h2]:scroll-mt-32 [&_h2]:text-xl sm:[&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:font-display [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:text-ink [&_h3]:mt-8 [&_h3]:mb-3 [&_h3]:text-lg sm:[&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:font-display [&_h3]:font-semibold [&_h3]:text-ink [&_h4]:mt-6 [&_h4]:mb-3 [&_h4]:text-base sm:[&_h4]:text-lg md:[&_h4]:text-xl [&_h4]:font-semibold [&_h4]:text-gray-800 [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-3 [&_ul]:mb-8 [&_ul]:text-ink-soft [&_ol]:list-decimal [&_ol]:list-inside [&_ol]:space-y-3 [&_ol]:mb-8 [&_ol]:text-ink-soft [&_blockquote]:border-l-4 [&_blockquote]:border-[#159895] [&_blockquote]:pl-4 sm:[&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-ink-soft [&_blockquote]:text-base sm:[&_blockquote]:text-lg md:[&_blockquote]:text-xl [&_blockquote]:mb-8 [&_figure]:mb-10 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-3xl [&_hr]:my-12";
 
 const renderBlock = (
   block: ArticleBlock,
   index: number,
-  dividerCount: number = 0
+  dividerCount: number = 0,
+  headingId?: string
 ) => {
   switch (block.type) {
     case "html":
@@ -161,7 +162,7 @@ const renderBlock = (
       );
     case "heading": {
       const classes = {
-        2: "mt-12 mb-4 text-xl sm:text-2xl md:text-3xl font-bold text-gray-900",
+        2: "mt-12 mb-4 scroll-mt-32 text-xl sm:text-2xl md:text-3xl font-bold text-gray-900",
         3: "mt-8 mb-3 text-lg sm:text-xl md:text-2xl font-semibold text-gray-900",
         4: "mt-6 mb-3 text-base sm:text-lg md:text-xl font-semibold text-gray-800",
       } as const;
@@ -171,7 +172,7 @@ const renderBlock = (
       if (block.content.startsWith("Conclusion:")) {
         return (
           <div key={index} className="mt-12 mb-6">
-            <Tag className="bg-[#1A5F7A] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg inline-block text-xl sm:text-2xl md:text-3xl font-bold">
+            <Tag id={headingId} className="scroll-mt-32 bg-[#1A5F7A] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg inline-block text-xl sm:text-2xl md:text-3xl font-bold">
               {block.content}
             </Tag>
           </div>
@@ -179,7 +180,7 @@ const renderBlock = (
       }
 
       return (
-        <Tag key={index} className={`${classes[block.level]} [&_a]:text-[#159895] [&_a]:font-medium [&_a]:underline [&_a:hover]:text-[#1A5F7A] [&_a]:transition-colors`}
+        <Tag key={index} id={headingId} className={`${classes[block.level]} [&_a]:text-[#159895] [&_a]:font-medium [&_a]:underline [&_a:hover]:text-[#1A5F7A] [&_a]:transition-colors`}
           dangerouslySetInnerHTML={{ __html: processLinks(formatInline(block.content)) }}
         />
       );
@@ -307,9 +308,10 @@ export function BlogPostView({ post }: { post: BlogPost }) {
   // Prefer CMS cover; strip the same banner from the start of content_html /
   // hero blocks so articles don't show the image twice.
   const showCoverHero = hasCmsCover;
-  const renderBlocks = showCoverHero
-    ? blocksWithoutDuplicateCover(post.blocks, true)
-    : post.blocks;
+  const { blocks: renderBlocks, headingIds } = useMemo(
+    () => withHeadingIds(showCoverHero ? blocksWithoutDuplicateCover(post.blocks, true) : post.blocks),
+    [post.blocks, showCoverHero],
+  );
   const canonicalPath = `/blog/${post.slug}/`;
 
   return (
@@ -409,7 +411,7 @@ export function BlogPostView({ post }: { post: BlogPost }) {
                     dividerCount++;
                     return renderBlock(block, index, count);
                   }
-                  return renderBlock(block, index);
+                  return renderBlock(block, index, 0, headingIds[index]);
                 });
               })()}
             </div>

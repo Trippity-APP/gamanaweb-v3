@@ -27,6 +27,10 @@ export const DESTINATION_IMAGES: DestinationImage[] = [
   { cityId: "132201", names: ["jaipur"], image: photo("dest-jaipur", "tile"), wide: photo("slide-jaipur", "hero") },
   { cityId: "133024", names: ["mumbai", "bombay"], image: photo("dest-mumbai", "tile") },
   { cityId: "131517", names: ["chennai", "madras"], image: photo("dest-chennai", "tile") },
+  { cityId: "32", names: ["dubai"], image: photo("dest-dubai", "tile"), wide: photo("slide-dubai", "hero") },
+  { cityId: "6a5e89efa9c8e6bff50dc94b", names: ["valència", "valencia"], image: photo("dest-valencia", "tile"), wide: photo("slide-valencia", "hero") },
+  { cityId: "104057", names: ["singapore"], image: photo("dest-singapore", "tile") },
+  { cityId: "122756", names: ["new orleans", "nola"], image: photo("dest-new-orleans", "tile") },
 ];
 
 export const NEUTRAL_CITY_IMAGE: CityImage = photo("neutral-city", "tile");

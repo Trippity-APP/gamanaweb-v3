@@ -9,7 +9,7 @@ import {
   Smartphone, Search,
 } from '@/components/icons';
 import { GamanaCoinIcon } from '@/components/GamanaCoinIcon';
-import { ExploreTrustPanel, ExploreMobileAppNotice } from '@/components/marketplace/ExploreTrustPanel';
+import { ExploreWhyGamana } from '@/components/marketplace/ExploreTrustPanel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,9 +26,16 @@ import {
   getExploreSearchQuery,
   getTourHref,
   isWalkCatalogVisible,
+  mergeTours,
+  searchLiveCatalog,
   tourMatchesSearch,
 } from '@/lib/marketplace-api';
-import { countSearchResults, getExploreCatalogPath, getExploreTabFromPathname } from '@/lib/explore-search';
+import {
+  countSearchResults,
+  getExploreCatalogPath,
+  getExploreTabFromPathname,
+  tourSearchScore,
+} from '@/lib/explore-search';
 import { useCart } from '@/lib/cart-context';
 import { useAccount } from '@/lib/account-context';
 import {
@@ -51,10 +58,13 @@ function matchesAccessFilter(tour: Tour, filter: AccessFilter): boolean {
   return tour.price > 0;
 }
 
-const TOURS_INITIAL_VISIBLE = 9;
+const TOURS_INITIAL_VISIBLE = 12;
 
-/** Place-API types too broad to be useful as a filter. */
-const GENERIC_CATEGORIES = new Set(['story', 'walk', 'point of interest', 'premise', 'establishment', 'tourist attraction']);
+const ACCESS_FILTERS: { value: AccessFilter; label: string }[] = [
+  { value: 'all', label: 'All tiers' },
+  { value: 'free', label: 'Free' },
+  { value: 'premium', label: 'Premium' },
+];
 
 /**
  * The full Tours / Combos / Experiences / Buy Coins / Special Offers browsing surface,
@@ -100,7 +110,6 @@ export function MarketplaceBrowser({
   const searchQuery = controlledSearchQuery ?? internalSearchQuery;
   const setSearchQuery = onSearchQueryChange ?? setInternalSearchQuery;
   const [accessFilter, setAccessFilter] = useState<AccessFilter>('all');
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const { account, journey, login, coinBalance, unlockItem, isUnlocked } = useAccount();
 
   const clearSearchFilter = () => {
@@ -228,6 +237,26 @@ export function MarketplaceBrowser({
     void loadTours();
   }, [initialTours.length]);
 
+  // Pull database matches newer than the build-time catalog into the grid for `?q=`.
+  // Derived rather than set in the effect so the tab auto-switch below sees "pending" on the first render.
+  const [liveSettledFor, setLiveSettledFor] = useState('');
+  const liveTerm = searchFromUrl.trim();
+  const liveSearching = liveTerm !== '' && liveSettledFor !== liveTerm;
+  useEffect(() => {
+    if (!liveTerm) return;
+    const controller = new AbortController();
+    searchLiveCatalog(liveTerm, controller.signal)
+      .then((found) => {
+        if (controller.signal.aborted) return;
+        setTours((current) => mergeTours(current, found));
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (!controller.signal.aborted) setLiveSettledFor(liveTerm);
+      });
+    return () => controller.abort();
+  }, [liveTerm]);
+
   // --- Personalization: score the same catalog against the traveler's saved interests ---
   const interestIds = useMemo(
     () => Array.from(new Set(journey?.travelerProfiles?.flatMap((p) => p.interests) ?? [])),
@@ -292,7 +321,7 @@ export function MarketplaceBrowser({
       prevSearchRef.current = searchFromUrl;
       return;
     }
-    if (toursLoading) return;
+    if (toursLoading || liveSearching) return;
     if (prevSearchRef.current === searchFromUrl) return;
     prevSearchRef.current = searchFromUrl;
 
@@ -301,57 +330,24 @@ export function MarketplaceBrowser({
     if (currentTab !== preferredTab) {
       router.push(catalogHref(preferredTab));
     }
-  }, [searchFromUrl, toursLoading, storySearchCount, walkSearchCount, pathname, router]);
+  }, [searchFromUrl, toursLoading, liveSearching, storySearchCount, walkSearchCount, pathname, router]);
 
   useEffect(() => {
     setVisibleTourCount(TOURS_INITIAL_VISIBLE);
-  }, [searchQuery, accessFilter, categoryFilter, searchFromUrl, activeTab]);
+  }, [searchQuery, accessFilter, searchFromUrl, activeTab]);
 
-  useEffect(() => {
-    setCategoryFilter(null);
-  }, [activeTab]);
-
-  // City and category chips are drawn from the tab's own catalog, most-covered first.
-  const chipKind: 'story' | 'walk' | null =
-    activeTab === 'walks' ? 'walk' : activeTab === 'stories' ? 'story' : null;
-  const { cityChips, categoryChips } = useMemo(() => {
-    if (!chipKind) return { cityChips: [] as string[], categoryChips: [] as string[] };
-    const cities = new Map<string, number>();
-    const categories = new Map<string, number>();
-    for (const t of tours) {
-      if ((t.contentKind ?? 'walk') !== chipKind || !isWalkCatalogVisible(t)) continue;
-      const city = t.location.split(',')[0]?.trim();
-      if (city) cities.set(city, (cities.get(city) ?? 0) + 1);
-      if (t.category && !GENERIC_CATEGORIES.has(t.category.toLowerCase())) categories.set(t.category, (categories.get(t.category) ?? 0) + 1);
-    }
-    const ranked = (m: Map<string, number>, max: number) =>
-      Array.from(m.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, max).map(([k]) => k);
-    return { cityChips: ranked(cities, 8), categoryChips: categories.size > 1 ? ranked(categories, 6) : [] };
-  }, [tours, chipKind]);
-
-  const selectCity = (city: string) => {
-    const active = searchFromUrl.trim().toLowerCase() === city.toLowerCase();
-    setSearchQuery(active ? '' : city);
-    router.replace(active ? pathname : `${pathname}?q=${encodeURIComponent(city)}`, { scroll: false });
-  };
-
-  const chipClass = (active: boolean) =>
-    cn(
-      'focus-ring inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors duration-200',
-      active ? 'border-ink bg-ink text-white' : 'border-ink/10 bg-white text-ink hover:border-ink/30'
-    );
+  const showAccessFilter = activeTab === 'walks' || activeTab === 'stories';
 
   const buildFilteredTours = (kind: 'story' | 'walk') =>
     tours
       .filter((tour) => (tour.contentKind ?? 'walk') === kind)
       .filter((tour) => isWalkCatalogVisible(tour))
-      .filter((tour) => {
-        const matchesSearch = tourMatchesSearch(tour, searchQuery);
-        const matchesAccess = matchesAccessFilter(tour, accessFilter);
-        const matchesCategory = !categoryFilter || tour.category === categoryFilter;
-        return matchesSearch && matchesAccess && matchesCategory;
-      })
-      .sort((a, b) => (active ? Number(tourMatches(b)) - Number(tourMatches(a)) : 0));
+      .filter((tour) => tourMatchesSearch(tour, searchQuery) && matchesAccessFilter(tour, accessFilter))
+      .sort(
+        (a, b) =>
+          (active ? Number(tourMatches(b)) - Number(tourMatches(a)) : 0) ||
+          (searchQuery ? tourSearchScore(b, searchQuery) - tourSearchScore(a, searchQuery) : 0),
+      );
 
   /*
     Coverage detection for the empty states below.
@@ -387,14 +383,14 @@ export function MarketplaceBrowser({
 
     return (
       <TabsContent value={kind === 'story' ? 'stories' : 'walks'} className="mt-0 space-y-6">
-        {toursLoading ? (
+        {toursLoading || (liveSearching && filteredTours.length === 0) ? (
           <TourGridSkeleton count={TOURS_INITIAL_VISIBLE} />
         ) : filteredTours.length > 0 ? (
           <>
             <p className="text-sm text-ink-muted" aria-live="polite">
               {filteredTours.length} {filteredTours.length === 1 ? labelPlural.replace(/s$/, '').toLowerCase() : labelPlural.toLowerCase()}
             </p>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {visibleTours.map((tour, index) =>
                 tourCard(tour, index, active && tourMatches(tour), kind),
               )}
@@ -588,11 +584,9 @@ export function MarketplaceBrowser({
         source="explore-walk-unlock"
       />
 
-      <div className="container-site pb-16 pt-8 sm:pt-10">
-        <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:items-start lg:gap-8">
-          <div className="min-w-0">
+      <div className="container-site pb-4 pt-8 sm:pt-10">
             <Tabs value={activeTab} onValueChange={selectCatalogTab} className="w-full">
-              <div className="sticky top-14 z-30 -mx-4 mb-6 space-y-3 border-b border-ink/5 bg-sand-50/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:top-16 lg:mx-0 lg:px-0">
+              <div className="sticky top-14 z-30 -mx-4 mb-6 border-b border-ink/5 bg-sand-50/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:top-16 lg:mx-0 lg:px-0">
                 <div className="flex flex-wrap items-center gap-3">
                   <TabsList className="h-11 rounded-full bg-white p-1 shadow-card">
                     {hasRecommendations && (
@@ -611,6 +605,37 @@ export function MarketplaceBrowser({
                     </TabsTrigger>
                   </TabsList>
 
+                  {showAccessFilter && (
+                    <div
+                      role="group"
+                      aria-label="Filter by access tier"
+                      className="relative inline-grid h-11 w-fit grid-cols-3 rounded-full border border-ink/10 bg-white p-1 text-sm font-semibold shadow-card"
+                    >
+                      <span
+                        className={cn(
+                          'absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/3)] rounded-full bg-brand-700 shadow-sm transition-transform duration-500 ease-spring motion-reduce:transition-none',
+                          accessFilter === 'free' && 'translate-x-full',
+                          accessFilter === 'premium' && 'translate-x-[200%]'
+                        )}
+                        aria-hidden
+                      />
+                      {ACCESS_FILTERS.map(({ value, label }) => (
+                        <button
+                          key={value}
+                          type="button"
+                          aria-pressed={accessFilter === value}
+                          onClick={() => setAccessFilter(value)}
+                          className={cn(
+                            'focus-ring relative z-10 rounded-full px-4 transition-colors duration-300 sm:px-5',
+                            accessFilter === value ? 'text-white' : 'text-ink-soft hover:text-ink'
+                          )}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
                   {account && (
                     <div className="flex w-fit shrink-0 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">
                       <GamanaCoinIcon className="h-4 w-4" aria-hidden />
@@ -626,41 +651,6 @@ export function MarketplaceBrowser({
                   )}
                 </div>
 
-                {chipKind && (
-                  <div
-                    role="group"
-                    aria-label="Filter the catalog"
-                    className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden"
-                  >
-                    {(['all', 'free', 'premium'] as const).map((f) => (
-                      <button key={f} type="button" aria-pressed={accessFilter === f} onClick={() => setAccessFilter(f)} className={chipClass(accessFilter === f)}>
-                        {f === 'all' ? 'All tiers' : f === 'free' ? 'Free' : 'Premium'}
-                      </button>
-                    ))}
-                    {cityChips.length > 0 && <span aria-hidden className="mx-1 my-1.5 w-px shrink-0 bg-ink/10" />}
-                    {cityChips.map((city) => {
-                      const active = searchFromUrl.trim().toLowerCase() === city.toLowerCase();
-                      return (
-                        <button key={city} type="button" aria-pressed={active} onClick={() => selectCity(city)} className={chipClass(active)}>
-                          <MapPin className="h-3.5 w-3.5" aria-hidden />
-                          {city}
-                        </button>
-                      );
-                    })}
-                    {categoryChips.length > 0 && <span aria-hidden className="mx-1 my-1.5 w-px shrink-0 bg-ink/10" />}
-                    {categoryChips.map((cat) => (
-                      <button
-                        key={cat}
-                        type="button"
-                        aria-pressed={categoryFilter === cat}
-                        onClick={() => setCategoryFilter((c) => (c === cat ? null : cat))}
-                        className={chipClass(categoryFilter === cat)}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {searchFromUrl && (
@@ -678,21 +668,6 @@ export function MarketplaceBrowser({
                 </div>
               )}
 
-              <ExploreMobileAppNotice />
-
-              <details className="group mb-6 rounded-2xl bg-white shadow-card lg:hidden">
-                <summary className="focus-ring cursor-pointer list-none rounded-2xl px-5 py-3.5 text-sm font-semibold text-ink marker:content-none [&::-webkit-details-marker]:hidden">
-                  <span className="flex items-center justify-between gap-2">
-                    Why Gamana?
-                    <span className="text-xs font-normal text-ink-muted group-open:hidden">Show</span>
-                    <span className="hidden text-xs font-normal text-ink-muted group-open:inline">Hide</span>
-                  </span>
-                </summary>
-                <div className="border-t border-ink/5 px-5 pb-5">
-                  <ExploreTrustPanel variant="compact" showAppNotice={false} />
-                </div>
-              </details>
-
           {hasRecommendations && (
             <TabsContent value="recommended" className="space-y-8">
               <p className="text-sm text-gray-500">
@@ -702,7 +677,7 @@ export function MarketplaceBrowser({
               {filteredRecommendedTours.length > 0 ? (
                 <div className="space-y-3">
                   <h2 className="text-lg font-semibold text-gray-900">Picked for you</h2>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filteredRecommendedTours.map((tour, i) =>
                       tourCard(
                         tour,
@@ -731,16 +706,9 @@ export function MarketplaceBrowser({
           {renderCatalogTab('story', 'Audio Stories')}
               {renderCatalogTab('walk', 'Audio Walks')}
             </Tabs>
-          </div>
-
-          <aside className="hidden lg:sticky lg:top-32 lg:block lg:self-start">
-            <div className="rounded-3xl bg-white p-6 shadow-card">
-              <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-ink-muted">Why Gamana</h2>
-              <ExploreTrustPanel />
-            </div>
-          </aside>
-        </div>
       </div>
+
+      <ExploreWhyGamana />
 
       {/* Spend confirmation — Coins leave the balance immediately and can't be refunded,
           so the exact cost and resulting balance are both shown before committing. */}

@@ -6,6 +6,7 @@ import {
   buildPlaceAudioDurationLookup,
   fetchPublicStoriesCatalog,
   fetchPublicStoryDetailByPlaceId,
+  searchPublicStoriesByCity,
 } from "@/lib/places-api";
 
 const DEFAULT_API_URL = "https://apidev.gamana.app/api/v1";
@@ -83,7 +84,22 @@ const CITY_ALIASES: Record<string, string[]> = {
   mumbai: ["bombay"],
   calcutta: ["kolkata"],
   kolkata: ["calcutta"],
+  rome: ["roma"],
+  roma: ["rome"],
+  valencia: ["valència"],
+  "valència": ["valencia"],
+  "new york": ["new york city", "manhattan"],
+  saigon: ["ho chi minh city"],
+  "ho chi minh city": ["saigon"],
+  "da nang": ["sơn trà", "son tra"],
+  "siem reap": ["krong siem reap"],
 };
+
+/** The query plus known alternate city names, for API lookups that match city text exactly. */
+export function cityQueryVariants(query: string): string[] {
+  const q = normalizeText(query);
+  return [q, ...(CITY_ALIASES[q] ?? [])];
+}
 
 const GENERIC_TAGS = new Set([
   "storylist",
@@ -742,6 +758,97 @@ export async function fetchPublicTours(): Promise<Tour[]> {
   const walks = walksResult.status === "fulfilled" ? walksResult.value : [];
 
   return assignTourSlugs(dedupeToursById([...stories, ...walks]));
+}
+
+async function searchStorylists(
+  params: Record<string, string>,
+  signal?: AbortSignal,
+): Promise<ApiStorylist[]> {
+  const query = new URLSearchParams({ skip: "0", limit: "30", ...params });
+  const response = await fetch(`${getMarketplaceApiBaseUrl()}/marketplace/tours?${query}`, {
+    ...getCatalogFetchInit(),
+    signal,
+  });
+  if (!response.ok) return [];
+  const payload = (await response.json()) as ApiListResponse;
+  return payload.data ?? [];
+}
+
+const LIVE_SEARCH_MIN_LENGTH = 3;
+
+/**
+ * Live database lookup for tours and stories that may be newer than the build-time
+ * catalog: walks by title (`search`) or city, stories by city. Never throws; any
+ * failed source (aborted, offline, CORS on non-production origins) contributes nothing.
+ */
+export async function searchLiveCatalog(query: string, signal?: AbortSignal): Promise<Tour[]> {
+  const q = query.trim();
+  if (q.length < LIVE_SEARCH_MIN_LENGTH) return [];
+
+  const settle = <T,>(p: Promise<T[]>) => p.catch(() => [] as T[]);
+  const cities = cityQueryVariants(q).slice(0, 3);
+  const [byTitle, byCity, storyLists] = await Promise.all([
+    settle(searchStorylists({ search: q }, signal)),
+    Promise.all(cities.map((city) => settle(searchStorylists({ city }, signal)))),
+    Promise.all(cities.map((city) => settle(searchPublicStoriesByCity(city, signal)))),
+  ]);
+  const stories = storyLists.flat();
+
+  const storylists = new Map<string, ApiStorylist>();
+  for (const item of [...byTitle, ...byCity.flat()]) {
+    const id = storylistId(item);
+    if (id && !storylists.has(id)) storylists.set(id, item);
+  }
+
+  const hydrate = async (item: ApiStorylist): Promise<ApiStorylist> => {
+    try {
+      const response = await fetch(`${getMarketplaceApiBaseUrl()}/marketplace/tours/${storylistId(item)}`, {
+        ...getCatalogFetchInit(),
+        signal,
+      });
+      if (!response.ok) return item;
+      return ((await response.json()) as ApiDetailResponse).data ?? item;
+    } catch {
+      return item;
+    }
+  };
+
+  const candidates = Array.from(storylists.values()).filter(
+    (item) => mapContentKind(item) === "walk" && mapIsRecommended(item.is_recommended),
+  );
+  const walkTours = (await Promise.all(candidates.map(hydrate)))
+    .map(mapStorylistToTour)
+    .filter((tour): tour is Tour => Boolean(tour))
+    .filter((tour) => (tour.contentKind ?? "walk") === "walk" && isWalkCatalogVisible(tour));
+
+  // The database matched these on fields the local filter may not see (e.g. "rome" vs "Roma").
+  const matched = normalizeText(q);
+  return dedupeToursById([...walkTours, ...stories]).map((tour) => ({
+    ...tour,
+    searchTerms: [...(tour.searchTerms ?? []), matched],
+  }));
+}
+
+/**
+ * Adds tours from `extra` that are not already in `base` (keeping `base` order) and carries
+ * new search terms over to tours that are, so database matches stay visible in local filters.
+ */
+export function mergeTours<T extends { id: string; searchTerms?: string[] }>(base: T[], extra: T[]): T[] {
+  if (extra.length === 0) return base;
+  const extraById = new Map(extra.filter((t) => t.id).map((t) => [t.id, t]));
+  let changed = false;
+  const merged = base.map((tour) => {
+    const match = extraById.get(tour.id);
+    if (!match) return tour;
+    extraById.delete(tour.id);
+    const newTerms = (match.searchTerms ?? []).filter((term) => !(tour.searchTerms ?? []).includes(term));
+    if (newTerms.length === 0) return tour;
+    changed = true;
+    return { ...tour, searchTerms: [...(tour.searchTerms ?? []), ...newTerms] };
+  });
+  const added = Array.from(extraById.values());
+  if (!changed && added.length === 0) return base;
+  return [...merged, ...added];
 }
 
 export async function fetchPublicTourById(id: string): Promise<Tour | null> {

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import {
   Store,
   Hotel,
@@ -17,6 +16,7 @@ import {
 import HeroHeader from "@/components/navigation/hero-header";
 import PartnerForm from "@/components/partner-form";
 import { PageHero } from "@/components/site/PageHero";
+import { ResponsiveImage } from "@/components/site/ResponsiveImage";
 import { SectionHeader } from "@/components/site/SectionHeader";
 import { Reveal } from "@/components/motion/Reveal";
 import { CountUp } from "@/components/motion/CountUp";
@@ -130,12 +130,13 @@ export default function EcosystemPageContent() {
     <>
       <HeroHeader transparent />
       <main>
-        {/* Audience is Indian experience operators, so the hero shows a visitor visibly
-            listening: the behaviour a partner's guests will arrive with. */}
+        {/* Audience is local experience operators, so the hero shows a host with engaged
+            travellers; the host sits on the right, clear of the headline. */}
         <PageHero
           size="lg"
           className="pb-28 sm:pb-32"
           image={getPhoto("hero-ecosystem")}
+          imageClassName="object-[85%_center]"
           imageAlt="Gamana travel partnerships for tourism businesses"
           imageTitle="Gamana Travel Partnerships for Tourism Businesses"
           eyebrow="Join the Journey"
@@ -247,12 +248,12 @@ export default function EcosystemPageContent() {
                 );
               })}
               <Reveal variant="scale" delay={270} className="relative hidden min-h-[20rem] overflow-hidden rounded-3xl shadow-card lg:col-start-3 lg:row-span-2 lg:row-start-1 lg:block">
-                <Image
-                  src="/solo-traveller-cobblestone-street-audio-guide-hands-free-exploration.png"
+                <ResponsiveImage
+                  image={getPhoto("ecosystem-partner-benefits", "tile")}
                   alt=""
                   fill
-                  sizes="33vw"
-                  className="object-cover transition-transform duration-700 ease-out-expo hover:scale-105"
+                  sizes="(min-width: 1280px) 400px, 33vw"
+                  className="object-[50%_40%] transition-transform duration-700 ease-out-expo hover:scale-105"
                 />
               </Reveal>
             </div>

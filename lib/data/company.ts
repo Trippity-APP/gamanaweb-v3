@@ -9,6 +9,7 @@ export const COMPANY = {
   india: {
     name: "Gamana India LLP",
     llpin: "ACU-1165",
+    address: "48, Church St, Haridevpur, Shanthala Nagar, Ashok Nagar, Bengaluru, Karnataka 560001, India",
     short: "Bengaluru, Karnataka, India",
   },
   email: "support@gamana.app",

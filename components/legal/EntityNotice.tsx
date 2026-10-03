@@ -21,7 +21,7 @@ export function EntityNotice() {
           <div className="text-sm">
             <dt className="font-semibold text-ink">{COMPANY.india.name}</dt>
             <dd className="text-ink-muted">Subsidiary, India (LLPIN {COMPANY.india.llpin})</dd>
-            <dd className="mt-1 text-ink-soft">{COMPANY.india.short}</dd>
+            <dd className="mt-1 text-ink-soft">{COMPANY.india.address}</dd>
           </div>
         </div>
       </dl>

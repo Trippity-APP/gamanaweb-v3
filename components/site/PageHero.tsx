@@ -18,6 +18,8 @@ type PageHeroProps = {
   image: string | ImageVariant;
   imageAlt: string;
   imageTitle?: string;
+  /** e.g. an object-position class to keep the subject clear of the left-aligned text. */
+  imageClassName?: string;
   /** Rendered after "Home"; the last crumb is the current page. Emits BreadcrumbList JSON-LD. */
   breadcrumbs?: Crumb[];
   children?: ReactNode;
@@ -33,6 +35,7 @@ export function PageHero({
   image,
   imageAlt,
   imageTitle,
+  imageClassName,
   breadcrumbs,
   children,
   size = "md",
@@ -49,9 +52,9 @@ export function PageHero({
       )}
     >
       {typeof image === "string" ? (
-        <Image src={image} alt={imageAlt} title={imageTitle} fill priority sizes="100vw" className="-z-20 object-cover" />
+        <Image src={image} alt={imageAlt} title={imageTitle} fill priority sizes="100vw" className={cn("-z-20 object-cover", imageClassName)} />
       ) : (
-        <ResponsiveImage image={image} alt={imageAlt} title={imageTitle} sizes="100vw" priority fill className="-z-20" />
+        <ResponsiveImage image={image} alt={imageAlt} title={imageTitle} sizes="100vw" priority fill className={cn("-z-20", imageClassName)} />
       )}
       <div
         className="absolute inset-0 -z-10 bg-gradient-to-t from-ink via-ink/60 to-ink/10"

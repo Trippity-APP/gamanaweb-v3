@@ -1,8 +1,8 @@
 "use client";
 
-import { FileText, Mail } from "@/components/icons";
+import { FileText, Mail, MapPin } from "@/components/icons";
 import { LegalPageLayout } from "@/components/legal/LegalPageLayout";
-import { ENTITY_STATEMENT } from "@/lib/data/company";
+import { COMPANY, ENTITY_STATEMENT } from "@/lib/data/company";
 
 export default function TermsOfServicePage() {
   return (
@@ -430,6 +430,20 @@ export default function TermsOfServicePage() {
                         <a href="mailto:support@gamana.app" className="text-[#159895] hover:underline">
                           support@gamana.app
                         </a>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-5 w-5 shrink-0 text-[#159895] mt-1" />
+                      <div>
+                        <p className="font-semibold">Postal Address</p>
+                        <p className="text-gray-600">{COMPANY.parent.name} – {COMPANY.parent.address}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-5 w-5 shrink-0 text-[#159895] mt-1" />
+                      <div>
+                        <p className="font-semibold">Postal Address</p>
+                        <p className="text-gray-600">{COMPANY.india.name} (LLPIN {COMPANY.india.llpin}) – {COMPANY.india.address}</p>
                       </div>
                     </div>
                   </div>

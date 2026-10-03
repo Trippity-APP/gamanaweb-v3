@@ -8,9 +8,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { MarketplaceCoverImage } from "@/components/marketplace/marketplace-cover-image";
 import { fetchCities, type ApiCity } from "@/lib/services/cityService";
-import { getTourHref } from "@/lib/marketplace-api";
+import { getTourHref, mergeTours, searchLiveCatalog } from "@/lib/marketplace-api";
 import { buildExploreSuggestions, buildSearchRows, findBestTourMatch, type SearchRow } from "@/lib/explore-search";
-import type { SearchTour } from "@/lib/marketplace-data";
+import { toSearchTour, type SearchTour } from "@/lib/marketplace-data";
 import { loadSearchCatalog } from "@/lib/search-catalog";
 import { getCityImage, type CityImage } from "@/lib/city-image";
 import { FEATURED_CITIES } from "@/lib/data/home";
@@ -62,6 +62,11 @@ const ICON_SIZE = {
   xl: "left-4 h-5 w-5 sm:left-5 sm:h-6 sm:w-6",
 };
 
+const EMPTY_CATALOG: SearchTour[] = [];
+const LIVE_MIN_LENGTH = 3;
+/** Live database results per lowercased query, shared by every search box on the page. */
+const liveCache = new Map<string, SearchTour[]>();
+
 const thumbOf = (image: CityImage) => image.photo?.srcSet[0].src ?? image.src;
 const safeSrc = (src: string) => (/^https?:\/\//.test(src) ? src : encodeURI(src));
 
@@ -69,7 +74,7 @@ const POPULAR_ROWS: SearchRow[] = FEATURED_CITIES.slice(0, 6).map((c) => ({
   key: `popular-${c.id}`,
   kind: "city",
   title: c.name,
-  subtitle: `${c.tagline} · India`,
+  subtitle: `${c.tagline} · ${c.country}`,
   image: thumbOf(c.image),
   select: { type: "city", value: c.name },
 }));
@@ -133,7 +138,10 @@ export function ExploreHeroSearch({
   const [cities, setCities] = useState<ApiCity[]>([]);
   const [loading, setLoading] = useState(false);
   const [lazyCatalog, setLazyCatalog] = useState<SearchTour[] | null>(null);
-  const catalog = catalogProp ?? lazyCatalog ?? [];
+  const [live, setLive] = useState<SearchTour[]>([]);
+  const [liveLoading, setLiveLoading] = useState(false);
+  const baseCatalog = catalogProp ?? lazyCatalog ?? EMPTY_CATALOG;
+  const catalog = useMemo(() => mergeTours(baseCatalog, live), [baseCatalog, live]);
   const wantsCatalog = open || query !== "";
   const trimmed = query.trim();
 
@@ -175,6 +183,34 @@ export function ExploreHeroSearch({
     };
   }, [trimmed]);
 
+  useEffect(() => {
+    const key = trimmed.toLowerCase();
+    if (key.length < LIVE_MIN_LENGTH) {
+      setLive([]);
+      setLiveLoading(false);
+      return;
+    }
+    const cached = liveCache.get(key);
+    if (cached) {
+      setLive(cached);
+      setLiveLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    setLiveLoading(true);
+    const timer = window.setTimeout(async () => {
+      const found = (await searchLiveCatalog(trimmed, controller.signal)).map(toSearchTour);
+      if (controller.signal.aborted) return;
+      liveCache.set(key, found);
+      setLive(found);
+      setLiveLoading(false);
+    }, 250);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [trimmed]);
+
   useEffect(() => setActive(-1), [trimmed]);
 
   const suggestions = useMemo(() => buildExploreSuggestions(query, catalog, cities), [query, catalog, cities]);
@@ -184,7 +220,7 @@ export function ExploreHeroSearch({
   );
 
   const catalogLoading = !catalogProp && lazyCatalog === null;
-  const pending = !!trimmed && rows.length === 0 && (loading || catalogLoading);
+  const pending = !!trimmed && rows.length === 0 && (loading || catalogLoading || liveLoading);
   const noResults = !!trimmed && rows.length === 0 && !pending;
   const visibleRows = trimmed ? (noResults ? POPULAR_ROWS : rows) : POPULAR_ROWS;
   const optionCount = visibleRows.length + (trimmed ? 1 : 0);
@@ -219,10 +255,8 @@ export function ExploreHeroSearch({
     } else if (select.type === "city") {
       if (variant === "home") goToExploreSearch(select.value);
       else applyExploreFilter(select.value);
-    } else if (variant === "home") {
-      goToTour(select.tour);
     } else {
-      applyExploreFilter(select.tour.title);
+      goToTour(select.tour);
     }
   };
 

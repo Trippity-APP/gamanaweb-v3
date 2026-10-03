@@ -128,6 +128,10 @@ const CITY_ALIASES: Record<string, string[]> = {
   mumbai: ["bombay"],
   calcutta: ["kolkata"],
   kolkata: ["calcutta"],
+  rome: ["roma"],
+  roma: ["rome"],
+  valencia: ["valència"],
+  "valència": ["valencia"],
 };
 
 function buildPlaceSearchTerms(place: ApiPublicPlace): string[] {
@@ -392,6 +396,18 @@ export async function buildPlaceAudioDurationLookup(): Promise<Map<string, numbe
 export async function fetchPublicPlaceById(id: string): Promise<ApiPublicPlace | null> {
   const places = await fetchAllPublicPlaces();
   return places.find((place) => placeId(place) === id) ?? null;
+}
+
+/** Live stories for one city from any country. The places API only allows the production origin. */
+export async function searchPublicStoriesByCity(city: string, signal?: AbortSignal): Promise<Tour[]> {
+  const params = new URLSearchParams({ skip: "0", limit: "50", city: city.trim() });
+  const response = await fetch(`${getMarketplaceApiBaseUrl()}/places/search/public/location?${params}`, {
+    ...getCatalogFetchInit(),
+    signal,
+  });
+  if (!response.ok) return [];
+  const payload = (await response.json()) as ApiPlacesListResponse;
+  return (payload.data ?? []).map(mapPublicPlaceToTour).filter((tour): tour is Tour => Boolean(tour));
 }
 
 export async function fetchPublicStoriesCatalog(): Promise<Tour[]> {

@@ -144,22 +144,22 @@ export default function CookiePolicyPage() {
                       <Building2 className="h-5 w-5 text-[#159895] mt-1" />
                       <div>
                         <p className="font-semibold">Company Name</p>
-                        <p className="text-gray-600">SIARLabs LLC</p>
+                        <p className="text-gray-600">{COMPANY.parent.name}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <MapPin className="h-5 w-5 text-[#159895] mt-1" />
+                      <MapPin className="h-5 w-5 shrink-0 text-[#159895] mt-1" />
                       <div>
                         <p className="font-semibold">Address</p>
-                        <p className="text-gray-600">24 East Avenue #127 New Canaan CT 06840</p>
+                        <p className="text-gray-600">{COMPANY.parent.address}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Building2 className="h-5 w-5 text-[#159895] mt-1" />
+                      <Building2 className="h-5 w-5 shrink-0 text-[#159895] mt-1" />
                       <div>
                         <p className="font-semibold">India</p>
                         <p className="text-gray-600">
-                          {COMPANY.india.name} (LLPIN {COMPANY.india.llpin}), subsidiary of {COMPANY.parent.name}, {COMPANY.india.short}
+                          {COMPANY.india.name} (LLPIN {COMPANY.india.llpin}), subsidiary of {COMPANY.parent.name}, {COMPANY.india.address}
                         </p>
                       </div>
                     </div>

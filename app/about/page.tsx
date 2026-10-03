@@ -84,11 +84,11 @@ export default function AboutPage() {
           imageAlt=""
           eyebrow={
             <span className="normal-case tracking-normal text-base sm:text-lg">
-              <span>gamana</span>
+                  <span>gamana</span>
               <span className="text-white/50" aria-hidden="true">
                 {" "}·{" "}
               </span>
-              <span lang="sa">गमन</span>
+                  <span lang="sa">गमन</span>
               <span className="text-white/50" aria-hidden="true">
                 {" "}·{" "}
               </span>
@@ -153,7 +153,7 @@ export default function AboutPage() {
             the destination, and not the distance. The going itself.
           </p>
           <p>
-            Every traveller who has ever set out has been doing{" "}
+                  Every traveller who has ever set out has been doing{" "}
             <span lang="sa" className="text-ink">
               गमन
             </span>
@@ -222,7 +222,7 @@ export default function AboutPage() {
           <p>
             <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-800">
               <Compass className="h-4 w-4" aria-hidden />
-              Spoken where it happened
+                    Spoken where it happened
             </span>
           </p>
         </StorySection>
@@ -289,20 +289,20 @@ export default function AboutPage() {
                 <Link
                   href="/ecosystem/"
                   className="focus-ring group inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 font-semibold text-brand-800 shadow-card transition-all duration-300 ease-spring hover:-translate-y-0.5 hover:shadow-lift active:scale-95"
-                >
-                  Partner with Gamana
+                  >
+                    Partner with Gamana
                   <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
                 </Link>
                 <Link
                   href="/contact/"
                   className="focus-ring inline-flex items-center justify-center rounded-full border-2 border-white/50 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/20 active:scale-95"
-                >
-                  Get in Touch
+                  >
+                    Get in Touch
                 </Link>
               </div>
             }
           />
-        </div>
+          </div>
       </main>
       <Footer />
     </>

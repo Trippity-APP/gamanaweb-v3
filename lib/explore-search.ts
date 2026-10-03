@@ -1,6 +1,11 @@
 import type { ApiCity } from "@/lib/services/cityService";
 import type { SearchTour } from "@/lib/marketplace-data";
-import { isWalkCatalogVisible, tourMatchesCity, tourMatchesSearch } from "@/lib/marketplace-api";
+import {
+  cityQueryVariants,
+  isWalkCatalogVisible,
+  tourMatchesCity,
+  tourMatchesSearch,
+} from "@/lib/marketplace-api";
 
 export type ExploreCitySuggestion = {
   kind: "city";
@@ -25,13 +30,20 @@ function normalizeText(value: string): string {
   return value.trim().toLowerCase();
 }
 
-function tourSearchScore(tour: SearchTour, query: string): number {
+const startsWord = (text: string, q: string) => text.startsWith(q) || text.includes(` ${q}`);
+
+/** Title matches first, then city/location, then tags; mid-word description hits ("promenade" for "rome") last. */
+export function tourSearchScore(tour: SearchTour, query: string): number {
   const q = normalizeText(query);
   const title = normalizeText(tour.title);
   if (title === q) return 100;
   if (title.startsWith(q)) return 80;
+  if (startsWord(title, q)) return 70;
   if (title.includes(q)) return 60;
-  return 40;
+  const location = normalizeText(tour.location);
+  if (cityQueryVariants(q).some((city) => startsWord(location, city))) return 50;
+  if ((tour.searchTerms ?? []).some((term) => term === q || term.startsWith(`${q} `))) return 45;
+  return 20;
 }
 
 function rankTours<T extends SearchTour>(tours: T[], query: string): T[] {

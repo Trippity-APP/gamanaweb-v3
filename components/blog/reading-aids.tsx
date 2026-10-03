@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type RefObject } from "react";
 import { cn } from "@/lib/utils";
+import type { ArticleBlock } from "@/content/blog/types";
 
 /** Thin bar under the header that fills as the reader moves through the article. */
 export function ReadingProgress({ target }: { target: RefObject<HTMLElement | null> }) {
@@ -53,12 +54,47 @@ const slugify = (text: string) =>
   text
     .toLowerCase()
     .replace(/<[^>]+>/g, "")
+    .replace(/&[a-z0-9#]+;/g, " ")
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-")
     .slice(0, 64);
 
-/** Builds a contents list from the article's h2s (CMS HTML has no ids, so they are added here). */
+/**
+ * Gives every h2 a stable id in the rendered markup. Ids must be part of the HTML React renders:
+ * ids patched onto the DOM afterwards are wiped whenever React re-renders the article.
+ */
+export function withHeadingIds(blocks: ArticleBlock[]): { blocks: ArticleBlock[]; headingIds: Record<number, string> } {
+  const used = new Set<string>();
+  const unique = (text: string) => {
+    const base = slugify(text) || "section";
+    let id = base;
+    for (let n = 2; used.has(id); n++) id = `${base}-${n}`;
+    used.add(id);
+    return id;
+  };
+  const headingIds: Record<number, string> = {};
+  const next = blocks.map((block, index) => {
+    if (block.type === "heading" && block.level === 2) {
+      headingIds[index] = unique(block.content);
+      return block;
+    }
+    if (block.type !== "html") return block;
+    const content = block.content.replace(/<h2(\s[^>]*)?>([\s\S]*?)<\/h2>/gi, (match, attrs = "", inner: string) => {
+      const existing = /\sid=["']([^"']+)["']/i.exec(attrs);
+      if (existing) {
+        used.add(existing[1]);
+        return match;
+      }
+      if (!inner.replace(/<[^>]+>/g, "").trim()) return match;
+      return `<h2 id="${unique(inner)}"${attrs}>${inner}</h2>`;
+    });
+    return content === block.content ? block : { ...block, content };
+  });
+  return { blocks: next, headingIds };
+}
+
+/** Contents list built from the article's h2s; ids come from `withHeadingIds`. */
 export function TableOfContents({ target }: { target: RefObject<HTMLElement | null> }) {
   const [items, setItems] = useState<TocItem[]>([]);
   const [active, setActive] = useState<string | null>(null);
@@ -66,30 +102,39 @@ export function TableOfContents({ target }: { target: RefObject<HTMLElement | nu
   useEffect(() => {
     const root = target.current;
     if (!root) return;
-    const used = new Set<string>();
-    const headings = Array.from(root.querySelectorAll("h2")).filter((h) => h.textContent?.trim());
-    const next = headings.map((h) => {
-      if (!h.id) {
-        let id = slugify(h.textContent ?? "") || "section";
-        while (used.has(id) || document.getElementById(id)) id = `${id}-${used.size + 1}`;
-        h.id = id;
-      }
-      used.add(h.id);
-      h.classList.add("scroll-mt-32");
-      return { id: h.id, text: h.textContent!.trim() };
-    });
-    setItems(next);
+    let observer: IntersectionObserver | undefined;
+    let frame = 0;
 
-    if (typeof IntersectionObserver === "undefined" || headings.length === 0) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible[0]) setActive(visible[0].target.id);
-      },
-      { rootMargin: "-120px 0px -65% 0px" }
-    );
-    headings.forEach((h) => observer.observe(h));
-    return () => observer.disconnect();
+    // Re-collect when React replaces article nodes, so the active-section observer never watches detached headings.
+    const collect = () => {
+      frame = 0;
+      const headings = Array.from(root.querySelectorAll<HTMLHeadingElement>("h2[id]")).filter((h) => h.textContent?.trim());
+      setItems((prev) => {
+        const next = headings.map((h) => ({ id: h.id, text: h.textContent!.trim() }));
+        return prev.length === next.length && prev.every((p, i) => p.id === next[i].id && p.text === next[i].text) ? prev : next;
+      });
+      observer?.disconnect();
+      if (typeof IntersectionObserver === "undefined" || headings.length === 0) return;
+      observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          if (visible[0]) setActive(visible[0].target.id);
+        },
+        { rootMargin: "-120px 0px -65% 0px" }
+      );
+      headings.forEach((h) => observer!.observe(h));
+    };
+
+    collect();
+    const mutations = new MutationObserver(() => {
+      if (!frame) frame = requestAnimationFrame(collect);
+    });
+    mutations.observe(root, { childList: true, subtree: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      mutations.disconnect();
+      observer?.disconnect();
+    };
   }, [target]);
 
   if (items.length < 2) return null;
@@ -97,7 +142,7 @@ export function TableOfContents({ target }: { target: RefObject<HTMLElement | nu
   return (
     <nav aria-label="On this page" className="rounded-3xl bg-white p-5 shadow-card">
       <p className="eyebrow mb-3">On this page</p>
-      <ol className="max-h-[60vh] space-y-1 overflow-y-auto pr-1 text-sm">
+      <ol className="max-h-[calc(100vh-17rem)] space-y-1 overflow-y-auto pr-1 text-sm">
         {items.map((item) => (
           <li key={item.id}>
             <a

@@ -189,7 +189,7 @@ const BlogExplorer = ({ posts: initialPosts = [], highlightSlug, heroPhoto }: Pr
             fill
             priority
             sizes="(min-width: 1280px) 1216px, 100vw"
-            className="-z-20"
+            className="-z-20 object-right-top"
           />
           <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/85 via-ink/40 to-ink/5" aria-hidden />
 

@@ -16,6 +16,7 @@ export function MarketplaceHeroSearch({ catalog = [] }: { catalog?: Tour[] }) {
       variant="explore"
       urlQuery={urlQuery}
       size="xl"
+      placeholder="Search a city, tour or story"
       containerClassName="relative w-full"
     />
   );

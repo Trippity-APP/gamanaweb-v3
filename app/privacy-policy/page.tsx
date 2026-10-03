@@ -399,28 +399,28 @@ export default function PrivacyPolicyPage() {
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-start gap-3">
-                      <Mail className="h-5 w-5 text-[#159895] mt-1" />
+                      <Mail className="h-5 w-5 shrink-0 text-[#159895] mt-1" />
                       <div>
                         <p className="font-semibold">Email</p>
                         <p className="text-sm text-gray-600 mb-2">You can reach our privacy team at <a href="mailto:support@gamana.app" className="text-[#159895] hover:underline">support@gamana.app</a>. This is the primary email for all data protection inquiries, including GDPR or DPDP requests.</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <FileText className="h-5 w-5 text-[#159895] mt-1" />
+                      <FileText className="h-5 w-5 shrink-0 text-[#159895] mt-1" />
                       <div>
                         <p className="font-semibold">Postal Mail</p>
-                        <p className="text-sm text-gray-600">SIARLabs LLC (Siar Labs) – 24 East Avenue #127, New Canaan, CT 06840, USA. (Attn: Privacy Officer)</p>
+                        <p className="text-sm text-gray-600">{COMPANY.parent.name} (Siar Labs) – {COMPANY.parent.address}. (Attn: Privacy Officer)</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Building2 className="h-5 w-5 text-[#159895] mt-1" />
+                      <Building2 className="h-5 w-5 shrink-0 text-[#159895] mt-1" />
                       <div>
                         <p className="font-semibold">India</p>
-                        <p className="text-sm text-gray-600">{COMPANY.india.name} (LLPIN {COMPANY.india.llpin}), subsidiary of {COMPANY.parent.name}, {COMPANY.india.short}. Email <a href={`mailto:${COMPANY.email}`} className="text-[#159895] hover:underline">{COMPANY.email}</a> (Attn: Grievance Officer).</p>
+                        <p className="text-sm text-gray-600">{COMPANY.india.name} (LLPIN {COMPANY.india.llpin}), subsidiary of {COMPANY.parent.name}, {COMPANY.india.address}. Email <a href={`mailto:${COMPANY.email}`} className="text-[#159895] hover:underline">{COMPANY.email}</a> (Attn: Grievance Officer).</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Mail className="h-5 w-5 text-[#159895] mt-1" />
+                      <Mail className="h-5 w-5 shrink-0 text-[#159895] mt-1" />
                       <div>
                         <p className="font-semibold">In-App Support</p>
                         <p className="text-sm text-gray-600">You may also contact us through the app's help/support section or via the web Contact Us form. Just mention that your inquiry is privacy-related, and it will be routed to the correct team.</p>
@@ -445,7 +445,7 @@ export default function PrivacyPolicyPage() {
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-start gap-3">
-                      <Mail className="h-5 w-5 text-[#159895] mt-1" />
+                      <Mail className="h-5 w-5 shrink-0 text-[#159895] mt-1" />
                       <div>
                         <p className="font-semibold">DPO Contact:</p>
                         <a href="mailto:ananth@gamana.app" className="text-[#159895] hover:underline">
@@ -454,7 +454,7 @@ export default function PrivacyPolicyPage() {
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <FileText className="h-5 w-5 text-[#159895] mt-1" />
+                      <FileText className="h-5 w-5 shrink-0 text-[#159895] mt-1" />
                       <div>
                         <p className="font-semibold">Mailing Address:</p>
                         <p className="text-sm text-gray-600">(same as above, Attn: Data Protection Officer)</p>

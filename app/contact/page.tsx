@@ -16,6 +16,7 @@ import { StoreBadges } from "@/components/site/StoreBadges";
 import { HERITAGE_BADGE_LABELS } from "@/lib/data/nav-config";
 import { useToast } from "@/hooks/use-toast";
 import { submitContactForm } from "@/lib/contact-api";
+import { COMPANY } from "@/lib/data/company";
 import { getPhoto } from "@/lib/images";
 import { cn } from "@/lib/utils";
 
@@ -59,7 +60,7 @@ const contactInfo = [
   {
     icon: MapPin,
     title: "Visit Us",
-    content: "48, Church St, Haridevpur, Shanthala Nagar, Ashok Nagar, Bengaluru, Karnataka 560001",
+    content: COMPANY.india.address,
     link: "https://www.google.com/maps/search/?api=1&query=48+Church+St+Ashok+Nagar+Bengaluru+Karnataka+560001",
     external: true,
   },

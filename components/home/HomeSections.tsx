@@ -42,7 +42,7 @@ export function CityRailSection() {
               key={c.id}
               href={`/cities/${c.id}/`}
               name={c.name}
-              country="India"
+              country={c.country}
               meta={c.tagline}
               image={c.image}
             />
@@ -69,7 +69,7 @@ export function CityRailSection() {
         data={destinationListJsonLd(
           "Popular Destinations with Audio Tours",
           FEATURED_CITIES.map((c) => ({
-            name: `${c.name}, India`,
+            name: `${c.name}, ${c.country}`,
             path: `/cities/${c.id}/`,
             image: c.image.src,
             description: `${c.tagline}: self-guided audio tours in ${c.name} with Gamana.`,
