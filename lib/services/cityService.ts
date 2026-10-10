@@ -113,6 +113,10 @@ export async function fetchCityById(id: string): Promise<ApiCity | null> {
     }
 }
 
+function hasValidCityId(city: ApiCity): boolean {
+    return typeof city.id === "string" && city.id.trim().length > 0;
+}
+
 export async function fetchAllActiveCities(): Promise<ApiCity[]> {
     const cities: ApiCity[] = [];
     let page = 1;
@@ -121,7 +125,7 @@ export async function fetchAllActiveCities(): Promise<ApiCity[]> {
     do {
         const response = await fetchCities({ active: true, page, page_size: 200 });
         if (!response.success) break;
-        cities.push(...response.data.cities);
+        cities.push(...response.data.cities.filter(hasValidCityId));
         totalPages = response.data.total_pages;
         page++;
     } while (page <= totalPages);

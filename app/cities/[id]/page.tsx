@@ -18,8 +18,11 @@ import { getDestinationImage } from "@/lib/data/destination-images";
 export async function generateStaticParams() {
     try {
         const cities = await fetchAllActiveCities();
-        if (cities.length > 0) {
-            return [...cities.map((city) => ({ id: city.id })), { id: STATIC_SPA_PARAM }];
+        const ids = cities
+            .map((city) => city.id)
+            .filter((id): id is string => typeof id === "string" && id.trim().length > 0);
+        if (ids.length > 0) {
+            return [...ids.map((id) => ({ id })), { id: STATIC_SPA_PARAM }];
         }
     } catch {
         // Build-time API may be unavailable.
