@@ -16,6 +16,8 @@ type ApiPlaceAudio = {
   id?: string;
   is_default?: boolean;
   is_deleted?: boolean;
+  is_active?: boolean;
+  audio_blob_name?: string | null;
   audio_language?: string;
   audio_duration?: number;
   persona_name?: string;
@@ -89,8 +91,28 @@ function resolvePlaceImage(place: ApiPublicPlace): string {
   return "";
 }
 
+/** Match backend playable_place_audio_match: active, not deleted, stored file. */
+function isPlayablePlaceAudio(audio: ApiPlaceAudio): boolean {
+  if (!audio?.id) return false;
+  if (audio.is_deleted === true) return false;
+  if (audio.is_active === false) return false;
+  if (audio.audio_blob_name != null) {
+    return String(audio.audio_blob_name).trim().length > 0;
+  }
+  // Public location API omits blob names; duration > 0 means a track was generated.
+  return (audio.audio_duration ?? 0) > 0;
+}
+
+function playableAudios(place: ApiPublicPlace): ApiPlaceAudio[] {
+  return (place.audios ?? []).filter(isPlayablePlaceAudio);
+}
+
+function hasPlayableAudio(place: ApiPublicPlace): boolean {
+  return playableAudios(place).length > 0;
+}
+
 function defaultAudio(place: ApiPublicPlace): ApiPlaceAudio | undefined {
-  const audios = (place.audios ?? []).filter((a) => a.is_deleted !== true);
+  const audios = playableAudios(place);
   return audios.find((a) => a.is_default) ?? audios[0];
 }
 
@@ -195,8 +217,8 @@ function mapPlaceSubTopics(place: ApiPublicPlace): StorySubTopic[] {
 }
 
 function mapPlaceNarrators(place: ApiPublicPlace, durationMinutes?: number) {
-  return (place.audios ?? [])
-    .filter((a) => a.is_deleted !== true && (a.persona_name || a.id))
+  return playableAudios(place)
+    .filter((a) => a.persona_name || a.id)
     .map((audio, index) => ({
       id: audio.id || `audio-${index}`,
       name: audio.persona_name?.trim() || "Gamana",
@@ -214,7 +236,7 @@ function mapPlaceNarrators(place: ApiPublicPlace, durationMinutes?: number) {
 
 function mapPlaceLanguages(place: ApiPublicPlace) {
   const codes = new Set<string>();
-  for (const audio of place.audios ?? []) {
+  for (const audio of playableAudios(place)) {
     if (audio.audio_language) codes.add(audio.audio_language);
   }
   const labels: Record<string, { label: string; nativeLabel?: string }> = {
@@ -235,7 +257,8 @@ function mapPlaceLanguages(place: ApiPublicPlace) {
 export function isPlaceCatalogVisible(place: ApiPublicPlace): boolean {
   if (place.is_deleted) return false;
   if (place.is_active === false) return false;
-  return Boolean(place.name?.trim());
+  if (!place.name?.trim()) return false;
+  return hasPlayableAudio(place);
 }
 
 export function mapPublicPlaceToTour(place: ApiPublicPlace): Tour | null {
