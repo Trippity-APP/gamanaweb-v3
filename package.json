@@ -8,6 +8,7 @@
     "start": "node scripts/serve-out.mjs",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "test": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning 'tests/**/*.test.mjs'",
     "new:blog": "node scripts/new-blog.js",
     "images:process": "node scripts/process-images.mjs",
     "pricing:snapshot": "node scripts/build-pricing-snapshot.mjs"

@@ -5,6 +5,7 @@ import { PriceTag } from "@/components/experiences/PriceTag";
 import { RatingInline } from "@/components/experiences/RatingInline";
 import { WishlistButton } from "@/components/experiences/WishlistButton";
 import { Skeleton } from "@/components/ui/skeleton";
+import { track } from "@/lib/analytics";
 import type { ExperienceSummary } from "@/lib/api/schemas/experiences";
 import {
   cardBadge,
@@ -48,6 +49,7 @@ export function ExperienceCard({
   return (
     <Link
       href={experienceHref(experience.slug)}
+      onClick={() => track("experience_card_click", { slug: experience.slug ?? undefined })}
       className={cn(
         "focus-ring group relative flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-card transition-all duration-500 ease-out-expo hover:-translate-y-1 hover:shadow-lift",
         className

@@ -6,6 +6,7 @@ import { ResponsiveSheet } from "@/components/common/ResponsiveSheet";
 import { StoreBadges } from "@/components/site/StoreBadges";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { track } from "@/lib/analytics";
 import { openInApp } from "@/lib/app-links";
 
 export type AppHandoffContent = {
@@ -34,12 +35,16 @@ export function AppHandoffSheet({ open, onOpenChange, title, steps, note, deepLi
     if (!open || !desktop) return;
     let cancelled = false;
     QRCode.toDataURL(deepLink, { margin: 1, width: 200, color: { dark: "#0F1B24", light: "#FFFFFF" } })
-      .then((url) => !cancelled && setQr(url))
+      .then((url) => {
+        if (cancelled) return;
+        setQr(url);
+        track("handoff_qr_view", { source });
+      })
       .catch(() => !cancelled && setQr(null));
     return () => {
       cancelled = true;
     };
-  }, [open, desktop, deepLink]);
+  }, [open, desktop, deepLink, source]);
 
   useEffect(() => {
     if (!open) setShowBadges(false);
@@ -49,6 +54,7 @@ export function AppHandoffSheet({ open, onOpenChange, title, steps, note, deepLi
   }, [open]);
 
   const openApp = () => {
+    track("handoff_open_app_click", { source });
     openInApp(deepLink);
     fallbackTimer.current = window.setTimeout(() => {
       if (document.visibilityState === "visible") setShowBadges(true);
@@ -100,7 +106,7 @@ export function AppHandoffSheet({ open, onOpenChange, title, steps, note, deepLi
           {showBadges ? (
             <StoreBadges source={source} keyword="travel app" className="justify-center" />
           ) : (
-            <button type="button" onClick={() => setShowBadges(true)} className="focus-ring mx-auto block rounded text-sm font-semibold text-brand-700">
+            <button type="button" onClick={() => setShowBadges(true)} className="focus-ring mx-auto block min-h-11 rounded px-4 text-sm font-semibold text-brand-700">
               Get the app
             </button>
           )}

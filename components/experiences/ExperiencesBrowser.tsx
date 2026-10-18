@@ -26,6 +26,7 @@ import type { ExperienceFilterOptions, ExperienceSummary } from "@/lib/api/schem
 import { getExperienceFilterOptions, listExperiences } from "@/lib/experiences/api";
 import { formatMoney } from "@/lib/experiences/format";
 import { writeLastCity } from "@/lib/home/last-city";
+import { track } from "@/lib/analytics";
 import {
   EMPTY_FILTERS,
   activeChips,
@@ -111,6 +112,7 @@ export function ExperiencesBrowser() {
         setHasNext(!!last.has_next);
         setPage(last.page ?? targetPage);
         setState("ready");
+        track("experience_list_view", { results: last.total ?? collected.length, city: filters.city || undefined, category: filters.category || undefined });
       } catch {
         if (!controller.signal.aborted) setState("error");
       }

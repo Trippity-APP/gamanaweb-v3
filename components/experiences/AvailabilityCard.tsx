@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { ExperienceDetail } from "@/lib/api/schemas/experiences";
+import { track } from "@/lib/analytics";
 import { useAuth } from "@/lib/auth/auth-context";
 import { webAccountsEnabled } from "@/lib/flags";
 import {
@@ -52,6 +53,7 @@ export function AvailabilityCard({ experience, state, className, bare = false }:
 
   const bookNow = () => {
     if (!state.checkoutParams) return;
+    track("book_now_click", { slug, web_checkout: webAccountsEnabled });
     if (!webAccountsEnabled) {
       setHandoffOpen(true);
       return;

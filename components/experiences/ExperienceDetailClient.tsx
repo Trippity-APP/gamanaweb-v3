@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ExperienceDetail } from "@/lib/api/schemas/experiences";
+import { track } from "@/lib/analytics";
 import { getExperienceDetail } from "@/lib/experiences/api";
 import {
   cancellationText,
@@ -91,6 +92,7 @@ export function ExperienceDetailClient({ slugParam, initial, linkedStory }: Expe
       .then((live) => {
         setExperience(live);
         setStatus("ready");
+        track("experience_view", { slug, city: live.city ?? undefined });
       })
       .catch(() => {
         if (controller.signal.aborted) return;
