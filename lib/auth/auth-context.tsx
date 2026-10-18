@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { apiFetch, refreshSession, webClientHeaders } from "@/lib/api/client";
 import {
@@ -14,6 +15,9 @@ import type { WebLoginResponse } from "@/lib/api/schemas/auth";
 import { coinBalanceSchema, toCoinCount } from "@/lib/api/schemas/coins";
 import { toAuthUser, userProfileSchema, type AuthUser } from "@/lib/api/schemas/profile";
 import { webAccountsEnabled } from "@/lib/flags";
+
+/** Loaded on first `openLogin()` so the login UI stays out of every page's initial bundle. */
+const LoginSheet = dynamic(() => import("@/components/auth/LoginSheet"), { ssr: false });
 
 export type AuthStatus = "loading" | "anonymous" | "authenticated";
 
@@ -35,8 +39,13 @@ interface AuthContextValue {
   /** Pending login request for the login sheet; `null` when closed. */
   loginRequest: LoginRequest | null;
   closeLogin: () => void;
-  /** Called by the login flow with the `/auth/web/login/*` response. */
-  completeLogin: (response: WebLoginResponse) => Promise<AuthUser | null>;
+  /**
+   * Called by the login flow with the `/auth/web/login/*` response. With `defer`, the sheet stays
+   * open (profile step) until `finishLogin` runs.
+   */
+  completeLogin: (response: WebLoginResponse, opts?: { defer?: boolean }) => Promise<AuthUser | null>;
+  /** Closes the login sheet and runs the pending `onSuccess`. */
+  finishLogin: () => void;
   logout: () => Promise<void>;
   /** Runs `cb` now if logged in, otherwise after a successful login. */
   requireAuth: (cb: () => void, reason?: string) => void;
@@ -71,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState<number | null>(null);
   const [restoring, setRestoring] = useState(false);
   const [loginRequest, setLoginRequest] = useState<LoginRequest | null>(null);
+  const [sheetLoaded, setSheetLoaded] = useState(false);
   const pendingSuccess = useRef<(() => void) | null>(null);
 
   const resetToAnonymous = useCallback(() => {
@@ -171,8 +181,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoginRequest(null);
   }, []);
 
+  const finishLogin = useCallback(() => {
+    const onSuccess = pendingSuccess.current;
+    pendingSuccess.current = null;
+    setLoginRequest(null);
+    onSuccess?.();
+  }, []);
+
   const completeLogin = useCallback(
-    async (response: WebLoginResponse) => {
+    async (response: WebLoginResponse, opts: { defer?: boolean } = {}) => {
       setSession({
         accessToken: response.access_token,
         sessionId: response.session_id,
@@ -184,10 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(nextUser);
         setStatus("authenticated");
         void refreshBalance();
-        const onSuccess = pendingSuccess.current;
-        pendingSuccess.current = null;
-        setLoginRequest(null);
-        onSuccess?.();
+        if (!opts.defer) finishLogin();
         return nextUser;
       } catch {
         clearSession();
@@ -195,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null;
       }
     },
-    [refreshBalance, resetToAnonymous],
+    [refreshBalance, resetToAnonymous, finishLogin],
   );
 
   const logout = useCallback(async () => {
@@ -235,13 +249,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loginRequest,
       closeLogin,
       completeLogin,
+      finishLogin,
       logout,
       requireAuth,
     }),
-    [status, user, balance, restoring, refreshBalance, refreshProfile, openLogin, loginRequest, closeLogin, completeLogin, logout, requireAuth],
+    [status, user, balance, restoring, refreshBalance, refreshProfile, openLogin, loginRequest, closeLogin, completeLogin, finishLogin, logout, requireAuth],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  if (loginRequest && !sheetLoaded) setSheetLoaded(true);
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      {sheetLoaded && <LoginSheet />}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
