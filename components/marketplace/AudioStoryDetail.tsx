@@ -23,6 +23,8 @@ import {
 } from '@/lib/marketplace-api';
 import type { StoryDetail } from '@/lib/marketplace-data';
 import { isStaticSpaParam } from '@/lib/static-spa';
+import { useAuth } from '@/lib/auth/auth-context';
+import { daysLeft, useLibrary } from '@/lib/library/library-context';
 
 function resolveStoryId(paramId: string): string {
   if (!isStaticSpaParam(paramId)) return paramId;
@@ -75,10 +77,14 @@ export function AudioStoryDetail({
     void loadStoryById(resolved);
   }, [paramTourId, initialStory]);
 
+  const { status: authStatus } = useAuth();
+  const library = useLibrary();
+  const unlock = story && authStatus === 'authenticated' ? library.find('place', story.id) : undefined;
   const unlockState = useMemo(
-    () => (story?.price === 0 ? ('free' as const) : ('locked' as const)),
-    [story],
+    () => (story?.price === 0 ? ('free' as const) : unlock ? ('unlocked' as const) : ('locked' as const)),
+    [story, unlock],
   );
+  const unlockDays = unlock ? daysLeft(unlock) : null;
 
   const retry = () => {
     clearMarketplaceCache();
@@ -120,14 +126,12 @@ export function AudioStoryDetail({
         <AudioStoryHero
           story={story}
           unlockState={unlockState}
+          daysLeft={unlockDays}
           onDownloadClick={() => setDownloadOpen(true)}
         />
 
         <div className="mt-6 lg:hidden">
-          <AudioStoryActionCard
-            story={story}
-            unlockState={unlockState}
-          />
+          <AudioStoryActionCard story={story} />
         </div>
 
         <div className="mt-10 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
@@ -145,10 +149,7 @@ export function AudioStoryDetail({
           </div>
 
           <aside className="hidden lg:sticky lg:top-32 lg:block">
-            <AudioStoryActionCard
-              story={story}
-              unlockState={unlockState}
-            />
+            <AudioStoryActionCard story={story} />
           </aside>
         </div>
       </div>

@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowRight, Calendar, Library, Ticket } from "@/components/icons";
+import { ArrowRight, Calendar, Library, Smartphone, Ticket } from "@/components/icons";
 import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
-import { bookingId, fetchBookings, fetchPlaceUnlocks, fetchTourUnlocks, isUpcoming } from "@/lib/account/api";
+import { StoreBadges } from "@/components/site/StoreBadges";
+import { bookingId, fetchBookings, isUpcoming } from "@/lib/account/api";
+import { isExpired, useLibrary } from "@/lib/library/library-context";
 import type { BookingSummary } from "@/lib/api/schemas/bookings";
 import { useAuth } from "@/lib/auth/auth-context";
 import { formatDateLabel, formatTimeLabel } from "@/lib/experiences/format";
@@ -15,17 +17,18 @@ const CARD_LINK = "focus-ring mt-auto inline-flex items-center gap-1 self-start 
 
 export default function AccountOverviewPage() {
   const { user, balance } = useAuth();
+  const { places, tours, loading, lastHandoff } = useLibrary();
   const [next, setNext] = useState<BookingSummary | null | undefined>(undefined);
-  const [unlockCount, setUnlockCount] = useState<number | null>(null);
+  const unlockCount =
+    places === null && tours === null && loading
+      ? null
+      : [...(places ?? []), ...(tours ?? [])].filter((u) => !isExpired(u)).length;
 
   useEffect(() => {
     let cancelled = false;
     fetchBookings()
       .then((list) => !cancelled && setNext(list.find(isUpcoming) ?? null))
       .catch(() => !cancelled && setNext(null));
-    Promise.all([fetchPlaceUnlocks().catch(() => []), fetchTourUnlocks().catch(() => [])]).then(
-      ([places, tours]) => !cancelled && setUnlockCount(places.length + tours.length),
-    );
     return () => {
       cancelled = true;
     };
@@ -34,6 +37,26 @@ export default function AccountOverviewPage() {
   return (
     <div className="space-y-8">
       <h1 className="font-display text-h2 font-bold text-ink">Hi {user?.firstName || "there"}</h1>
+
+      {lastHandoff?.device_count === 0 && (
+        <section
+          aria-labelledby="ov-get-app"
+          className="flex flex-col gap-4 rounded-3xl bg-brand-700 p-6 text-white shadow-card md:flex-row md:items-center md:justify-between"
+        >
+          <div className="flex items-start gap-3">
+            <Smartphone className="mt-1 h-6 w-6 shrink-0" aria-hidden />
+            <div>
+              <h2 id="ov-get-app" className="font-display text-lg font-bold">
+                Get the Gamana app to listen
+              </h2>
+              <p className="mt-1 text-sm text-white/85">
+                Your stories and walks play in the app. Log in there with the same account and they&apos;re waiting for you.
+              </p>
+            </div>
+          </div>
+          <StoreBadges source="account_overview_get_app" className="shrink-0 gap-2 [&_img]:h-10 [&_img]:w-auto" />
+        </section>
+      )}
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         <section className={CARD} aria-labelledby="ov-coins">

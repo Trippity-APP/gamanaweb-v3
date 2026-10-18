@@ -7,6 +7,7 @@ import {
   MapPin,
   Sparkles, Lock,
   Search,
+  Smartphone,
 } from '@/components/icons';
 import { GamanaCoinIcon } from '@/components/GamanaCoinIcon';
 import { ExploreWhyGamana } from '@/components/marketplace/ExploreTrustPanel';
@@ -15,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CityNotCovered } from '@/components/marketplace/CityNotCovered';
 import { cn } from '@/lib/utils';
 import { MarketplaceCoverImage, isPlaceholderTourImage } from '@/components/marketplace/marketplace-cover-image';
-import { DownloadAppDialog } from '@/components/DownloadAppDialog';
+import { UnlockFlow } from '@/components/unlock/UnlockFlow';
 import { TourGridSkeleton } from '@/components/ui/list-skeletons';
 import {
   clearMarketplaceCache,
@@ -64,8 +65,8 @@ const ACCESS_FILTERS: { value: AccessFilter; label: string }[] = [
 /**
  * The Audio Stories / Audio Walks browsing surface for /marketplace.
  *
- * Premium stories and walks are listened to in the app, so "Unlock" opens the app
- * download dialog until web unlocks with coins land.
+ * Premium stories and walks are unlocked with coins here (UnlockFlow) and listened
+ * to in the app.
  *
  * The "Recommended for you" treatment (matching items boosted to the front of each grid,
  * called out with a small label, scored against the traveler's saved interests via
@@ -107,8 +108,6 @@ export function MarketplaceBrowser({
   useEffect(() => {
     setInternalSearchQuery(searchFromUrl);
   }, [searchFromUrl]);
-
-  const [downloadSource, setDownloadSource] = useState<string | null>(null);
 
   const [tours, setTours] = useState<Tour[]>(initialTours);
   const [toursLoading, setToursLoading] = useState(initialTours.length === 0);
@@ -326,14 +325,37 @@ export function MarketplaceBrowser({
     }
 
     return (
-      <Button
-        size="sm"
-        onClick={() => setDownloadSource(catalogKind === 'walk' ? 'explore-walk-unlock' : 'explore-story-unlock')}
-        className="rounded-full bg-ink px-4 text-white hover:bg-black"
+      <UnlockFlow
+        item={{
+          kind: catalogKind === 'walk' ? 'storylist' : 'place',
+          id: tour.id,
+          title: tour.title,
+          price: tour.price,
+          image: tour.image,
+          city: tour.location,
+          narrator: tour.narrator,
+        }}
+        source={catalogKind === 'walk' ? 'explore-walk-unlock' : 'explore-story-unlock'}
       >
-        <Lock className="mr-1.5 h-3.5 w-3.5" />
-        Unlock
-      </Button>
+        {({ state, start }) =>
+          state === 'unlocked' ? (
+            <Button size="sm" variant="outline" onClick={start} className="min-h-11 rounded-full px-4">
+              <Smartphone className="mr-1.5 h-3.5 w-3.5" aria-hidden />
+              Open in app
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={start}
+              aria-label={`Unlock ${tour.title} for ${tour.price} coins`}
+              className="min-h-11 rounded-full bg-ink px-4 text-white hover:bg-black"
+            >
+              <Lock className="mr-1.5 h-3.5 w-3.5" aria-hidden />
+              Unlock
+            </Button>
+          )
+        }
+      </UnlockFlow>
     );
   };
 
@@ -406,12 +428,6 @@ export function MarketplaceBrowser({
 
   return (
     <>
-      <DownloadAppDialog
-        open={downloadSource !== null}
-        onOpenChange={(open) => { if (!open) setDownloadSource(null); }}
-        source={downloadSource ?? 'explore-unlock'}
-      />
-
       <div className="container-site pb-4 pt-8 sm:pt-10">
             <Tabs value={activeTab} onValueChange={selectCatalogTab} className="w-full">
               <div className="sticky top-14 z-30 -mx-4 mb-6 border-b border-ink/5 bg-sand-50/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:top-16 lg:mx-0 lg:px-0">

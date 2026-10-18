@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { apiFetch } from "@/lib/api/client";
 import { bookingSummarySchema, type BookingSummary } from "@/lib/api/schemas/bookings";
-import { libraryUnlockSchema, type LibraryUnlock } from "@/lib/api/schemas/library";
-
 /** Accepts either a bare array or `{ items: [...] }`. */
 export function listOf<T extends z.ZodTypeAny>(item: T) {
   return z
@@ -26,12 +24,4 @@ export function isUpcoming(b: BookingSummary): boolean {
 export async function fetchBookings(): Promise<BookingSummary[]> {
   const list = await apiFetch("/my/bookings", { auth: "required", schema: listOf(bookingSummarySchema) });
   return [...list].sort((a, b) => (a.local_date ?? "").localeCompare(b.local_date ?? ""));
-}
-
-export function fetchPlaceUnlocks(): Promise<LibraryUnlock[]> {
-  return apiFetch("/library/unlocks", { auth: "required", version: "v2", schema: listOf(libraryUnlockSchema) });
-}
-
-export function fetchTourUnlocks(): Promise<LibraryUnlock[]> {
-  return apiFetch("/tours/mine", { auth: "required", version: "v2", schema: listOf(libraryUnlockSchema) });
 }

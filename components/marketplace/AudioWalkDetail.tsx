@@ -18,6 +18,8 @@ import {
 } from '@/lib/marketplace-api';
 import type { WalkDetail } from '@/lib/marketplace-data';
 import { isStaticSpaParam } from '@/lib/static-spa';
+import { useAuth } from '@/lib/auth/auth-context';
+import { daysLeft, useLibrary } from '@/lib/library/library-context';
 
 function resolveTourId(paramId: string): string {
   if (!isStaticSpaParam(paramId)) return paramId;
@@ -77,10 +79,14 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
     void loadWalkById(resolved);
   }, [paramTourId, initialWalk]);
 
+  const { status: authStatus } = useAuth();
+  const library = useLibrary();
+  const unlock = walk && authStatus === 'authenticated' ? library.find('storylist', walk.id) : undefined;
   const unlockState = useMemo(
-    () => (walk?.price === 0 ? ('free' as const) : ('locked' as const)),
-    [walk],
+    () => (walk?.price === 0 ? ('free' as const) : unlock ? ('unlocked' as const) : ('locked' as const)),
+    [walk, unlock],
   );
+  const unlockDays = unlock ? daysLeft(unlock) : null;
 
   const retry = () => {
     clearMarketplaceCache();
@@ -119,24 +125,18 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
       <div className="container-site pb-28 pt-6 sm:pt-8 lg:pb-12">
         <ExploreDetailBreadcrumb title={walk.title} />
 
-        <AudioWalkHero walk={walk} unlockState={unlockState} />
+        <AudioWalkHero walk={walk} unlockState={unlockState} daysLeft={unlockDays} />
 
         {/* Action card visible on mobile/tablet before route */}
         <div className="mt-6 lg:hidden">
-          <AudioWalkActionCard
-            walk={walk}
-            unlockState={unlockState}
-          />
+          <AudioWalkActionCard walk={walk} />
         </div>
 
         <div className="mt-10 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
           <TourRouteTimeline stops={walk.stops} />
 
           <aside className="hidden lg:sticky lg:top-32 lg:block">
-            <AudioWalkActionCard
-              walk={walk}
-              unlockState={unlockState}
-            />
+            <AudioWalkActionCard walk={walk} />
           </aside>
         </div>
       </div>

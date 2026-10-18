@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import QRCode from "qrcode";
 import { ResponsiveSheet } from "@/components/common/ResponsiveSheet";
 import { StoreBadges } from "@/components/site/StoreBadges";
@@ -20,9 +20,11 @@ type AppHandoffSheetProps = AppHandoffContent & {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   source: string;
+  /** Extra actions under the steps (e.g. "Send again", "Go to My Collection"). */
+  children?: ReactNode;
 };
 
-export function AppHandoffSheet({ open, onOpenChange, title, steps, note, deepLink, source }: AppHandoffSheetProps) {
+export function AppHandoffSheet({ open, onOpenChange, title, steps, note, deepLink, source, children }: AppHandoffSheetProps) {
   const desktop = useMediaQuery("(min-width: 768px)");
   const [qr, setQr] = useState<string | null>(null);
   const [showBadges, setShowBadges] = useState(false);
@@ -71,6 +73,7 @@ export function AppHandoffSheet({ open, onOpenChange, title, steps, note, deepLi
           <div>
             {stepList}
             {note && <p className="mt-5 text-sm text-ink-soft">{note}</p>}
+            {children && <div className="mt-6">{children}</div>}
           </div>
           <div className="flex flex-col items-center gap-3">
             {qr ? (
@@ -101,6 +104,7 @@ export function AppHandoffSheet({ open, onOpenChange, title, steps, note, deepLi
               Get the app
             </button>
           )}
+          {children}
         </div>
       )}
     </ResponsiveSheet>

@@ -8,6 +8,7 @@ import { SkipLink } from "@/components/site/SkipLink";
 import { MockApiBadge } from "@/components/dev/MockApiBadge";
 import { AuthProvider } from "@/lib/auth/auth-context";
 import { JourneyProvider } from "@/lib/journey-context";
+import { LibraryProvider } from "@/lib/library/library-context";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 // Display face for headings on redesigned pages, reached via Tailwind's `font-display`.
@@ -126,10 +127,12 @@ export default function RootLayout({
         {/* End Google Tag Manager (noscript) */}
         <SkipLink />
         <AuthProvider>
-          <JourneyProvider>
-            {children}
-            <SideRail />
-          </JourneyProvider>
+          <LibraryProvider>
+            <JourneyProvider>
+              {children}
+              <SideRail />
+            </JourneyProvider>
+          </LibraryProvider>
         </AuthProvider>
         <Toaster />
         <MockApiBadge />
