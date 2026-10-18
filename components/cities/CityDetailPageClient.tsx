@@ -8,6 +8,7 @@ import { fetchCityById, type ApiCity } from "@/lib/services/cityService";
 import { fetchPublicTours, tourMatchesCity } from "@/lib/marketplace-api";
 import type { Tour } from "@/lib/marketplace-data";
 import { isStaticSpaParam } from "@/lib/static-spa";
+import { writeLastCity } from "@/lib/home/last-city";
 
 function resolveCityId(paramId: string): string {
     if (!isStaticSpaParam(paramId)) return paramId;
@@ -84,6 +85,8 @@ export function CityDetailPageClient({
             }
         })();
     }, [paramCityId, initialCity]);
+
+    useEffect(() => writeLastCity(city?.name), [city?.name]);
 
     if (loading) {
         return (

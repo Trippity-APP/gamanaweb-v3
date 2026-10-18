@@ -25,6 +25,7 @@ import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "
 import type { ExperienceFilterOptions, ExperienceSummary } from "@/lib/api/schemas/experiences";
 import { getExperienceFilterOptions, listExperiences } from "@/lib/experiences/api";
 import { formatMoney } from "@/lib/experiences/format";
+import { writeLastCity } from "@/lib/home/last-city";
 import {
   EMPTY_FILTERS,
   activeChips,
@@ -56,6 +57,8 @@ export function ExperiencesBrowser() {
   const queryString = searchParams.toString();
 
   const filters = useMemo(() => parseFilters(new URLSearchParams(queryString)), [queryString]);
+
+  useEffect(() => writeLastCity(filters.city), [filters.city]);
   const filterKey = serializeFilters(filters);
   const urlPage = parsePage(new URLSearchParams(queryString));
 

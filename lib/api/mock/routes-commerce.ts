@@ -483,6 +483,14 @@ export const commerceRoutes: MockRoute[] = [
   },
   {
     method: "GET",
+    version: "v2",
+    path: "/tours/recommended",
+    auth: true,
+    // Empty on purpose: the home shelf then falls back to the live public catalog.
+    handle: () => ok({ items: [] }),
+  },
+  {
+    method: "GET",
     path: "/storylists/my-storylists",
     auth: true,
     handle: () => ok({ items: [{ id: "my-tour-1", title: "My weekend in Jaipur", stops_count: 6, city: "Jaipur", updated_at: daysFromNow(-3) }] }),

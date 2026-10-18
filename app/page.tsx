@@ -14,6 +14,7 @@ import { NarratorRail } from "@/components/site/NarratorRail";
 import { FaqAccordion } from "@/components/site/FaqAccordion";
 import { DownloadBand } from "@/components/site/DownloadBand";
 import { HomeHero, HOME_HERO_SEARCH_ID } from "@/components/home/HomeHero";
+import { AnonymousOnly, PersonalizedHome } from "@/components/home/PersonalizedHome";
 import { OfferBanners } from "@/components/home/OfferBanners";
 import { LatestStories } from "@/components/home/LatestStories";
 import {
@@ -65,8 +66,11 @@ export default async function HomePage() {
       <SiteHeader variant="solid" searchAnchorId={HOME_HERO_SEARCH_ID} />
 
       <main>
-        <HomeHero />
-        <CategoryTiles />
+        <PersonalizedHome />
+        <AnonymousOnly>
+          <HomeHero />
+          <CategoryTiles />
+        </AnonymousOnly>
 
         <CityRailSection />
 

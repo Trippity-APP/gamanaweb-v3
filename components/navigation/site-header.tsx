@@ -86,14 +86,20 @@ export default function SiteHeader({ variant = "solid", search, searchAnchorId }
   useEffect(() => {
     if (!searchAnchorId) return;
     const anchor = document.getElementById(searchAnchorId);
-    if (!anchor || typeof IntersectionObserver === "undefined") return;
+    if (!anchor) {
+      // The anchor (home hero) is hidden for signed-in visitors — keep search in the header.
+      setShowSearch(true);
+      return;
+    }
+    setShowSearch(false);
+    if (typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(
       ([entry]) => setShowSearch(!entry.isIntersecting && entry.boundingClientRect.top < 0),
       { rootMargin: "-64px 0px 0px 0px" }
     );
     observer.observe(anchor);
     return () => observer.disconnect();
-  }, [searchAnchorId]);
+  }, [searchAnchorId, status]);
 
   const isActive = (href: string) => pathname === normalize(href) || pathname.startsWith(`${normalize(href)}/`);
   const destinationsActive = pathname.startsWith("/cities");
