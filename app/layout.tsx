@@ -5,6 +5,7 @@ import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import SideRail from "@/components/side-rail";
 import { SkipLink } from "@/components/site/SkipLink";
+import { MockApiBadge } from "@/components/dev/MockApiBadge";
 import { AuthProvider } from "@/lib/auth/auth-context";
 import { JourneyProvider } from "@/lib/journey-context";
 
@@ -131,6 +132,7 @@ export default function RootLayout({
           </JourneyProvider>
         </AuthProvider>
         <Toaster />
+        <MockApiBadge />
       </body>
     </html>
   );

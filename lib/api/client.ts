@@ -8,6 +8,7 @@ import {
   SESSION_EXPIRED_EVENT,
 } from "@/lib/api/session";
 import { webRefreshResponseSchema } from "@/lib/api/schemas/auth";
+import { transport } from "@/lib/api/transport";
 
 /**
  * - `none`: never attach credentials. Use for every public catalog call (`/experiences*`,
@@ -70,7 +71,7 @@ export function refreshSession(): Promise<boolean> {
 
 async function doRefresh(): Promise<boolean> {
   try {
-    const res = await fetch(`${getApiBaseUrl("v1")}/auth/web/refresh`, {
+    const res = await transport(`${getApiBaseUrl("v1")}/auth/web/refresh`, {
       method: "POST",
       credentials: "include",
       headers: { Accept: "application/json", ...WEB_CLIENT_HEADER },
@@ -153,7 +154,7 @@ function send<T>(path: string, options: ApiFetchOptions<T>): Promise<Response> {
     requestBody = JSON.stringify(body);
   }
 
-  return fetch(buildUrl(path, version, query), {
+  return transport(buildUrl(path, version, query), {
     method,
     headers: finalHeaders,
     body: requestBody,
