@@ -1,0 +1,39 @@
+{
+  "source": "https://apidev.gamana.app/api/v1",
+  "packages": [
+    {
+      "product_id": "gamana_ten_coin",
+      "display_name": "Ten Coins",
+      "description": "",
+      "amount": 999,
+      "currency": "INR",
+      "coins": 10,
+      "bonus_coins": 0,
+      "save_percent": 0,
+      "is_popular": false,
+      "is_best_value": false,
+      "tag_text": null,
+      "poi_range": "1-5",
+      "tour_range": "1-2",
+      "order": 0,
+      "is_active": true
+    },
+    {
+      "product_id": "ten_coin",
+      "display_name": "Ten Coins",
+      "description": "",
+      "amount": 999,
+      "currency": "INR",
+      "coins": 10,
+      "bonus_coins": 0,
+      "save_percent": 0,
+      "is_popular": false,
+      "is_best_value": false,
+      "tag_text": null,
+      "poi_range": "1-5",
+      "tour_range": "1-2",
+      "order": 0,
+      "is_active": true
+    }
+  ]
+}

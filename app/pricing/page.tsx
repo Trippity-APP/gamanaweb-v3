@@ -6,7 +6,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { SectionHeader } from "@/components/site/SectionHeader";
 import { FaqAccordion, type FaqItem } from "@/components/site/FaqAccordion";
 import { Reveal } from "@/components/motion/Reveal";
-import { coinPacks } from "@/lib/coin-pricing";
+import { snapshotPacks } from "@/lib/pricing/packages";
 import { getPhoto } from "@/lib/images";
 import { OG_IMAGE } from "@/lib/seo";
 
@@ -74,24 +74,19 @@ export default function PricingPage() {
     "@context": "https://schema.org",
     "@type": "OfferCatalog",
     name: "Gamana Coins",
-    itemListElement: coinPacks.flatMap((pack, index) => [
-      {
+    itemListElement: snapshotPacks
+      .flatMap((pack) => [
+        { pack, price: pack.amountInr, priceCurrency: "INR" },
+        ...(pack.amountUsd != null ? [{ pack, price: pack.amountUsd, priceCurrency: "USD" }] : []),
+      ])
+      .map(({ pack, price, priceCurrency }, index) => ({
         "@type": "Offer",
-        position: index * 2 + 1,
+        position: index + 1,
         name: `${pack.coins} Gamana Coins`,
-        price: pack.priceInr,
-        priceCurrency: "INR",
+        price,
+        priceCurrency,
         availability: "https://schema.org/InStock",
-      },
-      {
-        "@type": "Offer",
-        position: index * 2 + 2,
-        name: `${pack.coins} Gamana Coins`,
-        price: pack.priceUsd,
-        priceCurrency: "USD",
-        availability: "https://schema.org/InStock",
-      },
-    ]),
+      })),
   };
 
   return (
