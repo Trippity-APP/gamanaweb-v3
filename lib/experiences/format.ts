@@ -7,10 +7,13 @@ export function experienceHref(slug: string): string {
   return `/experiences/${encodeURIComponent(slug)}/`;
 }
 
+/** Fixed locale so prerendered HTML and the hydrated client format identically. */
+const MONEY_LOCALE = "en-US";
+
 export function formatMoney(amount: number, currency: string | null | undefined): string {
   const code = (currency || "INR").toUpperCase();
   try {
-    return new Intl.NumberFormat(undefined, {
+    return new Intl.NumberFormat(MONEY_LOCALE, {
       style: "currency",
       currency: code,
       maximumFractionDigits: Number.isInteger(amount) ? 0 : 2,
@@ -105,8 +108,12 @@ function readText(value: unknown): string | null {
 export function cancellationText(
   item: Pick<ExperienceDetail, "cancellation_policy"> & { booking_policies?: ExperienceDetail["booking_policies"] }
 ): string | null {
-  return readText(item.booking_policies?.cancellation_policy) ?? item.cancellation_policy ?? null;
+  const text = readText(item.booking_policies?.cancellation_policy) ?? item.cancellation_policy ?? null;
+  return text && !PLACEHOLDER_POLICY.test(text) ? text : null;
 }
+
+/** Operator-system defaults that carry no information for a traveller. */
+const PLACEHOLDER_POLICY = /^\s*default\s*$/i;
 
 export function refundText(item: Pick<ExperienceDetail, "booking_policies">): string | null {
   return readText(item.booking_policies?.refund_processing);

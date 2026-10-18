@@ -20,7 +20,7 @@ export function RatingInline({ rating, count, className }: RatingInlineProps) {
     <span className={cn("inline-flex items-center gap-1 text-sm", className)}>
       <Star className="h-4 w-4 text-sunset-400" weight="fill" aria-hidden />
       <span className="font-bold text-ink">{rating.toFixed(1)}</span>
-      <span className="text-ink-soft">({count.toLocaleString()})</span>
+      <span className="text-ink-soft">({count.toLocaleString("en-US")})</span>
       <span className="sr-only">
         Rated {rating.toFixed(1)} out of 5 from {count} reviews
       </span>

@@ -14,6 +14,7 @@ export type DurationBucketId = (typeof DURATION_BUCKETS)[number]["id"];
 export type ExperienceFilters = {
   search: string;
   city: string;
+  country: string;
   category: string;
   languages: string[];
   cancellation: string;
@@ -28,6 +29,7 @@ export type ExperienceFilters = {
 export const EMPTY_FILTERS: ExperienceFilters = {
   search: "",
   city: "",
+  country: "",
   category: "",
   languages: [],
   cancellation: "",
@@ -48,6 +50,7 @@ export function parseFilters(params: URLSearchParams): ExperienceFilters {
   return {
     search: params.get("q") ?? "",
     city: params.get("city") ?? "",
+    country: params.get("country") ?? "",
     category: params.get("category") ?? "",
     languages: params.getAll("language"),
     cancellation: params.get("cancellation") ?? "",
@@ -69,6 +72,7 @@ export function serializeFilters(filters: ExperienceFilters, page = 1): string {
   const params = new URLSearchParams();
   if (filters.search.trim()) params.set("q", filters.search.trim());
   if (filters.city) params.set("city", filters.city);
+  if (filters.country) params.set("country", filters.country);
   if (filters.category) params.set("category", filters.category);
   for (const lang of filters.languages) params.append("language", lang);
   if (filters.cancellation) params.set("cancellation", filters.cancellation);
@@ -101,6 +105,7 @@ export function toListQuery(filters: ExperienceFilters, page: number, pageSize =
     page_size: pageSize,
     search: filters.search.trim() || undefined,
     city: filters.city || undefined,
+    country: filters.country || undefined,
     category: filters.category || undefined,
     languages: filters.languages.length ? filters.languages : undefined,
     cancellation_policy: filters.cancellation || undefined,
@@ -120,6 +125,7 @@ export function activeChips(filters: ExperienceFilters, formatPrice: (n: number)
   const chips: ActiveChip[] = [];
   if (filters.search.trim()) chips.push({ key: "q", label: `“${filters.search.trim()}”`, clear: (f) => ({ ...f, search: "" }) });
   if (filters.city) chips.push({ key: "city", label: filters.city, clear: (f) => ({ ...f, city: "" }) });
+  if (filters.country) chips.push({ key: "country", label: filters.country, clear: (f) => ({ ...f, country: "" }) });
   if (filters.category) chips.push({ key: "category", label: categoryLabel(filters.category), clear: (f) => ({ ...f, category: "" }) });
   for (const lang of filters.languages) {
     chips.push({ key: `lang-${lang}`, label: lang, clear: (f) => ({ ...f, languages: f.languages.filter((l) => l !== lang) }) });
