@@ -1,5 +1,5 @@
 import type { ZodType, ZodTypeDef } from "zod";
-import { getApiBaseUrl, type ApiVersion } from "@/lib/api-base-url";
+import { getApiBaseUrl, getCatalogFetchInit, type ApiVersion } from "@/lib/api-base-url";
 import {
   clearSession,
   getSession,
@@ -159,7 +159,7 @@ function send<T>(path: string, options: ApiFetchOptions<T>): Promise<Response> {
     body: requestBody,
     signal,
     credentials: "same-origin",
-    cache: "no-store",
+    ...(auth === "none" && method === "GET" ? getCatalogFetchInit() : { cache: "no-store" }),
   });
 }
 

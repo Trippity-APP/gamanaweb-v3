@@ -29,12 +29,13 @@ export const featureItems = [
 
 // Second header row, in display order. "Destinations" and "Features" are mega menus
 // rendered by site-header.tsx around these plain links: Destinations first, Features
-// after Audio Stories. The logo is the Home link. Contact, About and FAQ live in the
+// after the tours group. The logo is the Home link. Contact, About and FAQ live in the
 // footer and the mobile drawer's Company group.
 export const categoryNavItems = {
   tours: [
     { name: "Audio Tours", href: "/marketplace/tours" },
     { name: "Audio Stories", href: "/marketplace/story" },
+    { name: "Experiences", href: "/experiences" },
   ],
   more: [
     { name: "Pricing", href: "/pricing" },
@@ -55,6 +56,7 @@ export const companyNavItems = [
 export const footerCompanyLinks = [
   { name: "Cities", href: "/cities" },
   { name: "Explore", href: "/marketplace" },
+  { name: "Experiences", href: "/experiences" },
   { name: "Partner with Gamana", href: "/ecosystem" },
   { name: "Blog", href: "/blog" },
   { name: "About", href: "/about" },

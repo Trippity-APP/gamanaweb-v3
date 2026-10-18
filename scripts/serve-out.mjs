@@ -335,13 +335,13 @@ async function materializeBlogPage(slug) {
 }
 
 /**
- * serve.json rewrites every /cities/:id, /marketplace/{tours,story}/:id (and the
+ * serve.json rewrites every /cities/:id, /marketplace/{tours,story}/:id, /experiences/:slug (and the
  * legacy /explore/... aliases) to a `__spa__` shell, and serve-handler applies
  * rewrites before looking for real files. Pages pre-rendered at build time have
  * their own title, canonical and JSON-LD, so serve those directly and leave the
  * shell for IDs published after the last deploy.
  */
-const PRERENDERED_DETAIL_ROUTE = /^\/(cities|marketplace\/tours|marketplace\/story)\/([^/]+)\/?$/;
+const PRERENDERED_DETAIL_ROUTE = /^\/(cities|marketplace\/tours|marketplace\/story|experiences)\/([^/]+)\/?$/;
 
 function prerenderedDetailPath(pathname) {
   const match = pathname.match(PRERENDERED_DETAIL_ROUTE);

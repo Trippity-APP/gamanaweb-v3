@@ -149,6 +149,14 @@
     {
       "source": "/marketplace/story/:id/",
       "destination": "/marketplace/story/__spa__/index.html"
+    },
+    {
+      "source": "/experiences/:slug",
+      "destination": "/experiences/__spa__/index.html"
+    },
+    {
+      "source": "/experiences/:slug/",
+      "destination": "/experiences/__spa__/index.html"
     }
   ]
 }

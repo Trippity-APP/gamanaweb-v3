@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getAllPosts } from '@/lib/blog';
+import { listAllPublishedExperiences } from '@/lib/experiences/api';
 
 // Required for static export compatibility
 export const dynamic = 'force-static';
@@ -160,7 +161,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  const experiences = await listAllPublishedExperiences();
+  const experienceRoutes = [
+    {
+      url: `${baseUrl}/experiences/`,
+      lastModified: currentDate,
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    },
+    ...experiences
+      .filter((experience) => experience.slug)
+      .map((experience) => {
+        const updated = experience.updated_at ? new Date(experience.updated_at) : null;
+        return {
+          url: `${baseUrl}/experiences/${encodeURIComponent(experience.slug as string)}/`,
+          lastModified: updated && !Number.isNaN(updated.getTime()) ? updated : currentDate,
+          changeFrequency: 'weekly' as const,
+          priority: 0.7,
+        };
+      }),
+  ];
+
   // Combine all routes
-  return [...staticRoutes, ...blogRoutes];
+  return [...staticRoutes, ...experienceRoutes, ...blogRoutes];
 }
 

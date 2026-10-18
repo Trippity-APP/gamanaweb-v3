@@ -18,6 +18,16 @@ export async function generateStaticParams() {
 
 type PageProps = { params: Promise<{ slug: string }> };
 
+/** Non-ASCII slugs (e.g. `santarém-…`) arrive percent-encoded. */
+async function readSlug(params: PageProps["params"]): Promise<string> {
+  const { slug } = await params;
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
+}
+
 function metaDescription(experience: ExperienceDetail): string {
   const base = experience.short_description || experience.description || experience.title;
   const text = base.replace(/\s+/g, " ").trim();
@@ -25,7 +35,7 @@ function metaDescription(experience: ExperienceDetail): string {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const slug = await readSlug(params);
   if (isStaticSpaParam(slug)) {
     return { title: "Experience", description: "Book a local experience with Gamana." };
   }
@@ -81,7 +91,7 @@ function experienceJsonLd(experience: ExperienceDetail, slug: string) {
 }
 
 export default async function ExperienceDetailPage({ params }: PageProps) {
-  const { slug } = await params;
+  const slug = await readSlug(params);
   const experience = isStaticSpaParam(slug) ? null : await getExperienceDetailSafe(slug);
 
   const crumbs = experience
