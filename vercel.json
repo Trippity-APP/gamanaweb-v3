@@ -151,6 +151,14 @@
       "destination": "/marketplace/story/__spa__/index.html"
     },
     {
+      "source": "/place/:id",
+      "destination": "/place/__spa__/index.html"
+    },
+    {
+      "source": "/place/:id/",
+      "destination": "/place/__spa__/index.html"
+    },
+    {
       "source": "/experiences/:slug",
       "destination": "/experiences/__spa__/index.html"
     },

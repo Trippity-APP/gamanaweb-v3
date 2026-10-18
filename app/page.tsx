@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { CategoryTiles } from "@/components/home/CategoryTiles";
 import { AppSpotlight } from "@/components/home/AppSpotlight";
 import { SectionHeader } from "@/components/site/SectionHeader";
+import { ExperiencesRail } from "@/components/experiences/ExperiencesRail";
 import { TrustBar } from "@/components/site/TrustBar";
 import { NarratorRail } from "@/components/site/NarratorRail";
 import { FaqAccordion } from "@/components/site/FaqAccordion";
@@ -97,6 +98,14 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        <ExperiencesRail
+          eyebrow="Local experiences"
+          title="Book an experience"
+          query={{ featured: true, page_size: 12 }}
+          fallbackQuery={{ page_size: 12 }}
+          seeAllHref="/experiences/"
+        />
 
         <FeaturesBento />
 

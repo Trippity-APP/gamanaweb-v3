@@ -30,6 +30,9 @@ export type ExperienceListQuery = {
   duration_min?: number;
   duration_max?: number;
   rating_min?: number;
+  latitude?: number;
+  longitude?: number;
+  radius_km?: number;
 };
 
 export function listExperiences(query: ExperienceListQuery, signal?: AbortSignal) {

@@ -4,6 +4,8 @@ import SiteHeader from '@/components/navigation/site-header';
 import { JsonLd } from '@/components/site/JsonLd';
 import { DownloadBand } from '@/components/site/DownloadBand';
 import { RelatedRail } from '@/components/marketplace/detail/RelatedRail';
+import { ExperiencesRail } from '@/components/experiences/ExperiencesRail';
+import { OpenInAppBanner } from '@/components/handoff/OpenInAppBanner';
 import { breadcrumbJsonLd } from '@/lib/seo';
 import type { Tour } from '@/lib/marketplace-data';
 import Footer from '@/components/navigation/footer';
@@ -77,6 +79,7 @@ export default async function ExploreStoryPage({
   const story = storyId ? await fetchPublicStoryDetailById(storyId) : null;
 
   const city = story?.location.split(',')[0]?.trim() ?? '';
+  const hasCoords = !!story?.coordinates && story.coordinates.some((value) => value !== 0);
   let related: Tour[] = [];
   if (story && city) {
     try {
@@ -91,6 +94,9 @@ export default async function ExploreStoryPage({
     <div className="min-h-screen bg-sand-50">
       <SiteHeader variant="solid" />
       <main>
+        <Suspense fallback={null}>
+          <OpenInAppBanner />
+        </Suspense>
         {story && (
           <JsonLd
             data={breadcrumbJsonLd([
@@ -110,6 +116,17 @@ export default async function ExploreStoryPage({
         >
           <ExploreStoryDetailClient storyId={id} story={story} />
         </Suspense>
+        {story && (hasCoords || city) && (
+          <ExperiencesRail
+            title="Experiences nearby"
+            query={
+              story.coordinates && hasCoords
+                ? { longitude: story.coordinates[0], latitude: story.coordinates[1], radius_km: 25, page_size: 12 }
+                : { city, page_size: 12 }
+            }
+            seeAllHref={city ? `/experiences/?city=${encodeURIComponent(city)}` : '/experiences/'}
+          />
+        )}
         <RelatedRail title={city ? `More audio stories in ${city}` : 'More audio stories'} tours={related} />
         <DownloadBand
           title="Hear every story in the Gamana app"

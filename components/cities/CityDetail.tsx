@@ -8,6 +8,7 @@ import { CardRail } from "@/components/site/CardRail";
 import { DownloadBand } from "@/components/site/DownloadBand";
 import { RelatedRail } from "@/components/marketplace/detail/RelatedRail";
 import { CityCard } from "@/components/cities/CityCard";
+import { ExperiencesRail } from "@/components/experiences/ExperiencesRail";
 import type { Tour } from "@/lib/marketplace-data";
 import type { ApiCity } from "@/lib/services/cityService";
 import { getApiCityImageUrl, getCuratedCityImage, type CityImage } from "@/lib/city-image";
@@ -131,6 +132,12 @@ export function CityDetail({ city, tours, relatedCities = [] }: CityDetailProps)
                     </ul>
                 </div>
             </section>
+
+            <ExperiencesRail
+                title={`Things to do in ${city.name}`}
+                query={{ city: city.name, page_size: 12 }}
+                seeAllHref={`/experiences/?city=${encodeURIComponent(city.name)}`}
+            />
 
             {tours.length > 0 ? (
                 <RelatedRail title={`Audio tours in ${city.name}`} tours={tours} />

@@ -6,6 +6,7 @@ import { ResponsiveSheet } from "@/components/common/ResponsiveSheet";
 import { StoreBadges } from "@/components/site/StoreBadges";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { openInApp } from "@/lib/app-links";
 
 export type AppHandoffContent = {
   title: string;
@@ -46,7 +47,7 @@ export function AppHandoffSheet({ open, onOpenChange, title, steps, note, deepLi
   }, [open]);
 
   const openApp = () => {
-    window.location.href = deepLink;
+    openInApp(deepLink);
     fallbackTimer.current = window.setTimeout(() => {
       if (document.visibilityState === "visible") setShowBadges(true);
     }, 1200);

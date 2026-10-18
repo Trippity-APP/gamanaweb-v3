@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Clock,
   ExternalLink,
+  Headphones,
   Hotel,
   Languages,
   MapPin,
@@ -22,19 +23,19 @@ import {
 } from "@/components/icons";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AvailabilityCard } from "@/components/experiences/AvailabilityCard";
-import { ExperienceCard } from "@/components/experiences/ExperienceCard";
 import { ExperienceReviews } from "@/components/experiences/ExperienceReviews";
+import { ExperiencesRail } from "@/components/experiences/ExperiencesRail";
 import { PriceTag } from "@/components/experiences/PriceTag";
 import { RatingInline } from "@/components/experiences/RatingInline";
 import { WishlistButton } from "@/components/experiences/WishlistButton";
 import { DetailGallery } from "@/components/marketplace/detail/DetailGallery";
-import { CardRail } from "@/components/site/CardRail";
+import { MarketplaceCoverImage } from "@/components/marketplace/marketplace-cover-image";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { ExperienceDetail, ExperienceSummary } from "@/lib/api/schemas/experiences";
-import { getExperienceDetail, listExperiences } from "@/lib/experiences/api";
+import type { ExperienceDetail } from "@/lib/api/schemas/experiences";
+import { getExperienceDetail } from "@/lib/experiences/api";
 import {
   cancellationText,
   confirmationText,
@@ -61,12 +62,21 @@ function resolveSlug(param: string): string {
   return match ? decodeURIComponent(match[1]) : param;
 }
 
+export type LinkedStory = {
+  href: string;
+  title: string;
+  image: string;
+  narrator?: string;
+  duration?: string;
+};
+
 type ExperienceDetailClientProps = {
   slugParam: string;
   initial: ExperienceDetail | null;
+  linkedStory?: LinkedStory | null;
 };
 
-export function ExperienceDetailClient({ slugParam, initial }: ExperienceDetailClientProps) {
+export function ExperienceDetailClient({ slugParam, initial, linkedStory }: ExperienceDetailClientProps) {
   const [experience, setExperience] = useState<ExperienceDetail | null>(initial);
   const [status, setStatus] = useState<"loading" | "ready" | "missing">(initial ? "ready" : "loading");
 
@@ -106,10 +116,10 @@ export function ExperienceDetailClient({ slugParam, initial }: ExperienceDetailC
     );
   }
 
-  return <ExperienceDetailView experience={experience} />;
+  return <ExperienceDetailView experience={experience} linkedStory={linkedStory ?? null} />;
 }
 
-function ExperienceDetailView({ experience }: { experience: ExperienceDetail }) {
+function ExperienceDetailView({ experience, linkedStory }: { experience: ExperienceDetail; linkedStory: LinkedStory | null }) {
   const availability = useAvailability(experience);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const slug = experience.slug ?? experience.id;
@@ -194,6 +204,8 @@ function ExperienceDetailView({ experience }: { experience: ExperienceDetail }) 
               </Section>
             )}
 
+            {linkedStory && <ListenBeforeYouGo story={linkedStory} />}
+
             {experience.highlights.length > 0 && (
               <Section title="Highlights">
                 <CheckList items={experience.highlights} />
@@ -266,7 +278,14 @@ function ExperienceDetailView({ experience }: { experience: ExperienceDetail }) 
         </div>
       </div>
 
-      {experience.city && <MoreInCity city={experience.city} excludeId={experience.id} />}
+      {experience.city && (
+        <ExperiencesRail
+          title={`More experiences in ${experience.city}`}
+          query={{ city: experience.city, page_size: 9 }}
+          seeAllHref={`/experiences/?city=${encodeURIComponent(experience.city)}`}
+          excludeId={experience.id}
+        />
+      )}
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm lg:hidden">
         <div className="flex items-center gap-3">
@@ -477,31 +496,31 @@ function BeforeYouGo({ experience }: { experience: ExperienceDetail }) {
   );
 }
 
-function MoreInCity({ city, excludeId }: { city: string; excludeId: string }) {
-  const [items, setItems] = useState<ExperienceSummary[]>([]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    listExperiences({ city, page_size: 9 }, controller.signal)
-      .then((res) => setItems(res.items.filter((i) => i.id !== excludeId && i.slug).slice(0, 8)))
-      .catch(() => setItems([]));
-    return () => controller.abort();
-  }, [city, excludeId]);
-
-  if (!items.length) return null;
+function ListenBeforeYouGo({ story }: { story: LinkedStory }) {
+  const meta = [story.narrator, story.duration].filter(Boolean).join(" · ");
   return (
-    <section className="section-tight bg-white">
-      <div className="container-site">
-        <h2 className="text-h3 mb-6 text-ink">More experiences in {city}</h2>
-        <CardRail label={`More experiences in ${city}`}>
-          {items.map((item) => (
-            <div key={item.id} className="w-[280px] sm:w-[320px]">
-              <ExperienceCard experience={item} />
-            </div>
-          ))}
-        </CardRail>
-      </div>
-    </section>
+    <Section title="Listen before you go">
+      <Link
+        href={story.href}
+        className="focus-ring group flex items-center gap-4 rounded-3xl bg-white p-3 shadow-card transition-all duration-500 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      >
+        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-sand-100 sm:h-28 sm:w-28">
+          <MarketplaceCoverImage src={story.image} alt="" fill useDefaultFallback className="object-cover" />
+        </div>
+        <div className="min-w-0 flex-1 py-1 pr-2">
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brand-700">
+            <Headphones className="h-3.5 w-3.5" aria-hidden />
+            Audio story
+          </p>
+          <p className="mt-1 line-clamp-2 font-display text-base font-bold leading-snug text-ink group-hover:text-brand-800">
+            {story.title}
+          </p>
+          {meta && <p className="mt-1 text-sm text-ink-soft">{meta}</p>}
+          <p className="mt-2 text-xs text-ink-muted">Unlock it with coins and listen in the Gamana app.</p>
+        </div>
+        <ChevronRight className="h-5 w-5 shrink-0 text-ink-muted transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />
+      </Link>
+    </Section>
   );
 }
 

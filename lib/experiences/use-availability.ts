@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ApiError } from "@/lib/api/client";
 import type { AvailabilitySlot, ExperienceDetail, OrderSummary } from "@/lib/api/schemas/experiences";
 import {
@@ -106,9 +105,6 @@ function monthKey(date: Date) {
 }
 
 export function useAvailability(experience: ExperienceDetail | null) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const slug = experience?.slug ?? null;
 
   const [guests, setGuestsState] = useState<GuestCounts>({});
@@ -132,18 +128,16 @@ export function useAvailability(experience: ExperienceDetail | null) {
   const guestKey = guestsToParam(guests);
   const totalGuests = selections.reduce((a, s) => a + s.quantity, 0);
 
-  const syncUrl = useCallback(
-    (next: { date?: string | null; time?: string | null; guests?: GuestCounts }) => {
-      const params = new URLSearchParams(searchParams.toString());
-      const set = (key: string, value: string | null | undefined) => (value ? params.set(key, value) : params.delete(key));
-      if ("date" in next) set("date", next.date);
-      if ("time" in next) set("time", next.time);
-      if (next.guests) set("g", guestsToParam(next.guests));
-      const qs = params.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    },
-    [pathname, router, searchParams]
-  );
+  const syncUrl = useCallback((next: { date?: string | null; time?: string | null; guests?: GuestCounts }) => {
+    const params = new URLSearchParams(window.location.search);
+    const set = (key: string, value: string | null | undefined) => (value ? params.set(key, value) : params.delete(key));
+    if ("date" in next) set("date", next.date);
+    if ("time" in next) set("time", next.time);
+    if (next.guests) set("g", guestsToParam(next.guests));
+    const qs = params.toString();
+    const { pathname } = window.location;
+    window.history.replaceState(window.history.state, "", qs ? `${pathname}?${qs}` : pathname);
+  }, []);
 
   const resetResults = () => {
     setPhase("idle");
@@ -157,6 +151,7 @@ export function useAvailability(experience: ExperienceDetail | null) {
   useEffect(() => {
     if (!experience || restored.current) return;
     restored.current = true;
+    const searchParams = new URLSearchParams(window.location.search);
     const fromUrl = parseGuestParam(searchParams.get("g"), experience);
     setGuestsState(fromUrl ?? initialGuests(experience));
     const urlDate = searchParams.get("date");
@@ -166,7 +161,7 @@ export function useAvailability(experience: ExperienceDetail | null) {
       setVisibleMonth(parsed);
       setTimeState(searchParams.get("time"));
     }
-  }, [experience, searchParams]);
+  }, [experience]);
 
   const setGuest = (unitId: string, quantity: number) => {
     if (!experience) return;

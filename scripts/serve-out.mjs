@@ -387,6 +387,18 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
+    // Apple won't follow serve-handler's trailing-slash redirect for an extensionless file.
+    if (pathname === "/.well-known/apple-app-site-association" || pathname === "/apple-app-site-association") {
+      const body = fs.readFileSync(path.join(OUT, ".well-known", "apple-app-site-association"));
+      response.writeHead(200, {
+        "Content-Type": "application/json",
+        "Content-Length": body.length,
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      });
+      response.end(body);
+      return;
+    }
+
     // Always serve a live sitemap so newly published CMS posts are indexed
     // without waiting for the next Railway build.
     if (pathname === "/sitemap.xml") {

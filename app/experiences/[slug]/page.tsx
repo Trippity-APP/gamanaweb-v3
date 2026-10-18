@@ -3,10 +3,11 @@ import { Suspense } from "react";
 import SiteHeader from "@/components/navigation/site-header";
 import Footer from "@/components/navigation/footer";
 import { JsonLd } from "@/components/site/JsonLd";
-import { ExperienceDetailClient } from "@/components/experiences/ExperienceDetailClient";
+import { ExperienceDetailClient, type LinkedStory } from "@/components/experiences/ExperienceDetailClient";
 import type { ExperienceDetail } from "@/lib/api/schemas/experiences";
 import { getExperienceDetailSafe, listAllPublishedExperiences } from "@/lib/experiences/api";
 import { coverImage, experienceHref, galleryImages, locationLabel } from "@/lib/experiences/format";
+import { fetchPublicStoryDetailById, getDefaultTourImage, getTourHref } from "@/lib/marketplace-api";
 import { absoluteUrl, breadcrumbJsonLd } from "@/lib/seo";
 import { STATIC_SPA_PARAM, isStaticSpaParam } from "@/lib/static-spa";
 
@@ -57,6 +58,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+/** Build-time only: reuses the public story catalog the story pages already load. */
+async function resolveLinkedStory(id: string): Promise<LinkedStory | null> {
+  try {
+    const story = await fetchPublicStoryDetailById(id);
+    if (!story) return null;
+    return {
+      href: getTourHref(story),
+      title: story.title,
+      image: story.image || getDefaultTourImage(),
+      narrator: story.narrator || undefined,
+      duration: story.duration || undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function experienceJsonLd(experience: ExperienceDetail, slug: string) {
   const url = absoluteUrl(experienceHref(slug));
   const images = galleryImages(experience).slice(0, 6);
@@ -93,6 +111,7 @@ function experienceJsonLd(experience: ExperienceDetail, slug: string) {
 export default async function ExperienceDetailPage({ params }: PageProps) {
   const slug = await readSlug(params);
   const experience = isStaticSpaParam(slug) ? null : await getExperienceDetailSafe(slug);
+  const linkedStory = experience?.linked_story_id ? await resolveLinkedStory(experience.linked_story_id) : null;
 
   const crumbs = experience
     ? [
@@ -115,7 +134,7 @@ export default async function ExperienceDetailPage({ params }: PageProps) {
           </>
         )}
         <Suspense fallback={null}>
-          <ExperienceDetailClient slugParam={slug} initial={experience} />
+          <ExperienceDetailClient slugParam={slug} initial={experience} linkedStory={linkedStory} />
         </Suspense>
       </main>
       <Footer />
