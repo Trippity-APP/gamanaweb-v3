@@ -12,15 +12,12 @@ import {
 import { AudioWalkActionCard } from '@/components/marketplace/walk-detail/AudioWalkActionCard';
 import { AudioWalkMobileCTA } from '@/components/marketplace/walk-detail/AudioWalkMobileCTA';
 import { TourRouteTimeline } from '@/components/marketplace/walk-detail/TourRouteTimeline';
-import { useAccount } from '@/lib/account-context';
 import {
   clearMarketplaceCache,
   fetchPublicWalkDetailById,
 } from '@/lib/marketplace-api';
 import type { WalkDetail } from '@/lib/marketplace-data';
 import { isStaticSpaParam } from '@/lib/static-spa';
-
-const ACCESS_WINDOW_DAYS = 30;
 
 function resolveTourId(paramId: string): string {
   if (!isStaticSpaParam(paramId)) return paramId;
@@ -33,20 +30,12 @@ function isObjectId(id: string): boolean {
   return /^[a-f0-9]{24}$/i.test(id);
 }
 
-function getDaysLeft(unlockedAt: string): number {
-  const expiry = new Date(unlockedAt);
-  expiry.setDate(expiry.getDate() + ACCESS_WINDOW_DAYS);
-  const diff = expiry.getTime() - Date.now();
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-}
-
 type AudioWalkDetailProps = {
   tourId: string;
   walk: WalkDetail | null;
 };
 
 export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: AudioWalkDetailProps) {
-  const { isUnlocked, unlockedItems } = useAccount();
   const pathname = usePathname();
   const backHref = getExploreBackHref(pathname);
   const [walk, setWalk] = useState<WalkDetail | null>(initialWalk);
@@ -88,19 +77,10 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
     void loadWalkById(resolved);
   }, [paramTourId, initialWalk]);
 
-  const unlockState = useMemo(() => {
-    if (!walk) return 'locked' as const;
-    if (walk.price === 0) return 'free' as const;
-    if (isUnlocked(walk.id, 'tour')) return 'unlocked' as const;
-    return 'locked' as const;
-  }, [walk, isUnlocked]);
-
-  const daysLeft = useMemo(() => {
-    if (!walk || unlockState !== 'unlocked') return null;
-    const unlocked = unlockedItems.find((item) => item.id === walk.id && item.type === 'tour');
-    if (!unlocked?.unlockedAt) return null;
-    return getDaysLeft(unlocked.unlockedAt);
-  }, [walk, unlockState, unlockedItems]);
+  const unlockState = useMemo(
+    () => (walk?.price === 0 ? ('free' as const) : ('locked' as const)),
+    [walk],
+  );
 
   const retry = () => {
     clearMarketplaceCache();
@@ -139,14 +119,13 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
       <div className="container-site pb-28 pt-6 sm:pt-8 lg:pb-12">
         <ExploreDetailBreadcrumb title={walk.title} />
 
-        <AudioWalkHero walk={walk} unlockState={unlockState} daysLeft={daysLeft} />
+        <AudioWalkHero walk={walk} unlockState={unlockState} />
 
         {/* Action card visible on mobile/tablet before route */}
         <div className="mt-6 lg:hidden">
           <AudioWalkActionCard
             walk={walk}
             unlockState={unlockState}
-            daysLeft={daysLeft}
           />
         </div>
 
@@ -157,7 +136,6 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
             <AudioWalkActionCard
               walk={walk}
               unlockState={unlockState}
-              daysLeft={daysLeft}
             />
           </aside>
         </div>

@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CityAutocomplete } from "@/components/CityAutocomplete";
-import { useAccount } from "@/lib/account-context";
+import { useJourney } from "@/lib/journey-context";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import {
@@ -126,7 +126,7 @@ function StepShell({
 }
 
 export default function StartYourJourneyPage() {
-  const { login, updateJourney } = useAccount();
+  const { updateJourney } = useJourney();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>(initialAnswers);
   const [saveBanner, setSaveBanner] = useState({
@@ -258,20 +258,10 @@ export default function StartYourJourneyPage() {
   });
 
   // Hand off a light personalization signal to the marketplace so it can greet the user
-  // with what they told us. Prototype stand-in for a real account/session — once real
-  // accounts exist, this becomes a server-side profile instead of localStorage.
+  // with what they told us (held in memory for this visit only).
   useEffect(() => {
     if (step !== STEP_CONFIRMATION) return;
     updateJourney(buildJourneyPayload());
-    if (answers.authMethod) {
-      const loginEmail =
-        answers.authMethod === "email"
-          ? answers.email.trim() || "you@example.com"
-          : answers.authMethod === "google"
-          ? "you@gmail.com"
-          : "you@icloud.com";
-      login(loginEmail, answers.authMethod, answers.fullName.trim() || undefined);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
@@ -388,7 +378,6 @@ export default function StartYourJourneyPage() {
                     type="button"
                     variant="outline"
                     onClick={() => {
-                      login("you@gmail.com", "google");
                       updateJourney(buildJourneyPayload());
                       setSaveBanner((prev) => ({ ...prev, email: "you@gmail.com", saved: true }));
                     }}
@@ -403,7 +392,6 @@ export default function StartYourJourneyPage() {
                     type="button"
                     variant="outline"
                     onClick={() => {
-                      login("you@icloud.com", "apple");
                       updateJourney(buildJourneyPayload());
                       setSaveBanner((prev) => ({ ...prev, email: "you@icloud.com", saved: true }));
                     }}
@@ -445,7 +433,6 @@ export default function StartYourJourneyPage() {
                 onClick={() => {
                   if (!saveBanner.email.trim()) return;
                   setAnswers((prev) => ({ ...prev, email: saveBanner.email.trim() }));
-                  login(saveBanner.email.trim(), "email");
                   updateJourney(buildJourneyPayload());
                   setSaveBanner((prev) => ({ ...prev, saved: true }));
                 }}

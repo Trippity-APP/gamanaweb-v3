@@ -21,7 +21,7 @@ import { Drawer as DrawerPrimitive } from "vaul";
 import { categoryNavItems, companyNavItems, featureItems } from "@/lib/data/nav-config";
 import { FEATURED_CITIES } from "@/lib/data/home";
 import { cn } from "@/lib/utils";
-import { useAccount } from "@/lib/account-context";
+import { useAuth } from "@/lib/auth/auth-context";
 import { AccountMenu } from "@/components/navigation/AccountMenu";
 import { StoreBadges } from "@/components/site/StoreBadges";
 import { HeroCitySearch } from "@/components/HeroCitySearch";
@@ -57,8 +57,8 @@ interface SiteHeaderProps {
 
 export default function SiteHeader({ variant = "solid", search, searchAnchorId }: SiteHeaderProps) {
   const pathname = normalize(usePathname() || "/");
-  const { account } = useAccount();
-  const loggedIn = !!account;
+  const { status } = useAuth();
+  const loggedIn = status === "authenticated";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -387,7 +387,7 @@ function MobileDrawer({
   isActive: (href: string) => boolean;
 }) {
   const pathname = normalize(usePathname() || "/");
-  const { account, coinBalance, logout } = useAccount();
+  const { status, balance, logout } = useAuth();
   const close = () => onOpenChange(false);
   const moreLinks = companyNavItems.filter((i) => ["/about", "/faq", "/contact"].includes(i.href));
 
@@ -495,23 +495,20 @@ function MobileDrawer({
               </ul>
             </DrawerSection>
 
-            {account && (
+            {status === "authenticated" && (
               <div className="mt-3 space-y-1 border-t border-ink/5 pt-3">
                 <Link href="/pricing/" onClick={close} className={cn(drawerItem(false), "justify-start")}>
                   <GamanaCoinIcon className="h-6 w-6" aria-hidden />
                   <span className="flex-1">Gamana Coins</span>
-                  <span className="rounded-full bg-sand-100 px-3 py-1 text-sm font-bold text-ink">{coinBalance.toLocaleString()}</span>
+                  <span className="rounded-full bg-sand-100 px-3 py-1 text-sm font-bold text-ink">{(balance ?? 0).toLocaleString()}</span>
                 </Link>
-                <Link href="/account" onClick={close} className={drawerItem(isActive("/account"))}>
-                  Profile &amp; settings
-                </Link>
-                <Link href="/account#bookings" onClick={close} className={drawerItem(false)}>
-                  My bookings
+                <Link href="/account/" onClick={close} className={drawerItem(isActive("/account"))}>
+                  My account
                 </Link>
                 <button
                   type="button"
                   onClick={() => {
-                    logout();
+                    void logout();
                     close();
                   }}
                   className={cn(drawerItem(false), "text-red-700")}

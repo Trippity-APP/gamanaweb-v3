@@ -5,8 +5,8 @@ import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import SideRail from "@/components/side-rail";
 import { SkipLink } from "@/components/site/SkipLink";
-import { CartProvider } from "@/lib/cart-context";
-import { AccountProvider } from "@/lib/account-context";
+import { AuthProvider } from "@/lib/auth/auth-context";
+import { JourneyProvider } from "@/lib/journey-context";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 // Display face for headings on redesigned pages, reached via Tailwind's `font-display`.
@@ -124,12 +124,12 @@ export default function RootLayout({
         </noscript>
         {/* End Google Tag Manager (noscript) */}
         <SkipLink />
-        <AccountProvider>
-          <CartProvider>
+        <AuthProvider>
+          <JourneyProvider>
             {children}
             <SideRail />
-          </CartProvider>
-        </AccountProvider>
+          </JourneyProvider>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

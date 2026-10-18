@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
-import { useAccount } from '@/lib/account-context';
+import { useAuth } from '@/lib/auth/auth-context';
 
 type Category = 'destination' | 'bug' | 'idea' | 'other';
 
@@ -28,7 +28,7 @@ const FEEDBACK_KEY = 'gamanaFeedback';
  * Experiences cart buttons in the bottom-right.
  */
 export function FeedbackWidget() {
-  const { account } = useAccount();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<Category | null>(null);
   const [message, setMessage] = useState('');
@@ -37,7 +37,7 @@ export function FeedbackWidget() {
   // Deliberately NOT gated on login. Signed-out visitors are the ones most likely to
   // bounce over a missing destination or a confusing flow, so they're exactly the input
   // worth capturing — gating this behind an account filtered out the most
-  // decision-relevant feedback. account?.email is still attached when it's available.
+  // decision-relevant feedback. user?.email is still attached when it's available.
   const reset = () => {
     setCategory(null);
     setMessage('');
@@ -52,7 +52,7 @@ export function FeedbackWidget() {
       existing.unshift({
         category,
         message: message.trim(),
-        email: account?.email,
+        email: user?.email || undefined,
         submittedAt: new Date().toISOString(),
       });
       window.localStorage.setItem(FEEDBACK_KEY, JSON.stringify(existing));

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { MapPinOff, Check, ArrowRight } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAccount } from '@/lib/account-context';
+import { useAuth } from '@/lib/auth/auth-context';
 
 const CITY_REQUESTS_KEY = 'gamanaCityRequests';
 
@@ -35,7 +35,8 @@ export type CityRequest = {
  * would route these to the team — until then, requests stay on the visitor's own machine.
  */
 export function CityNotCovered({ city, source }: { city: string; source: string }) {
-  const { account } = useAccount();
+  const { user } = useAuth();
+  const accountEmail = user?.email || '';
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
@@ -46,7 +47,7 @@ export function CityNotCovered({ city, source }: { city: string; source: string 
     setEmail('');
   }, [city]);
 
-  const effectiveEmail = email.trim() || account?.email || '';
+  const effectiveEmail = email.trim() || accountEmail;
   // Deliberately loose — this is a "tell me when it's ready" field, not an auth flow, so
   // it only catches obvious typos rather than rejecting unusual but valid addresses.
   const emailLooksValid = !effectiveEmail || /^\S+@\S+\.\S+$/.test(effectiveEmail);
@@ -116,7 +117,7 @@ export function CityNotCovered({ city, source }: { city: string; source: string 
       </p>
 
       <div className="mx-auto mt-5 flex max-w-md flex-col gap-2 sm:flex-row">
-        {!account && (
+        {!accountEmail && (
           <Input
             type="email"
             inputMode="email"
@@ -140,10 +141,10 @@ export function CityNotCovered({ city, source }: { city: string; source: string 
       <p className="mt-2 text-xs text-gray-400">
         {!emailLooksValid
           ? 'That email doesn’t look right, check it, or clear it to request anyway.'
-          : account
+          : accountEmail
             // Signed-in visitors get told which address this will use, rather than having
             // it taken silently just because the input is hidden for them.
-            ? `We’ll notify ${account.email}.`
+            ? `We’ll notify ${accountEmail}.`
             : 'Email is optional, the request still counts without it.'}
       </p>
 

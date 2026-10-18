@@ -13,8 +13,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CityAutocomplete } from "@/components/CityAutocomplete";
 import { OptionCard } from "@/components/personalization/OptionCard";
 import { Chip } from "@/components/personalization/Chip";
-import { useAccount } from "@/lib/account-context";
-import type { SavedJourney } from "@/lib/account-context";
+import { useAuth } from "@/lib/auth/auth-context";
+import { hasSavedJourney, useJourney, type SavedJourney } from "@/lib/journey-context";
 import {
   type Corridor,
   type Depth,
@@ -75,7 +75,8 @@ function draftFromJourney(journey: SavedJourney | null): Draft {
  * components/personalization/*) so the two editing surfaces can't drift apart.
  */
 export function PersonalizationEditor() {
-  const { journey, updateJourney, account } = useAccount();
+  const { journey, updateJourney } = useJourney();
+  const { user } = useAuth();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Draft>(() => draftFromJourney(journey));
   const [justSaved, setJustSaved] = useState(false);
@@ -188,13 +189,7 @@ export function PersonalizationEditor() {
     setJustSaved(true);
   };
 
-  const hasAnyJourney = Boolean(
-    journey &&
-      (journey.homeLocation ||
-        journey.corridor ||
-        journey.groupType ||
-        (journey.interestLabels && journey.interestLabels.length > 0))
-  );
+  const hasAnyJourney = hasSavedJourney(journey);
 
   // --- Read-only summary view ---
   if (!editing) {
@@ -365,7 +360,7 @@ export function PersonalizationEditor() {
               <div className="flex items-center gap-2">
                 {i === 0 ? (
                   <p className="flex-1 text-sm font-semibold text-gray-900 py-2">
-                    {account?.fullName?.trim() || "You"}
+                    {user?.firstName?.trim() || "You"}
                   </p>
                 ) : (
                   <Input

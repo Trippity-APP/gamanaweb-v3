@@ -2,12 +2,12 @@
 
 import { JourneyGreeting } from "@/components/JourneyGreeting";
 import { JourneyCTA } from "@/components/marketplace/JourneyCTA";
-import { useAccount } from "@/lib/account-context";
+import { useAuth } from "@/lib/auth/auth-context";
 
 export function MarketplaceSignedInHeroExtras() {
-  const { account } = useAccount();
+  const { status } = useAuth();
 
-  if (!account) return null;
+  if (status !== "authenticated") return null;
 
   return (
     <>
