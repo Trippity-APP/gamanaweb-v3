@@ -27,13 +27,14 @@ const SPA_HTML = path.join(OUT, "blog", "__spa__", "index.html");
 
 const require = createRequire(import.meta.url);
 
-// Same target as the /api/v1 rewrite in next.config.js. The browser calls the
+// Same target as the /api/v1 and /api/v2 rewrites in next.config.js. The browser calls the
 // API same-origin (lib/api-base-url.ts) to avoid CORS, so production must proxy it too.
+// Upstream headers (including Set-Cookie for the web refresh cookie) pass through unchanged.
 const API_PROXY_TARGET = new URL(
   process.env.API_PROXY_TARGET ||
     process.env.NEXT_PUBLIC_MARKETPLACE_API_URL?.replace(/\/api\/v1\/?$/, "") ||
     process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, "") ||
-    "https://apidev.gamana.app"
+    "https://api-beta.gamana.app"
 );
 
 function proxyApi(request, response) {
@@ -381,7 +382,7 @@ const server = http.createServer(async (request, response) => {
     const url = new URL(request.url || "/", `http://${host}`);
     const pathname = url.pathname.replace(/\/+$/, "") || "/";
 
-    if (url.pathname.startsWith("/api/v1/")) {
+    if (url.pathname.startsWith("/api/v1/") || url.pathname.startsWith("/api/v2/")) {
       proxyApi(request, response);
       return;
     }

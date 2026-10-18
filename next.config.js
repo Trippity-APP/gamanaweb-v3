@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const DEFAULT_API_PROXY_TARGET = "https://apidev.gamana.app";
+const DEFAULT_API_PROXY_TARGET = "https://api-beta.gamana.app";
 
 const apiProxyTarget =
   process.env.API_PROXY_TARGET ||
@@ -37,6 +37,10 @@ const nextConfig = {
       {
         source: "/api/v1/:path*",
         destination: `${apiProxyTarget}/api/v1/:path*`,
+      },
+      {
+        source: "/api/v2/:path*",
+        destination: `${apiProxyTarget}/api/v2/:path*`,
       },
     ];
   },
