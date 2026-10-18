@@ -26,6 +26,8 @@ export interface SavedJourney {
   walkingTolerance?: string | null;
   heatSensitive?: boolean;
   additionalNotes?: string;
+  /** City used to personalize the home page (`travel_profile.home_city`). */
+  homeCity?: string;
   /** Derived display label list, kept for the marketplace's JourneyGreeting banner. */
   interestLabels?: string[];
   savedAt?: string;
@@ -53,6 +55,7 @@ export function hasSavedJourney(journey: SavedJourney | null): boolean {
   return Boolean(
     journey &&
       (journey.homeLocation ||
+        journey.homeCity ||
         journey.corridor ||
         journey.groupType ||
         (journey.interestLabels && journey.interestLabels.length > 0)),

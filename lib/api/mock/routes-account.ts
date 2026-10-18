@@ -187,7 +187,7 @@ export const accountRoutes: MockRoute[] = [
     fallback: true,
     handle: ({ params }) => {
       const code = params.code.toUpperCase();
-      return ok({ country_code: code, numbers: SOS[code] ?? [{ label: "All emergencies", number: "112" }] });
+      return ok({ countryCode: code, fallback: "112", services: SOS[code] ?? [{ label: "All emergencies", number: "112" }] });
     },
   },
   {

@@ -13,7 +13,7 @@ export default function LoginPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main" className="bg-sand-50 pb-16 pt-28 lg:pt-36">
+      <main id="main" className="bg-sand-50 py-12 lg:py-16">
         <div className="container-site flex justify-center">
           <LoginPageClient />
         </div>

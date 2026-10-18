@@ -42,6 +42,7 @@ interface Draft {
   walkingTolerance: string | null;
   heatSensitive: boolean;
   additionalNotes: string;
+  homeCity: string;
 }
 
 function draftFromJourney(journey: SavedJourney | null): Draft {
@@ -65,6 +66,7 @@ function draftFromJourney(journey: SavedJourney | null): Draft {
     walkingTolerance: journey?.walkingTolerance ?? null,
     heatSensitive: journey?.heatSensitive ?? false,
     additionalNotes: journey?.additionalNotes || "",
+    homeCity: journey?.homeCity || "",
   };
 }
 
@@ -74,12 +76,14 @@ function draftFromJourney(journey: SavedJourney | null): Draft {
  * and picker components as the wizard (lib/personalization.ts,
  * components/personalization/*) so the two editing surfaces can't drift apart.
  */
-export function PersonalizationEditor() {
+export function PersonalizationEditor({ onSave }: { onSave?: (journey: SavedJourney) => Promise<void> } = {}) {
   const { journey, updateJourney } = useJourney();
   const { user } = useAuth();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Draft>(() => draftFromJourney(journey));
   const [justSaved, setJustSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const startEditing = () => {
     setDraft(draftFromJourney(journey));
@@ -164,12 +168,12 @@ export function PersonalizationEditor() {
     });
   };
 
-  const save = () => {
+  const save = async () => {
     const groupInterestIds = Array.from(new Set(draft.travelerProfiles.flatMap((p) => p.interests)));
     const interestLabels = groupInterestIds
       .map((id) => interestCategoryOptions.find((c) => c.id === id)?.label)
       .filter((l): l is string => Boolean(l));
-    updateJourney({
+    const next: SavedJourney = {
       homeLocation: draft.homeLocation,
       corridor: draft.corridor,
       groupType: draft.groupType,
@@ -182,9 +186,23 @@ export function PersonalizationEditor() {
       walkingTolerance: draft.walkingTolerance,
       heatSensitive: draft.heatSensitive,
       additionalNotes: draft.additionalNotes,
+      homeCity: draft.homeCity.trim() || undefined,
       interestLabels,
       savedAt: new Date().toISOString(),
-    });
+    };
+    setSaveError("");
+    if (onSave) {
+      setSaving(true);
+      try {
+        await onSave(next);
+      } catch {
+        setSaveError("Couldn't save your preferences. Please try again.");
+        return;
+      } finally {
+        setSaving(false);
+      }
+    }
+    updateJourney(next);
     setEditing(false);
     setJustSaved(true);
   };
@@ -203,6 +221,9 @@ export function PersonalizationEditor() {
           <div className="space-y-2 text-sm text-gray-600">
             {journey?.homeLocation && (
               <p><span className="text-gray-400">Home base:</span> {journey.homeLocation}</p>
+            )}
+            {journey?.homeCity && (
+              <p><span className="text-gray-400">Home city for recommendations:</span> {journey.homeCity}</p>
             )}
             {journey?.groupType && (
               <p><span className="text-gray-400">Usually travels:</span> {journey.groupType}</p>
@@ -265,6 +286,18 @@ export function PersonalizationEditor() {
             />
           ))}
         </div>
+      </div>
+
+      {/* Home city (drives the personalized home page) */}
+      <div className="space-y-3">
+        <Label htmlFor="pz-home-city">Home city for recommendations</Label>
+        <p className="text-xs text-gray-500">We use this to pick stories and experiences for your home page.</p>
+        <CityAutocomplete
+          id="pz-home-city"
+          placeholder="e.g. Jaipur, India"
+          value={draft.homeCity}
+          onChange={(value) => update("homeCity", value)}
+        />
       </div>
 
       {/* Group */}
@@ -524,13 +557,16 @@ export function PersonalizationEditor() {
       </div>
 
       <div className="flex gap-2 pt-2 border-t border-gray-100">
-        <Button onClick={save} className="bg-gradient-to-r from-[#159895] to-[#1A5F7A]">
-          Save changes
+        <Button onClick={() => void save()} disabled={saving} className="bg-gradient-to-r from-[#159895] to-[#1A5F7A]">
+          {saving ? "Saving…" : "Save changes"}
         </Button>
         <Button variant="outline" onClick={() => setEditing(false)}>
           Cancel
         </Button>
       </div>
+      <p role="status" aria-live="polite" className="text-sm font-medium text-red-700">
+        {saveError}
+      </p>
       {groupInterestIds.length === 0 && (
         <p className="text-[11px] text-gray-400">
           Tip: give at least one traveler an interest so we have something to personalize around.
