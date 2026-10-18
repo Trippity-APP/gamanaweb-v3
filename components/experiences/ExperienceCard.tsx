@@ -25,7 +25,15 @@ const BADGE_TONE = {
 
 type CardExperience = ExperienceSummary & { is_wishlisted?: boolean | null; cancellation_policy?: string | null; is_cancellable?: boolean | null };
 
-export function ExperienceCard({ experience, className }: { experience: CardExperience; className?: string }) {
+export function ExperienceCard({
+  experience,
+  className,
+  onWishlistChange,
+}: {
+  experience: CardExperience;
+  className?: string;
+  onWishlistChange?: (saved: boolean) => void;
+}) {
   if (!experience.slug) return null;
   const badge = cardBadge(experience);
   const location = locationLabel(experience);
@@ -57,7 +65,7 @@ export function ExperienceCard({ experience, className }: { experience: CardExpe
             {badge.label}
           </span>
         )}
-        <WishlistButton experienceRef={experience.slug} initial={experience.is_wishlisted} className="absolute right-4 top-4" />
+        <WishlistButton experienceRef={experience.slug} initial={experience.is_wishlisted} onChange={onWishlistChange} className="absolute right-4 top-4" />
       </div>
       <div className="flex flex-1 flex-col p-5">
         {location && (

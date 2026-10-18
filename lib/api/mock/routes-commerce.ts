@@ -246,7 +246,16 @@ export const commerceRoutes: MockRoute[] = [
     method: "GET",
     path: "/experiences/review-tags",
     fallback: true,
-    handle: () => ok({ tags: ["Great guide", "Good value", "Punctual", "Beautiful views", "Well organised", "Family friendly", "Authentic", "Fun", "Informative", "Safe"] }),
+    handle: () => ({
+      status: 200,
+      body: {
+        success: true,
+        tags: ["Guide was great", "Great value", "Culturally insightful", "Well organised", "Would go again"].map((label) => ({
+          id: label.toLowerCase().replace(/\s+/g, "_"),
+          label,
+        })),
+      },
+    }),
   },
   {
     method: "POST",

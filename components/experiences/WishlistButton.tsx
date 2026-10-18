@@ -3,6 +3,7 @@
 import { useEffect, useState, type MouseEvent } from "react";
 import { toast } from "sonner";
 import { Heart } from "@/components/icons";
+import { track } from "@/lib/analytics";
 import { apiFetch } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/auth-context";
 import { webAccountsEnabled } from "@/lib/flags";
@@ -13,9 +14,11 @@ type WishlistButtonProps = {
   initial?: boolean | null;
   className?: string;
   variant?: "overlay" | "inline";
+  /** Called after the server accepts the change. */
+  onChange?: (saved: boolean) => void;
 };
 
-export function WishlistButton({ experienceRef, initial, className, variant = "overlay" }: WishlistButtonProps) {
+export function WishlistButton({ experienceRef, initial, className, variant = "overlay", onChange }: WishlistButtonProps) {
   const { status, openLogin } = useAuth();
   const [saved, setSaved] = useState(!!initial);
   const [busy, setBusy] = useState(false);
@@ -40,6 +43,8 @@ export function WishlistButton({ experienceRef, initial, className, variant = "o
         method: next ? "POST" : "DELETE",
         auth: "required",
       });
+      track("wishlist_toggle", { saved: next });
+      onChange?.(next);
     } catch {
       setSaved(!next);
       toast.error("Couldn't update your wishlist. Try again.");

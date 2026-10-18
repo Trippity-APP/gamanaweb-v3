@@ -84,7 +84,7 @@ export default function WalletPage() {
       setHasNext(res.hasNext);
       setPage(page + 1);
     } catch {
-      toast({ title: "Couldn't load more activity", description: "Please try again." });
+      toast({ title: "Couldn't load more activity", description: "Please try again.", variant: "destructive" });
     } finally {
       setLoadingMore(false);
     }
