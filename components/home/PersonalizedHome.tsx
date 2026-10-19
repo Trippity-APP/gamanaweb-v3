@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CardRail } from "@/components/site/CardRail";
 import { SectionHeader } from "@/components/site/SectionHeader";
 import { TourCard } from "@/components/site/TourCard";
-import { CoinChip } from "@/components/account/CoinChip";
+import { UnlockCard } from "@/components/account/UnlockCard";
 import { CityAutocomplete } from "@/components/CityAutocomplete";
 import { ExperienceCard } from "@/components/experiences/ExperienceCard";
 import { ExperiencesRail } from "@/components/experiences/ExperiencesRail";
@@ -20,18 +20,19 @@ import { apiFetch } from "@/lib/api/client";
 import { hasSessionHint } from "@/lib/api/session";
 import { experienceSummarySchema, type ExperienceSummary } from "@/lib/api/schemas/experiences";
 import type { BookingSummary } from "@/lib/api/schemas/bookings";
+import type { LibraryUnlock } from "@/lib/api/schemas/library";
 import { bookingId, fetchBookings, isUpcoming, listOf } from "@/lib/account/api";
 import { fetchPersonalization, narratorLanguages, type PersonalizationDoc } from "@/lib/account/personalization";
 import { useAuth } from "@/lib/auth/auth-context";
 import { detectPricingCurrency } from "@/lib/coin-pricing";
 import { formatDateLabel, formatTimeLabel } from "@/lib/experiences/format";
 import { cityLabel, readLastCity, writeLastCity } from "@/lib/home/last-city";
-import { isExpired, useLibrary } from "@/lib/library/library-context";
+import { isExpired, unlockTargetId, useLibrary } from "@/lib/library/library-context";
 import {
+  cityCatalog,
   getDefaultTourImage,
   getTourHref,
   mapStorylistToTour,
-  tourMatchesCity,
   type ApiStorylist,
 } from "@/lib/marketplace-api";
 import type { SearchTour, Tour } from "@/lib/marketplace-data";
@@ -82,7 +83,7 @@ export function PersonalizedHome() {
   return <Feed />;
 }
 
-/** Wraps marketing blocks that only make sense for visitors (hero, category tiles). */
+/** Wraps marketing blocks that only make sense for visitors; signed-in users get the feed only. */
 export function AnonymousOnly({ children }: { children: ReactNode }) {
   const { status } = useAuth();
   const [hint, setHint] = useState(false);
@@ -95,16 +96,25 @@ export function AnonymousOnly({ children }: { children: ReactNode }) {
 
 function FeedSkeleton() {
   return (
-    <div className="section-tight bg-sand-50" role="status" aria-label="Loading your home">
-      <div className="container-site space-y-8">
-        <Skeleton className="h-10 w-72 rounded-xl" />
-        <Skeleton className="h-28 rounded-3xl" />
-        <div className="flex gap-5 overflow-hidden">
-          {Array.from({ length: 4 }, (_, i) => (
-            <Skeleton key={i} className="h-72 w-[260px] shrink-0 rounded-3xl sm:w-[300px]" />
-          ))}
+    <div role="status" aria-label="Loading your home">
+      <div className="section-tight bg-sand-50">
+        <div className="container-site space-y-4">
+          <Skeleton className="h-10 w-72 rounded-xl" />
+          <Skeleton className="h-6 w-48 rounded-xl" />
         </div>
       </div>
+      {[0, 1].map((row) => (
+        <div key={row} className="section-tight border-t border-ink/5 bg-white">
+          <div className="container-site space-y-6">
+            <Skeleton className="h-8 w-64 rounded-xl" />
+            <div className="flex gap-5 overflow-hidden">
+              {Array.from({ length: 4 }, (_, i) => (
+                <Skeleton key={i} className="h-72 w-[260px] shrink-0 rounded-3xl sm:w-[300px]" />
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -193,15 +203,40 @@ function Feed() {
   };
 
   const languages = doc ? narratorLanguages(doc) : [];
+  const { places: unlockedPlaces, tours: unlockedTours } = useLibrary();
+  const [catalog, setCatalog] = useState<SearchTour[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadSearchCatalog()
+      .then((all) => !cancelled && setCatalog(all))
+      .catch(() => !cancelled && setCatalog([]));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const inCity = useMemo(
+    () => (place?.city && catalog ? cityCatalog(catalog, place.city, SHELF_SIZE) : { tours: [], stories: [] }),
+    [catalog, place?.city],
+  );
+
+  const exclude = useMemo(() => {
+    const ids = new Set<string>();
+    for (const u of [...(unlockedPlaces ?? []), ...(unlockedTours ?? [])]) ids.add(unlockTargetId(u));
+    for (const t of [...inCity.tours, ...inCity.stories]) ids.add(t.id);
+    return ids;
+  }, [unlockedPlaces, unlockedTours, inCity]);
 
   return (
     <div>
       <Welcome place={place} onCityChange={changeCity} />
       <NextExperience />
+      <YourCollection />
       {place && (
         <>
-          <PickedForYou city={place.city} languages={languages} />
-          {place.city && <InCity city={place.city} />}
+          {place.city && <InCityShelves city={place.city} tours={inCity.tours} stories={inCity.stories} />}
+          <PickedForYou city={place.city} languages={languages} catalog={catalog} exclude={exclude} />
           <Tracked shelf="experiences">
             <ExperiencesRail
               eyebrow="Book a local experience"
@@ -274,7 +309,6 @@ function Welcome({ place, onCityChange }: { place: Place | null; onCityChange: (
           <div>
             <h1 className="text-h2 text-ink">Welcome back{user?.firstName ? `, ${user.firstName}` : ""}</h1>
             <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-ink-soft">
-              <CoinChip />
               {place?.city ? (
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="h-4 w-4 text-brand-700" aria-hidden /> Showing {place.city}
@@ -442,70 +476,118 @@ function TourRail({ label, tours }: { label: string; tours: SearchTour[] }) {
 
 const storylistItem = z.custom<ApiStorylist>((v) => typeof v === "object" && v !== null);
 
-function PickedForYou({ city, languages }: { city: string | null; languages: string[] }) {
-  const [tours, setTours] = useState<SearchTour[] | null>(null);
+function PickedForYou({
+  city,
+  languages,
+  catalog,
+  exclude,
+}: {
+  city: string | null;
+  languages: string[];
+  catalog: SearchTour[] | null;
+  exclude: Set<string>;
+}) {
+  const [recommended, setRecommended] = useState<SearchTour[] | null>(null);
   const langKey = languages.join(",");
 
   useEffect(() => {
     let cancelled = false;
-    void (async () => {
-      let picked: SearchTour[] = [];
-      try {
-        const raw = await apiFetch("/tours/recommended", {
-          auth: "required",
-          version: "v2",
-          query: { audio_language: langKey || undefined, city: city ?? undefined, page_size: SHELF_SIZE },
-          schema: listOf(storylistItem),
-        });
-        picked = raw.map(mapStorylistToTour).filter((t): t is Tour => t !== null);
-      } catch {
-        picked = [];
-      }
-      if (!picked.length) {
-        const all = await loadSearchCatalog();
-        const local = city ? all.filter((t) => tourMatchesCity(t, city)) : [];
-        const rest = all.filter((t) => t.isRecommended && !local.includes(t));
-        picked = [...local.filter((t) => t.contentKind === "walk"), ...rest];
-      }
-      if (!cancelled) setTours(picked.slice(0, SHELF_SIZE));
-    })();
+    apiFetch("/tours/recommended", {
+      auth: "required",
+      version: "v2",
+      query: { audio_language: langKey || undefined, city: city ?? undefined, page_size: SHELF_SIZE * 2 },
+      schema: listOf(storylistItem),
+    })
+      .then((raw) => !cancelled && setRecommended(raw.map(mapStorylistToTour).filter((t): t is Tour => t !== null)))
+      .catch(() => !cancelled && setRecommended([]));
     return () => {
       cancelled = true;
     };
   }, [city, langKey]);
 
-  if (!tours?.length) return null;
+  const source = recommended?.length ? recommended : (catalog ?? []).filter((t) => t.isRecommended);
+  const tours = source.filter((t) => !exclude.has(t.id)).slice(0, SHELF_SIZE);
+
+  if (recommended === null || !tours.length) return null;
   return (
-    <Shelf shelf="picked_for_you" eyebrow="Audio walks & stories" title="Picked for you" action={{ href: "/marketplace/", label: "See all" }}>
+    <Shelf shelf="picked_for_you" eyebrow="Audio tours & stories" title="Picked for you" action={{ href: "/marketplace/", label: "See all" }}>
       <TourRail label="Picked for you" tours={tours} />
     </Shelf>
   );
 }
 
-function InCity({ city }: { city: string }) {
-  const [stories, setStories] = useState<SearchTour[] | null>(null);
-  const [cityHref, setCityHref] = useState("/cities/");
-
+function useCityHref(city: string): string {
+  const [href, setHref] = useState("/cities/");
   useEffect(() => {
     let cancelled = false;
-    loadSearchCatalog()
-      .then((all) => !cancelled && setStories(all.filter((t) => t.contentKind !== "walk" && tourMatchesCity(t, city)).slice(0, SHELF_SIZE)))
-      .catch(() => !cancelled && setStories([]));
     fetchAllActiveCities()
       .then((list) => {
         const match = list.find((c) => c.name.toLowerCase() === city.toLowerCase());
-        if (!cancelled) setCityHref(match ? getCityHref(match) : "/cities/");
+        if (!cancelled) setHref(match ? getCityHref(match) : "/cities/");
       })
       .catch(() => undefined);
     return () => {
       cancelled = true;
     };
   }, [city]);
+  return href;
+}
 
-  if (!stories?.length) return null;
+/** Same split as the city page: recommended audio tours, then audio stories. */
+function InCityShelves({ city, tours, stories }: { city: string; tours: SearchTour[]; stories: SearchTour[] }) {
+  const cityHref = useCityHref(city);
+  const explore = { href: cityHref, label: `Explore ${city}` };
+
   return (
-    <Shelf shelf="in_city" eyebrow="Audio stories" title={`In ${city}`} action={{ href: cityHref, label: `Explore ${city}` }} className="bg-sand-50">
-      <TourRail label={`Audio stories in ${city}`} tours={stories} />
+    <>
+      {tours.length > 0 && (
+        <Shelf
+          shelf="city_tours"
+          eyebrow="Audio tours"
+          title={`Audio Tours in ${city}`}
+          action={stories.length ? undefined : explore}
+          className="bg-sand-50"
+        >
+          <TourRail label={`Audio Tours in ${city}`} tours={tours} />
+        </Shelf>
+      )}
+      {stories.length > 0 && (
+        <Shelf shelf="city_stories" eyebrow="Audio stories" title={`Audio stories in ${city}`} action={explore}>
+          <TourRail label={`Audio stories in ${city}`} tours={stories} />
+        </Shelf>
+      )}
+    </>
+  );
+}
+
+const COLLECTION_SIZE = 8;
+
+function unlockedTime(u: LibraryUnlock): number {
+  const raw = (u as Record<string, unknown>).unlocked_at ?? (u as Record<string, unknown>).created_at;
+  const t = typeof raw === "string" ? Date.parse(raw) : NaN;
+  return Number.isFinite(t) ? t : 0;
+}
+
+function YourCollection() {
+  const { places, tours } = useLibrary();
+  const items = [
+    ...(places ?? []).map((unlock) => ({ kind: "place" as const, unlock })),
+    ...(tours ?? []).map((unlock) => ({ kind: "storylist" as const, unlock })),
+  ]
+    .filter(({ unlock }) => !isExpired(unlock))
+    .sort((a, b) => unlockedTime(b.unlock) - unlockedTime(a.unlock))
+    .slice(0, COLLECTION_SIZE);
+
+  if (!items.length) return null;
+  return (
+    <Shelf shelf="your_collection" eyebrow="Unlocked by you" title="Your collection" action={{ href: "/account/collection/", label: "See all" }}>
+      <CardRail label="Your collection">
+        {items.map(({ kind, unlock }) => (
+          <div key={`${kind}-${unlockTargetId(unlock)}`} className={CARD_WIDTH}>
+            <UnlockCard kind={kind} unlock={unlock} compact />
+          </div>
+        ))}
+      </CardRail>
     </Shelf>
   );
 }

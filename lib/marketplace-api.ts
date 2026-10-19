@@ -604,7 +604,11 @@ export function tourMatchesCity(tour: Pick<Tour, 'searchTerms' | 'location' | 't
 }
 
 /** City page shelves: recommended audio tours (walks) and audio stories, kept separate. */
-export function cityCatalog(all: Tour[], cityName: string, limit = 12): { tours: Tour[]; stories: Tour[] } {
+export function cityCatalog<T extends Pick<Tour, 'searchTerms' | 'location' | 'title' | 'contentKind' | 'isRecommended'>>(
+  all: T[],
+  cityName: string,
+  limit = 12,
+): { tours: T[]; stories: T[] } {
   const inCity = all.filter((tour) => tourMatchesCity(tour, cityName));
   return {
     tours: inCity.filter((tour) => (tour.contentKind ?? 'walk') === 'walk' && tour.isRecommended === true).slice(0, limit),
