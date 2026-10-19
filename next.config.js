@@ -11,7 +11,9 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
-  output: 'export',
+  // Export only on `next build`. In `next dev`, export mode rejects any slug missing from
+  // generateStaticParams(), which hits live API data whenever the catalog fetch is slow or partial.
+  output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
   // Required for Railway/`serve`: without this, Next emits both `page.html` and an
   // empty `page/` directory, and `serve` prefers the directory → 404 on blog/tour URLs.
   trailingSlash: true,

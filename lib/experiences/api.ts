@@ -76,14 +76,19 @@ export async function getExperienceDetailSafe(slug: string): Promise<ExperienceD
 /** Every published experience, paging through `page_size=100`. Build-time only. */
 export async function listAllPublishedExperiences(): Promise<ExperienceSummary[]> {
   const out: ExperienceSummary[] = [];
-  try {
-    for (let page = 1; page <= 50; page += 1) {
-      const res = await listExperiences({ page, page_size: 100 });
-      out.push(...res.items);
-      if (!res.has_next) break;
+  for (let page = 1; page <= 50; page += 1) {
+    let res: Awaited<ReturnType<typeof listExperiences>> | null = null;
+    for (let attempt = 0; attempt < 3 && !res; attempt += 1) {
+      try {
+        res = await listExperiences({ page, page_size: 100 });
+      } catch {
+        if (attempt < 2) await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+      }
     }
-  } catch {
-    // Build-time API may be unavailable; fall back to whatever was fetched.
+    // Build-time API may be unavailable; fall back to whatever was fetched (the __spa__ shell covers the rest).
+    if (!res) break;
+    out.push(...res.items);
+    if (!res.has_next) break;
   }
   return out;
 }
