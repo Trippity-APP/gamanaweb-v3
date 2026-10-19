@@ -603,6 +603,15 @@ export function tourMatchesCity(tour: Pick<Tour, 'searchTerms' | 'location' | 't
   return aliases.some((alias) => terms.some((term) => term.includes(alias)));
 }
 
+/** City page shelves: recommended audio tours (walks) and audio stories, kept separate. */
+export function cityCatalog(all: Tour[], cityName: string, limit = 12): { tours: Tour[]; stories: Tour[] } {
+  const inCity = all.filter((tour) => tourMatchesCity(tour, cityName));
+  return {
+    tours: inCity.filter((tour) => (tour.contentKind ?? 'walk') === 'walk' && tour.isRecommended === true).slice(0, limit),
+    stories: inCity.filter((tour) => tour.contentKind === 'story').slice(0, limit),
+  };
+}
+
 export function getExploreSearchQuery(params: URLSearchParams | { get(name: string): string | null }): string {
   return (params.get("q") ?? params.get("city") ?? "").trim();
 }
