@@ -71,6 +71,20 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
     }
   };
 
+  // Pre-rendered pages carry image and audio SAS URLs signed at build time, which expire after 24h.
+  useEffect(() => {
+    if (!initialWalk) return;
+    let cancelled = false;
+    fetchPublicWalkDetailById(initialWalk.id)
+      .then((fresh) => {
+        if (!cancelled && fresh) setWalk(fresh);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [initialWalk]);
+
   useEffect(() => {
     if (initialWalk) return;
     const resolved = resolveTourId(paramTourId);

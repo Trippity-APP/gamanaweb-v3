@@ -70,6 +70,20 @@ export function AudioStoryDetail({
     }
   };
 
+  // Pre-rendered pages carry image and audio SAS URLs signed at build time, which expire after 24h.
+  useEffect(() => {
+    if (!initialStory) return;
+    let cancelled = false;
+    fetchPublicStoryDetailById(initialStory.id)
+      .then((fresh) => {
+        if (!cancelled && fresh) setStory(fresh);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [initialStory]);
+
   useEffect(() => {
     if (initialStory || !isStaticSpaParam(paramTourId)) return;
     const resolved = resolveStoryId(paramTourId);

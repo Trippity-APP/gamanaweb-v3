@@ -131,6 +131,28 @@ export function MarketplaceBrowser({
     void loadTours();
   }, [initialTours.length]);
 
+  // Pre-rendered catalogs carry image SAS URLs signed at build time, which expire after 24h.
+  // Only cover URLs are swapped so the build-time list, order and filters stay as they are.
+  useEffect(() => {
+    if (initialTours.length === 0) return;
+    let cancelled = false;
+    fetchPublicTours()
+      .then((fresh) => {
+        if (cancelled) return;
+        const images = new Map(fresh.map((tour) => [tour.id, tour.image]));
+        setTours((current) =>
+          current.map((tour) => {
+            const image = images.get(tour.id);
+            return image && image !== tour.image ? { ...tour, image } : tour;
+          }),
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [initialTours.length]);
+
   // Pull database matches newer than the build-time catalog into the grid for `?q=`.
   // Derived rather than set in the effect so the tab auto-switch below sees "pending" on the first render.
   const [liveSettledFor, setLiveSettledFor] = useState('');
