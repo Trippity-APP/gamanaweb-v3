@@ -122,10 +122,53 @@ test("buildBookingAnswers produces the app's payload shape", () => {
       {
         booking_id: 42,
         answers: [{ questionId: "terms", values: ["false"] }],
-        passengers: [{ pricing_category_id: "adult", answers: [{ questionId: "age", values: ["30"] }] }],
+        passengers: [{ booking_id: null, pricing_category_id: "adult", answers: [{ questionId: "age", values: ["30"] }] }],
       },
     ],
   });
+});
+
+test("buildBookingAnswers keys passengers by the booking_id Bókun created for their category", () => {
+  const groups = normalizeQuestionGroups({
+    booking_questions: {
+      main_contact: [],
+      activities: [
+        {
+          booking_id: 900,
+          questions: [],
+          passengers: [
+            { booking_id: 901, pricing_category_id: "11", questions: [{ question_id: "age" }] },
+            { booking_id: 902, pricing_category_id: "22", questions: [{ question_id: "age" }] },
+            { booking_id: 903, pricing_category_id: "11", questions: [{ question_id: "age" }] },
+          ],
+        },
+      ],
+    },
+  });
+  assert.equal(groups.activityBookingId, "900");
+  assert.deepEqual(groups.perPassenger.map((q) => q.id), ["age"]);
+
+  const payload = buildBookingAnswers({
+    groups,
+    bookingId: "ignored",
+    mainContact: {},
+    perBooking: {},
+    passengers: [
+      { unitId: "22", answers: { age: "9" } },
+      { unitId: "11", answers: { age: "40" } },
+      { unitId: "11", answers: { age: "38" } },
+    ],
+  });
+  const [activity] = payload.activities;
+  assert.equal(activity.booking_id, "900");
+  assert.deepEqual(
+    activity.passengers.map((p) => [p.booking_id, p.pricing_category_id, p.answers[0].values[0]]),
+    [
+      ["902", "22", "9"],
+      ["901", "11", "40"],
+      ["903", "11", "38"],
+    ],
+  );
 });
 
 test("contactField maps main-contact ids to lead traveller fields", () => {

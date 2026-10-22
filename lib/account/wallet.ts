@@ -21,11 +21,14 @@ const pageSchema = z.union([
   z.array(passbookEntrySchema),
   z
     .object({
+      data: z.array(passbookEntrySchema).optional(),
       items: z.array(passbookEntrySchema).optional(),
       transactions: z.array(passbookEntrySchema).optional(),
       entries: z.array(passbookEntrySchema).optional(),
-      has_next: z.boolean().nullish(),
-      total: z.number().nullish(),
+      pagination: z
+        .object({ total: z.number().nullish(), has_more: z.boolean().nullish() })
+        .passthrough()
+        .nullish(),
     })
     .passthrough(),
 ]);
@@ -34,23 +37,24 @@ export function passbookKind(entry: Pick<PassbookEntry, "type" | "transaction_ty
   const raw = `${entry.type ?? ""} ${entry.transaction_type ?? ""}`.toLowerCase();
   if (/refund|revers/.test(raw)) return "refund";
   if (/promo|coupon/.test(raw)) return "promo";
-  if (/unlock|spend|debit|redeem_content|purchase_content/.test(raw)) return "unlock";
-  if (/reward|bonus|referral|gift|signup|welcome/.test(raw)) return "reward";
+  if (/unlock|spend|debit|redemption|redeem_content|purchase_content/.test(raw)) return "unlock";
+  if (/reward|bonus|cashback|referral|gift|signup|welcome/.test(raw)) return "reward";
   if (/purchase|iap|buy|topup|top_up|credit/.test(raw)) return "purchase";
   return "other";
 }
 
 export function toPassbookRow(entry: PassbookEntry, index: number): PassbookRow {
   const kind = passbookKind(entry);
-  const raw = Number(entry.amount ?? entry.coins ?? 0);
+  const raw = Number(entry.coin_amount ?? entry.amount ?? entry.coins ?? 0);
   const amount = kind === "unlock" && raw > 0 ? -raw : raw;
+  const createdAt = entry.timestamp ?? entry.created_at ?? "";
   return {
-    id: String(entry.id ?? entry._id ?? `${entry.created_at ?? "row"}-${index}`),
+    id: String(entry.transaction_id ?? entry.id ?? entry._id ?? `${createdAt || "row"}-${index}`),
     kind,
     description: entry.description?.trim() || defaultDescription(kind),
     amount,
     status: (entry.status ?? "completed").toLowerCase(),
-    createdAt: entry.created_at ?? "",
+    createdAt,
   };
 }
 
@@ -71,18 +75,25 @@ function defaultDescription(kind: PassbookKind): string {
   }
 }
 
-export async function fetchPassbookPage(page: number): Promise<PassbookPage> {
-  const data = await apiFetch("/passbook", {
-    auth: "required",
-    query: { page, page_size: PASSBOOK_PAGE_SIZE },
-    schema: pageSchema,
-  });
-  const list = Array.isArray(data) ? data : data.items ?? data.transactions ?? data.entries ?? [];
-  const rows = list.map(toPassbookRow);
-  const hasNext = Array.isArray(data)
-    ? list.length >= PASSBOOK_PAGE_SIZE
-    : data.has_next ?? (typeof data.total === "number" ? page * PASSBOOK_PAGE_SIZE < data.total : list.length >= PASSBOOK_PAGE_SIZE);
+/** `GET /passbook?skip&limit` → `{ data: [...], pagination: { total, skip, limit, has_more } }`. */
+export function parsePassbookPage(payload: unknown, page: number): PassbookPage {
+  const parsed = pageSchema.parse(payload);
+  const list = Array.isArray(parsed) ? parsed : parsed.data ?? parsed.items ?? parsed.transactions ?? parsed.entries ?? [];
+  const pagination = Array.isArray(parsed) ? null : parsed.pagination;
+  const rows = list.map((entry, i) => toPassbookRow(entry, (page - 1) * PASSBOOK_PAGE_SIZE + i));
+  const hasNext =
+    pagination?.has_more ??
+    (typeof pagination?.total === "number" ? page * PASSBOOK_PAGE_SIZE < pagination.total : list.length >= PASSBOOK_PAGE_SIZE);
   return { rows, hasNext };
+}
+
+export async function fetchPassbookPage(page: number): Promise<PassbookPage> {
+  const payload = await apiFetch<unknown>("/passbook", {
+    auth: "required",
+    query: { skip: (page - 1) * PASSBOOK_PAGE_SIZE, limit: PASSBOOK_PAGE_SIZE },
+    unwrap: false,
+  });
+  return parsePassbookPage(payload, page);
 }
 
 /** Groups rows (already newest-first) under "October 2026"-style month labels. */

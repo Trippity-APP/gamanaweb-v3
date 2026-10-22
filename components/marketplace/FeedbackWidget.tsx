@@ -7,8 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
-import { useAuth } from '@/lib/auth/auth-context';
-
 type Category = 'destination' | 'bug' | 'idea' | 'other';
 
 const categories: { id: Category; label: string }[] = [
@@ -18,17 +16,14 @@ const categories: { id: Category; label: string }[] = [
   { id: 'other', label: 'Something else' },
 ];
 
-const FEEDBACK_KEY = 'gamanaFeedback';
-
 /**
  * Shown to every visitor on /marketplace and /marketplace-redesign, signed in or not —
- * see the note in the component body for why it isn't login-gated. Stores submissions to
- * localStorage (prototype stand-in — a real backend would route these to the team).
+ * see the note in the component body for why it isn't login-gated. Submissions are not
+ * persisted until a backend feedback endpoint exists (browser storage is off-limits).
  * Anchored to the right edge at mid-height so it stays clear of the Audio Tours /
  * Experiences cart buttons in the bottom-right.
  */
 export function FeedbackWidget() {
-  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<Category | null>(null);
   const [message, setMessage] = useState('');
@@ -37,7 +32,7 @@ export function FeedbackWidget() {
   // Deliberately NOT gated on login. Signed-out visitors are the ones most likely to
   // bounce over a missing destination or a confusing flow, so they're exactly the input
   // worth capturing — gating this behind an account filtered out the most
-  // decision-relevant feedback. user?.email is still attached when it's available.
+  // decision-relevant feedback.
   const reset = () => {
     setCategory(null);
     setMessage('');
@@ -46,19 +41,6 @@ export function FeedbackWidget() {
 
   const submit = () => {
     if (!message.trim()) return;
-    try {
-      const raw = window.localStorage.getItem(FEEDBACK_KEY);
-      const existing = raw ? JSON.parse(raw) : [];
-      existing.unshift({
-        category,
-        message: message.trim(),
-        email: user?.email || undefined,
-        submittedAt: new Date().toISOString(),
-      });
-      window.localStorage.setItem(FEEDBACK_KEY, JSON.stringify(existing));
-    } catch {
-      // ignore
-    }
     setSubmitted(true);
   };
 
@@ -119,7 +101,7 @@ export function FeedbackWidget() {
                 Send feedback
               </Button>
               <p className="text-[11px] text-gray-400 text-center">
-                Prototype note: this is saved locally, not sent to the Gamana team yet.
+                Prototype note: feedback isn&apos;t sent to the Gamana team yet.
               </p>
             </>
           ) : (

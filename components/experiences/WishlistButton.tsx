@@ -43,7 +43,7 @@ export function WishlistButton({ experienceRef, initial, className, variant = "o
         method: next ? "POST" : "DELETE",
         auth: "required",
       });
-      track("wishlist_toggle", { saved: next });
+      track("wishlist_toggle", { slug: experienceRef, on: next });
       onChange?.(next);
     } catch {
       setSaved(!next);
@@ -63,7 +63,7 @@ export function WishlistButton({ experienceRef, initial, className, variant = "o
       aria-label={label}
       title={label}
       className={cn(
-        "focus-ring grid h-10 w-10 place-items-center rounded-full bg-white text-ink transition-transform hover:scale-105",
+        "focus-ring grid h-11 w-11 place-items-center rounded-full bg-white text-ink transition-transform hover:scale-105",
         variant === "overlay" ? "shadow-sm" : "border border-sand-200",
         className
       )}

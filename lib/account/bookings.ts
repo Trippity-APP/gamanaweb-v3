@@ -76,44 +76,40 @@ const tagsSchema = z
   .transform((v) => (Array.isArray(v) ? v : v.tags));
 
 export function fetchReviewTags(): Promise<ReviewTag[]> {
-  return apiFetch("/experiences/review-tags", { auth: "optional", schema: tagsSchema, unwrap: false });
+  return apiFetch("/experiences/review-tags", { auth: "none", schema: tagsSchema, unwrap: false });
 }
 
-const photoUploadSchema = z
-  .object({ blob_names: z.array(z.string()).optional(), urls: z.array(z.string()).optional() })
-  .passthrough()
-  .transform((v) => v.blob_names ?? v.urls ?? []);
+const photoUploadSchema = z.object({ blob_name: z.string() }).passthrough();
 
-export function uploadReviewPhotos(slug: string, files: Blob[]): Promise<string[]> {
-  const form = new FormData();
-  files.forEach((f, i) => form.append("files", f, `review-${i + 1}.jpg`));
-  return apiFetch(`/experiences/${encodeURIComponent(slug)}/reviews/photos`, {
-    method: "POST",
-    auth: "required",
-    body: form,
-    schema: photoUploadSchema,
-  });
+/** The endpoint takes one `file` per request and returns its `blob_name`. */
+export async function uploadReviewPhotos(slug: string, files: Blob[]): Promise<string[]> {
+  const names: string[] = [];
+  for (let i = 0; i < files.length; i++) {
+    const form = new FormData();
+    form.append("file", files[i], `review-${i + 1}.jpg`);
+    const res = await apiFetch(`/experiences/${encodeURIComponent(slug)}/reviews/photos`, {
+      method: "POST",
+      auth: "required",
+      body: form,
+      schema: photoUploadSchema,
+      unwrap: false,
+    });
+    names.push(res.blob_name);
+  }
+  return names;
 }
 
+/** `CreateExperienceReviewRequest`; creating the review also closes the reviewable prompt. */
 export type ReviewInput = {
-  booking_id: string;
   rating: number;
-  text?: string;
-  tags?: string[];
+  review_text?: string;
+  review_text_tags?: string[];
   would_recommend?: boolean;
-  photos?: string[];
+  photo_blob_names?: string[];
 };
 
 export function submitReview(slug: string, body: ReviewInput): Promise<unknown> {
-  return apiFetch(`/experiences/${encodeURIComponent(slug)}/reviews`, { method: "POST", auth: "required", body });
-}
-
-export function markReviewed(reviewableId: string): Promise<unknown> {
-  return apiFetch(`/my/reviewable/${encodeURIComponent(reviewableId)}/action`, {
-    method: "POST",
-    auth: "required",
-    body: { action: "reviewed" },
-  });
+  return apiFetch(`/experiences/${encodeURIComponent(slug)}/reviews`, { method: "POST", auth: "required", body, unwrap: false });
 }
 
 export type BookingTone = "confirmed" | "pending" | "cancelled" | "other";

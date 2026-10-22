@@ -9,6 +9,7 @@ import { AlertCircle, Calendar, Check, Clock, Loader2, MapPin, Phone, Smartphone
 import { track } from "@/lib/analytics";
 import { useAuth } from "@/lib/auth/auth-context";
 import { fetchBookingBrief, type BookingBrief } from "@/lib/account/bookings";
+import { getExperienceDetail } from "@/lib/experiences/api";
 import { clearStoredCheckout, getCheckoutState, retryPayment } from "@/lib/experiences/checkout";
 import { experienceHref, formatDateLabel, formatTimeLabel } from "@/lib/experiences/format";
 import { downloadIcs } from "@/lib/experiences/ics";
@@ -44,7 +45,17 @@ export function ReturnClient() {
   const [retrying, setRetrying] = useState(false);
   const [retryError, setRetryError] = useState("");
   const [handoff, setHandoff] = useState(false);
+  const [operatorName, setOperatorName] = useState<string | null>(null);
   const tracked = useRef(false);
+
+  useEffect(() => {
+    if (view !== "pending" || !params?.slug) return;
+    const controller = new AbortController();
+    getExperienceDetail(params.slug, controller.signal)
+      .then((exp) => setOperatorName(exp.operator_name?.trim() || null))
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [view, params?.slug]);
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
@@ -96,15 +107,24 @@ export function ReturnClient() {
     if (view === "confirmed") {
       tracked.current = true;
       clearStoredCheckout(params.slug);
-      track("booking_confirmed", { experience: params.slug });
+      const confirmed = (b: BookingBrief | null) =>
+        track("booking_confirmed", { slug: params.slug, value: b?.total_price ?? undefined, currency: b?.currency ?? undefined });
       if (state?.booking_id) {
         fetchBookingBrief(String(state.booking_id))
-          .then(setBrief)
-          .catch(() => setBrief(null));
+          .then((b) => {
+            setBrief(b);
+            confirmed(b);
+          })
+          .catch(() => {
+            setBrief(null);
+            confirmed(null);
+          });
+      } else {
+        confirmed(null);
       }
     } else if (view === "failed" || view === "expired") {
       tracked.current = true;
-      track("booking_failed", { experience: params.slug, reason: view });
+      track("booking_failed", { slug: params.slug, reason: view });
     }
   }, [view, params, state]);
 
@@ -319,7 +339,7 @@ export function ReturnClient() {
       <Panel>
         <Heading icon="clock" title="We're still confirming your booking" />
         <p className="mt-2 text-center text-ink-soft">
-          We&apos;re still confirming with the operator. We&apos;ll email you, and it will appear in Bookings.
+          We&apos;re still confirming with {operatorName ?? "the operator"}. We&apos;ll email you, and it will appear in Bookings.
         </p>
         <Actions>
           <Button asChild className="h-11 rounded-full px-6">

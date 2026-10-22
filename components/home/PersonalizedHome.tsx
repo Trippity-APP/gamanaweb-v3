@@ -22,7 +22,7 @@ import { experienceSummarySchema, type ExperienceSummary } from "@/lib/api/schem
 import type { BookingSummary } from "@/lib/api/schemas/bookings";
 import type { LibraryUnlock } from "@/lib/api/schemas/library";
 import { bookingId, fetchBookings, isUpcoming, listOf } from "@/lib/account/api";
-import { fetchPersonalization, narratorLanguages, type PersonalizationDoc } from "@/lib/account/personalization";
+import { fetchPersonalization, narratorLanguages, travelProfileHomeCity, type PersonalizationDoc } from "@/lib/account/personalization";
 import { useAuth } from "@/lib/auth/auth-context";
 import { detectPricingCurrency } from "@/lib/coin-pricing";
 import { formatDateLabel, formatTimeLabel } from "@/lib/experiences/format";
@@ -46,8 +46,8 @@ const CARD_WIDTH = "w-[260px] sm:w-[300px]";
 
 /** Decision 18: profile home city → last city opened → country from pricing currency → none. */
 function resolvePlace(doc: PersonalizationDoc | null): Place {
-  const home = doc?.travel_profile?.home_city;
-  if (typeof home === "string" && home.trim()) return { city: cityLabel(home), country: null };
+  const home = travelProfileHomeCity(doc?.travel_profile);
+  if (home) return { city: cityLabel(home), country: null };
   const last = readLastCity();
   if (last) return { city: cityLabel(last), country: null };
   return { city: null, country: detectPricingCurrency() === "INR" ? "India" : null };

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, Loader2, Star, Upload, X } from "@/components/icons";
-import { fetchReviewTags, markReviewed, submitReview, uploadReviewPhotos, type ReviewTag } from "@/lib/account/bookings";
+import { fetchReviewTags, submitReview, uploadReviewPhotos, type ReviewTag } from "@/lib/account/bookings";
 import { MAX_PHOTO_BYTES, PHOTO_TYPES, resizeImage } from "@/lib/account/image-resize";
 import { cn } from "@/lib/utils";
 
@@ -15,12 +15,10 @@ const MAX_TEXT = 2000;
 
 type Props = {
   slug: string;
-  bookingId: string;
-  reviewableId: string;
   onDone: () => void;
 };
 
-export function ReviewForm({ slug, bookingId, reviewableId, onDone }: Props) {
+export function ReviewForm({ slug, onDone }: Props) {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [tags, setTags] = useState<ReviewTag[]>([]);
@@ -70,14 +68,12 @@ export function ReviewForm({ slug, bookingId, reviewableId, onDone }: Props) {
     try {
       const blobNames = photos.length ? await uploadReviewPhotos(slug, photos.map((p) => p.file)) : [];
       await submitReview(slug, {
-        booking_id: bookingId,
         rating,
-        text: text.trim() || undefined,
-        tags: picked.length ? picked : undefined,
+        review_text: text.trim() || undefined,
+        review_text_tags: picked.length ? picked : undefined,
         would_recommend: recommend ?? undefined,
-        photos: blobNames.length ? blobNames : undefined,
+        photo_blob_names: blobNames.length ? blobNames : undefined,
       });
-      await markReviewed(reviewableId).catch(() => undefined);
       setDone(true);
       onDone();
     } catch {

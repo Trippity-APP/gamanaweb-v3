@@ -35,6 +35,7 @@ import {
   getPickupPlaces,
   parseCheckoutQuery,
   readStoredCheckout,
+  paymentFields,
   returnUrls,
   startCheckout,
   storeCheckout,
@@ -93,7 +94,7 @@ export function CheckoutClient() {
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
-  const [places, setPlaces] = useState<PickupPlace[]>([]);
+  const [places, setPlaces] = useState<PickupPlace[] | null>(null);
   const [pickup, setPickup] = useState<Pickup | null>(null);
 
   const [checkoutId, setCheckoutId] = useState<string | null>(null);
@@ -146,6 +147,7 @@ export function CheckoutClient() {
         setSummary(sum);
         const needsPickup = !!exp.pickup_required || !!exp.pickup_optional;
         if (needsPickup) {
+          setPlaces(null);
           getPickupPlaces(sel.slug)
             .then((list) => !cancelled && setPlaces(list))
             .catch(() => !cancelled && setPlaces([]));
@@ -298,7 +300,7 @@ export function CheckoutClient() {
     track("checkout_pay_click", { experience: sel.slug, currency: options.currency ?? experience.currency ?? undefined });
     try {
       const redirect = await confirmCheckout(checkoutId, {
-        preferred_payment: options.preferred_payment ?? undefined,
+        ...paymentFields(options.preferred_payment),
         currency: options.currency ?? experience.currency ?? undefined,
         contact_name: `${contact.firstName} ${contact.lastName}`.trim(),
         contact_email: contact.email.trim(),
@@ -671,7 +673,7 @@ function PickupStep({
   onCommit,
 }: {
   label: string;
-  places: PickupPlace[];
+  places: PickupPlace[] | null;
   optional: boolean;
   customAllowed: boolean;
   meetingPoint: string | null;
@@ -685,7 +687,7 @@ function PickupStep({
   const [room, setRoom] = useState(committed && "room" in committed ? committed.room : "");
   const [error, setError] = useState("");
 
-  const filtered = places.filter((p) => `${placeName(p)} ${p.address ?? ""}`.toLowerCase().includes(query.trim().toLowerCase()));
+  const filtered = (places ?? []).filter((p) => `${placeName(p)} ${p.address ?? ""}`.toLowerCase().includes(query.trim().toLowerCase()));
 
   const commit = () => {
     if (mode === "meeting") return onCommit({ kind: "meeting" });
@@ -694,7 +696,7 @@ function PickupStep({
       setError("");
       return onCommit({ kind: "custom", text: customText.trim().slice(0, 500), room: room.trim() });
     }
-    const place = places.find((p) => String(p.id) === placeId);
+    const place = places?.find((p) => String(p.id) === placeId);
     if (!place) return setError("Choose your hotel from the list.");
     setError("");
     onCommit({ kind: "place", placeId: String(place.id), label: placeName(place), room: room.trim() });
@@ -743,8 +745,13 @@ function PickupStep({
             />
           </div>
           <div role="radiogroup" aria-label="Pickup places" className="max-h-64 space-y-2 overflow-y-auto pr-1">
-            {places.length === 0 ? (
+            {places === null ? (
               <p className="text-sm text-ink-soft">Loading pickup places…</p>
+            ) : places.length === 0 ? (
+              <p className="text-sm text-ink-soft">
+                The operator hasn&apos;t listed pickup hotels.
+                {customAllowed ? " Choose “I don't see my hotel” to enter your address." : optional ? " Choose the meeting point instead." : ""}
+              </p>
             ) : filtered.length === 0 ? (
               <p className="text-sm text-ink-soft">No matches. Try another name{customAllowed ? " or choose “I don't see my hotel”" : ""}.</p>
             ) : (

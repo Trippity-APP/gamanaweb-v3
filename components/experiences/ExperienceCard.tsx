@@ -29,10 +29,13 @@ type CardExperience = ExperienceSummary & { is_wishlisted?: boolean | null; canc
 export function ExperienceCard({
   experience,
   className,
+  position,
   onWishlistChange,
 }: {
   experience: CardExperience;
   className?: string;
+  /** 1-based index in the list it was clicked from, for analytics. */
+  position?: number;
   onWishlistChange?: (saved: boolean) => void;
 }) {
   if (!experience.slug) return null;
@@ -49,7 +52,7 @@ export function ExperienceCard({
   return (
     <Link
       href={experienceHref(experience.slug)}
-      onClick={() => track("experience_card_click", { slug: experience.slug ?? undefined })}
+      onClick={() => track("experience_card_click", { slug: experience.slug ?? undefined, position })}
       className={cn(
         "focus-ring group relative flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-card transition-all duration-500 ease-out-expo hover:-translate-y-1 hover:shadow-lift",
         className

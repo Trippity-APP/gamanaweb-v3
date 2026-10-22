@@ -99,7 +99,7 @@ export default function BookingDetailPage() {
   }
 
   const tone = bookingTone(brief.status);
-  const slug = brief.experience_slug ?? "";
+  const slug = brief.experience_slug ?? reviewable?.experience_slug ?? "";
   const meeting = brief.meeting_point_address ?? brief.meeting_point;
   const hasMap = typeof brief.latitude === "number" && typeof brief.longitude === "number";
   const operatorName = brief.operator?.name ?? brief.operator_name ?? "the operator";
@@ -192,7 +192,7 @@ export default function BookingDetailPage() {
             Rate your experience
           </h2>
           <div className="mt-4">
-            <ReviewForm slug={slug} bookingId={String(brief.booking_id ?? id)} reviewableId={String(reviewable.id)} onDone={() => undefined} />
+            <ReviewForm slug={slug} onDone={() => undefined} />
           </div>
         </section>
       )}

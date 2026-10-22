@@ -16,16 +16,43 @@ export function toCoinCount(balance: CoinBalance): number {
   return Math.floor(balance.available_balance);
 }
 
+export const packOrderSchema = z
+  .object({
+    order_id: z.string().min(1),
+    amount: z.number().int().positive(),
+    currency: z.string(),
+    key_id: z.string().min(1),
+    product_id: z.string(),
+    display_name: nullish(z.string()),
+    coins: numberish,
+  })
+  .passthrough();
+
+export type PackOrder = z.infer<typeof packOrderSchema>;
+
+export const packVerifySchema = z
+  .object({
+    coins_credited: numberish,
+    new_balance: nullish(numberish),
+    already_processed: nullish(z.boolean()),
+  })
+  .passthrough();
+
+export type PackVerify = z.infer<typeof packVerifySchema>;
+
 export const passbookEntrySchema = z
   .object({
     id: nullish(idField),
     _id: nullish(idField),
+    transaction_id: nullish(idField),
     type: nullish(z.string()),
     transaction_type: nullish(z.string()),
     description: nullish(z.string()),
+    coin_amount: nullish(numberish),
     amount: nullish(numberish),
     coins: nullish(numberish),
     status: nullish(z.string()),
+    timestamp: nullish(z.string()),
     created_at: nullish(z.string()),
   })
   .passthrough();

@@ -21,18 +21,40 @@ const SOS: Record<string, { label: string; number: string }[]> = {
   TR: [{ label: "All emergencies", number: "112" }],
 };
 
-function loginResponse(isNew: boolean) {
+const MOCK_PACKS = [
+  { product_id: "ten_coin", display_name: "Starter", amount: 999, amount_usd: 11.99, currency: "INR", coins: 10, bonus_coins: 0, poi_range: "3–5", tour_range: "1", order: 1, is_active: true, show_on_web: true },
+  { product_id: "thirty_coin", display_name: "Explorer", amount: 2499, amount_usd: 29.99, currency: "INR", coins: 30, bonus_coins: 3, poi_range: "10–15", tour_range: "2–3", order: 2, is_active: true, show_on_web: true, is_popular: true },
+  { product_id: "hundred_coin", display_name: "Voyager", amount: 6999, amount_usd: 84.99, currency: "INR", coins: 100, bonus_coins: 15, poi_range: "35–50", tour_range: "8–10", order: 3, is_active: true, show_on_web: true, is_best_value: true, save_percent: 30 },
+];
+
+type PackLike = { product_id: string; display_name: string; amount: number; coins: number; bonus_coins?: number };
+
+/** The pricing page shows the real API's packs when it's reachable, so orders must accept those ids too. */
+async function realPacks(): Promise<PackLike[]> {
+  try {
+    const res = await fetch("/api/v1/iap/packages");
+    const json = (await res.json()) as { data?: PackLike[] };
+    if (res.ok && Array.isArray(json.data)) return [...json.data, ...MOCK_PACKS];
+  } catch {
+    // Fall through to the mock list.
+  }
+  return MOCK_PACKS;
+}
+
+/** Beta's login `data`: user fields flat next to the tokens. */
+function loginResponse() {
   const session = { accessToken: mockId("at"), sessionId: mockId("sess") };
   const db = writeDb((d) => {
     d.session = session;
   });
+  const user = db.user ?? {};
   return ok({
+    ...user,
+    _id: user.id,
     access_token: session.accessToken,
     session_id: session.sessionId,
     expires_in: 900,
-    user: db.user,
     organizations: [],
-    is_new_user: isNew,
   });
 }
 
@@ -61,9 +83,9 @@ export const accountRoutes: MockRoute[] = [
     method: "POST",
     path: "/auth/web/login/otp",
     handle: ({ body }) => {
-      if (String(body.otp) !== MOCK_OTP) return fail(400, "invalid_otp", "That code didn't match.");
-      const created = ensureUser({ phone: String(body.phone ?? ""), country_code: String(body.country_code ?? "+91") });
-      return loginResponse(created);
+      if (String(body.otp) !== MOCK_OTP) return ok({ success: false }, "Invalid OTP");
+      ensureUser({ phone: String(body.phone ?? ""), country_code: String(body.country_code ?? "+91") });
+      return loginResponse();
     },
   },
   {
@@ -71,12 +93,12 @@ export const accountRoutes: MockRoute[] = [
     path: "/auth/web/login/oauth",
     handle: ({ body }) => {
       const provider = String(body.auth_type ?? "google");
-      const created = ensureUser({
+      ensureUser({
         first_name: String(body.first_name ?? (provider === "google" ? "Asha" : "")),
         last_name: String(body.last_name ?? ""),
         email: provider === "google" ? "asha.traveller@example.com" : "",
       });
-      return loginResponse(created);
+      return loginResponse();
     },
   },
   {
@@ -175,11 +197,13 @@ export const accountRoutes: MockRoute[] = [
     path: "/voice-personas/mobile/active",
     fallback: true,
     handle: () =>
-      ok([
-        { id: "arjun", name: "Arjun", description: "Warm storyteller", image_url: null },
-        { id: "meera", name: "Meera", description: "Curious historian", image_url: null },
-        { id: "leo", name: "Leo", description: "Upbeat explorer", image_url: null },
-      ]),
+      ok({
+        personas: [
+          { id: "arjun", name: "Arjun", description: "Warm storyteller", voice_id: "en-IN-Arjun", persona_image_blob_url: null },
+          { id: "meera", name: "Meera", description: "Curious historian", voice_id: "en-IN-Meera", persona_image_blob_url: null },
+          { id: "leo", name: "Leo", description: "Upbeat explorer", voice_id: "en-US-Leo", persona_image_blob_url: null },
+        ],
+      }),
   },
   {
     method: "GET",
@@ -202,11 +226,19 @@ export const accountRoutes: MockRoute[] = [
     path: "/passbook",
     auth: true,
     handle: ({ db, query }) => {
-      const page = Number(query.get("page") ?? 1);
-      const size = Number(query.get("page_size") ?? query.get("limit") ?? 20);
+      const skip = Number(query.get("skip") ?? 0);
+      const limit = Number(query.get("limit") ?? 100);
       const sorted = [...db.passbook].sort((a, b) => b.created_at.localeCompare(a.created_at));
-      const items = sorted.slice((page - 1) * size, page * size);
-      return ok({ items, total: sorted.length, page, page_size: size, has_next: page * size < sorted.length });
+      const data = sorted.slice(skip, skip + limit);
+      return {
+        status: 200,
+        body: {
+          success: true,
+          message: "Passbook retrieved successfully",
+          data,
+          pagination: { total: sorted.length, skip, limit, has_more: skip + limit < sorted.length },
+        },
+      };
     },
   },
   {
@@ -229,11 +261,39 @@ export const accountRoutes: MockRoute[] = [
     method: "GET",
     path: "/iap/packages",
     fallback: true,
-    handle: () =>
-      ok([
-        { product_id: "ten_coin", display_name: "Starter", amount: 999, amount_usd: 11.99, currency: "INR", coins: 10, bonus_coins: 0, poi_range: "3–5", tour_range: "1", order: 1, is_active: true, show_on_web: true },
-        { product_id: "thirty_coin", display_name: "Explorer", amount: 2499, amount_usd: 29.99, currency: "INR", coins: 30, bonus_coins: 3, poi_range: "10–15", tour_range: "2–3", order: 2, is_active: true, show_on_web: true, is_popular: true },
-        { product_id: "hundred_coin", display_name: "Voyager", amount: 6999, amount_usd: 84.99, currency: "INR", coins: 100, bonus_coins: 15, poi_range: "35–50", tour_range: "8–10", order: 3, is_active: true, show_on_web: true, is_best_value: true, save_percent: 30 },
-      ]),
+    handle: () => ok(MOCK_PACKS),
+  },
+  {
+    method: "POST",
+    path: "/payments/razorpay/packs/order",
+    auth: true,
+    handle: async ({ body }) => {
+      const pack = (await realPacks()).find((p) => p.product_id === body.product_id);
+      if (!pack) return fail(404, "pack_unavailable", "This coin pack isn't available.");
+      const coins = Number(pack.coins) + Number(pack.bonus_coins ?? 0);
+      return ok({
+        order_id: `order_mock_${coins}_${Date.now()}`,
+        amount: Math.round(Number(pack.amount) * 100),
+        currency: "INR",
+        key_id: "rzp_test_mock",
+        product_id: pack.product_id,
+        display_name: pack.display_name,
+        coins,
+      });
+    },
+  },
+  {
+    method: "POST",
+    path: "/payments/razorpay/packs/verify",
+    auth: true,
+    handle: ({ body }) => {
+      const coins = Number(/^order_mock_(\d+)_/.exec(String(body.razorpay_order_id ?? ""))?.[1] ?? 0);
+      if (!coins) return fail(400, "payment_order_mismatch", "Payment not found for this order.");
+      const { balance } = writeDb((d) => {
+        d.balance += coins;
+        d.passbook.push({ id: mockId("pb"), type: "purchase", description: `${coins} Coins (website)`, amount: coins, status: "completed", created_at: daysFromNow(0) });
+      });
+      return ok({ coins_credited: String(coins), new_balance: String(balance), already_processed: false }, "Coins added");
+    },
   },
 ];

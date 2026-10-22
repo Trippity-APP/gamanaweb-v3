@@ -11,3 +11,10 @@ export const webAccountsEnabled = process.env.NEXT_PUBLIC_WEB_ACCOUNTS === "1";
  * the real API and only fall back to the mock when they fail. Never enable in production.
  */
 export const apiMocksEnabled = webAccountsEnabled && process.env.NEXT_PUBLIC_API_MOCKS === "1";
+
+/**
+ * Buy coin packs on /pricing with Razorpay (INR). Needs the backend's
+ * `/payments/razorpay/packs/*` endpoints and Razorpay keys on the server. When off, Buy hands
+ * off to the app.
+ */
+export const webCoinCheckoutEnabled = webAccountsEnabled && process.env.NEXT_PUBLIC_WEB_COIN_CHECKOUT === "1";

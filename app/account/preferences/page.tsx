@@ -13,10 +13,10 @@ import { PersonalizationEditor } from "@/components/account/PersonalizationEdito
 import { toast } from "@/hooks/use-toast";
 import { apiFetch } from "@/lib/api/client";
 import {
+  buildNarrators,
   fetchPersonalization,
-  mergeNarrators,
   narratorLanguages,
-  narratorVoice,
+  narratorVoiceCodes,
   patchPersonalization,
   travelProfileToJourney,
   journeyToTravelProfile,
@@ -27,7 +27,7 @@ import { useJourney } from "@/lib/journey-context";
 import { cn } from "@/lib/utils";
 
 type Language = { code: string; label: string };
-type Persona = { id: string; name: string; description?: string; image?: string };
+type Persona = { id: string; name: string; description?: string; image?: string; voiceId?: string };
 
 const MAX_LANGUAGES = 3;
 
@@ -58,8 +58,9 @@ function toPersonas(raw: unknown): Persona[] {
       name: String(p.name ?? p.display_name ?? "Narrator"),
       description: (p.description ?? p.tagline ?? p.style) as string | undefined,
       image: (p.persona_image_blob_url ?? p.image_url ?? p.image ?? p.avatar_url) as string | undefined,
+      voiceId: typeof p.voice_id === "string" && p.voice_id ? p.voice_id : undefined,
     }))
-    .filter((p) => p.id);
+    .filter((p) => p.id && p.voiceId);
 }
 
 const SECTION = "rounded-3xl bg-white p-6 shadow-card sm:p-8";
@@ -68,30 +69,30 @@ function NarratorSection({ doc, onSaved }: { doc: PersonalizationDoc; onSaved: (
   const [catalog, setCatalog] = useState<Language[]>([]);
   const [personas, setPersonas] = useState<Persona[] | null>(null);
   const [codes, setCodes] = useState<string[]>(() => narratorLanguages(doc));
-  const voice = narratorVoice(doc);
-  const [voiceId, setVoiceId] = useState<string | null>(voice.value);
+  const savedVoice = narratorVoiceCodes(doc)[0] ?? null;
+  const [voiceId, setVoiceId] = useState<string | null>(savedVoice);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    apiFetch("/personalization/catalog", { auth: "optional" })
+    apiFetch("/personalization/catalog", { auth: "required" })
       .then((raw) => setCatalog(toLanguages(raw)))
       .catch(() => setCatalog([]));
-    apiFetch("/voice-personas/mobile/active", { auth: "optional" })
+    apiFetch("/voice-personas/mobile/active", { auth: "none" })
       .then((raw) => setPersonas(toPersonas(raw)))
       .catch(() => setPersonas([]));
   }, []);
 
   const labelFor = (code: string) => catalog.find((l) => l.code === code)?.label ?? languageLabel(code);
-  const dirty =
-    JSON.stringify(codes) !== JSON.stringify(narratorLanguages(doc)) || voiceId !== narratorVoice(doc).value;
+  const dirty = JSON.stringify(codes) !== JSON.stringify(narratorLanguages(doc)) || voiceId !== savedVoice;
 
   async function save() {
     setSaving(true);
     try {
-      const narrators = mergeNarrators(doc.narrators, { languages: { codes }, [voice.key]: voiceId });
+      const live = await fetchPersonalization().catch(() => doc);
+      const narrators = buildNarrators(live, codes, voiceId);
       const updated = await patchPersonalization({ narrators });
-      onSaved({ ...doc, ...(updated ?? {}), narrators });
+      onSaved({ ...doc, ...(updated ?? {}), narrators: updated?.narrators ?? narrators });
       toast({ title: "Language and narrator saved" });
     } catch {
       toast({ title: "Couldn't save. Please try again.", variant: "destructive" });
@@ -171,14 +172,14 @@ function NarratorSection({ doc, onSaved }: { doc: PersonalizationDoc; onSaved: (
       ) : (
         <div role="radiogroup" aria-label="Narrator voice" className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {personas.map((p) => {
-            const selected = voiceId === p.id;
+            const selected = voiceId === p.voiceId;
             return (
               <button
                 key={p.id}
                 type="button"
                 role="radio"
                 aria-checked={selected}
-                onClick={() => setVoiceId(selected ? null : p.id)}
+                onClick={() => setVoiceId(selected ? null : p.voiceId ?? null)}
                 className={cn(
                   "focus-ring flex items-center gap-3 rounded-2xl border-2 p-3 text-left transition-colors",
                   selected ? "border-brand-600 bg-brand-50" : "border-sand-200 hover:border-brand-300",

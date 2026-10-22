@@ -11,7 +11,7 @@ type ContactFormResponse = {
   message: string;
 };
 
-const DEFAULT_API_URL = "https://apidev.gamana.app/api/v1";
+const DEFAULT_API_URL = "https://api-beta.gamana.app/api/v1";
 
 export function getContactApiBaseUrl(): string {
   return (

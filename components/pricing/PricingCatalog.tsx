@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Building2, Check, Lock, Smartphone, Sparkles, Wallet } from "@/components/icons";
+import { ArrowRight, Building2, Check, Loader2, Lock, Smartphone, Sparkles, Wallet } from "@/components/icons";
 import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import { AppHandoffSheet } from "@/components/handoff/AppHandoffSheet";
 import { Reveal } from "@/components/motion/Reveal";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { track } from "@/lib/analytics";
+import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/auth-context";
 import { detectPricingCurrency, formatMoney, persistPricingCurrency, type PricingCurrency } from "@/lib/coin-pricing";
+import { webCoinCheckoutEnabled } from "@/lib/flags";
 import { fetchWebPacks, snapshotPacks, type WebPack } from "@/lib/pricing/packages";
+import { createPackOrder, openPackCheckout, verifyPackPayment } from "@/lib/pricing/razorpay";
 
 const CURRENCIES = ["INR", "USD"] as const;
 
@@ -28,11 +32,15 @@ function packBullets(pack: WebPack): string[] {
 }
 
 export function PricingCatalog() {
-  const { status, balance } = useAuth();
+  const { status, balance, user, requireAuth, refreshBalance } = useAuth();
   const [packs, setPacks] = useState<WebPack[]>(snapshotPacks);
   const [preferred, setPreferred] = useState<PricingCurrency>("USD");
   const [ready, setReady] = useState(false);
   const [buying, setBuying] = useState<WebPack | null>(null);
+  const [paying, setPaying] = useState<string | null>(null);
+  const [payStatus, setPayStatus] = useState("");
+  const userRef = useRef(user);
+  userRef.current = user;
 
   useEffect(() => {
     setPreferred(detectPricingCurrency());
@@ -54,9 +62,64 @@ export function PricingCatalog() {
     persistPricingCurrency(next);
   };
 
+  const checkout = async (pack: WebPack) => {
+    const coins = pack.coins + pack.bonusCoins;
+    setPaying(pack.id);
+    setPayStatus(`Opening secure payment for ${coins} coins…`);
+    let paid = false;
+    try {
+      const order = await createPackOrder(pack.id);
+      const current = userRef.current;
+      const outcome = await openPackCheckout(order, {
+        name: [current?.firstName, current?.lastName].filter(Boolean).join(" ") || undefined,
+        email: current?.email || undefined,
+        contact: current?.phone ? `${current.countryCode}${current.phone}` : undefined,
+      });
+      if (outcome.kind === "dismissed") {
+        track("pricing_checkout_dismissed", { pack: pack.id });
+        setPayStatus("Payment cancelled.");
+        return;
+      }
+      if (outcome.kind === "failed") {
+        track("pricing_purchase_failed", { pack: pack.id, reason: outcome.message });
+        setPayStatus(outcome.message);
+        toast({ title: "Payment didn't go through", description: outcome.message, variant: "destructive" });
+        return;
+      }
+      paid = true;
+      setPayStatus("Payment received. Adding your coins…");
+      const result = await verifyPackPayment(outcome.result);
+      await refreshBalance();
+      track("pricing_purchase_success", { pack: pack.id, coins: result.coins_credited, value: pack.amountInr, currency: "INR" });
+      const done = `${result.coins_credited} coins added to your wallet. They're in the Gamana app too.`;
+      setPayStatus(done);
+      toast({ title: "Coins added", description: done });
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "Something went wrong. Please try again.";
+      track("pricing_purchase_failed", { pack: pack.id, reason: paid ? "verify" : "order" });
+      if (paid) {
+        const pending =
+          "Payment received. Your coins will appear in your wallet within a few minutes. If they don't, write to support@gamana.app.";
+        setPayStatus(pending);
+        toast({ title: "Payment received", description: pending });
+        window.setTimeout(() => void refreshBalance(), 15000);
+      } else {
+        setPayStatus(message);
+        toast({ title: "Couldn't start the payment", description: message, variant: "destructive" });
+      }
+    } finally {
+      setPaying(null);
+    }
+  };
+
   const buy = (pack: WebPack) => {
-    track("pricing_buy_click", { pack_id: pack.id, currency });
-    setBuying(pack);
+    track("pricing_buy_click", { pack: pack.id, currency });
+    if (!webCoinCheckoutEnabled) {
+      setBuying(pack);
+      return;
+    }
+    if (paying) return;
+    requireAuth(() => void checkout(pack), "to buy coins");
   };
 
   return (
@@ -117,6 +180,10 @@ export function PricingCatalog() {
           </div>
         )}
 
+        <p className="sr-only" role="status" aria-live="polite">
+          {payStatus}
+        </p>
+
         {packs.length === 0 ? (
           <p className="rounded-3xl bg-white p-8 text-center text-ink-soft shadow-card">
             Coin packs are available in the Gamana app.
@@ -125,7 +192,9 @@ export function PricingCatalog() {
           <div className="flex flex-wrap justify-center gap-5 xl:items-stretch">
             {packs.map((pack, i) => {
               const price = packPriceLabel(pack, currency);
+              const chargeLabel = webCoinCheckoutEnabled ? formatMoney(pack.amountInr, "INR") : price;
               const featured = pack.highlighted;
+              const isPaying = paying === pack.id;
 
               return (
                 <Reveal
@@ -205,15 +274,18 @@ export function PricingCatalog() {
                       <button
                         type="button"
                         onClick={() => buy(pack)}
+                        disabled={paying !== null}
+                        aria-busy={isPaying || undefined}
                         className={cn(
-                          "focus-ring mt-7 min-h-[44px] w-full rounded-full px-5 py-3 text-sm font-semibold transition-transform duration-300 ease-spring hover:-translate-y-0.5 active:scale-95",
+                          "focus-ring mt-7 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-transform duration-300 ease-spring hover:-translate-y-0.5 active:scale-95 disabled:pointer-events-none disabled:opacity-70",
                           featured ? "bg-white text-brand-800" : "bg-ink text-white"
                         )}
                       >
-                        Buy {pack.coins} coins · {price}
+                        {isPaying && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
+                        Buy {pack.coins} coins · {chargeLabel}
                       </button>
                       <p className={cn("mt-2 text-center text-xs", featured ? "text-white/65" : "text-ink-muted")}>
-                        Opens the Gamana app
+                        {webCoinCheckoutEnabled ? "Secure payment in INR · UPI, cards, netbanking" : "Opens the Gamana app"}
                       </p>
                     </div>
                   </div>
@@ -225,7 +297,14 @@ export function PricingCatalog() {
 
         <ul className="mt-10 grid gap-3 sm:grid-cols-3">
           {[
-            { icon: Smartphone, text: <>Buy securely in the Gamana app. Coins appear here instantly.</> },
+            {
+              icon: Smartphone,
+              text: webCoinCheckoutEnabled ? (
+                <>Pay securely with Razorpay. Coins land in your wallet here and in the Gamana app.</>
+              ) : (
+                <>Buy securely in the Gamana app. Coins appear here instantly.</>
+              ),
+            },
             { icon: Lock, text: <>One-time packs. Not a subscription. Unused coins stay in your wallet.</> },
             {
               icon: Wallet,

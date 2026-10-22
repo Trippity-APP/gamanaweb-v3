@@ -28,6 +28,8 @@ export interface SavedJourney {
   additionalNotes?: string;
   /** City used to personalize the home page (`travel_profile.home_city`). */
   homeCity?: string;
+  /** Country and coordinates of `homeCity` when it was picked from suggestions. */
+  homeCityGeo?: { country?: string; latitude?: number; longitude?: number };
   /** Derived display label list, kept for the marketplace's JourneyGreeting banner. */
   interestLabels?: string[];
   savedAt?: string;

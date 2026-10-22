@@ -162,11 +162,11 @@ export function LoginFlow({ reason, showHeader = false, onScreenChange, onDone }
   }
 
   async function afterLogin(response: WebLoginResponse) {
-    isNew.current = Boolean(response.is_new_user);
+    isNew.current = !response.first_name?.trim();
     if (response.organizations?.length) track("login_org_user");
     const user = await completeLogin(response, { defer: true });
     if (!user) throw new Error("profile_failed");
-    if (isNew.current || !user.firstName) {
+    if (!user.firstName) {
       setLoggedUser(user);
       setProfile({ firstName: user.firstName, lastName: user.lastName, email: user.email });
       setScreen("profile");

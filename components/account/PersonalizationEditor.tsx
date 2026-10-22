@@ -43,6 +43,7 @@ interface Draft {
   heatSensitive: boolean;
   additionalNotes: string;
   homeCity: string;
+  homeCityGeo: SavedJourney["homeCityGeo"];
 }
 
 function draftFromJourney(journey: SavedJourney | null): Draft {
@@ -67,6 +68,7 @@ function draftFromJourney(journey: SavedJourney | null): Draft {
     heatSensitive: journey?.heatSensitive ?? false,
     additionalNotes: journey?.additionalNotes || "",
     homeCity: journey?.homeCity || "",
+    homeCityGeo: journey?.homeCityGeo,
   };
 }
 
@@ -187,6 +189,7 @@ export function PersonalizationEditor({ onSave }: { onSave?: (journey: SavedJour
       heatSensitive: draft.heatSensitive,
       additionalNotes: draft.additionalNotes,
       homeCity: draft.homeCity.trim() || undefined,
+      homeCityGeo: draft.homeCity.trim() ? draft.homeCityGeo : undefined,
       interestLabels,
       savedAt: new Date().toISOString(),
     };
@@ -296,7 +299,8 @@ export function PersonalizationEditor({ onSave }: { onSave?: (journey: SavedJour
           id="pz-home-city"
           placeholder="e.g. Jaipur, India"
           value={draft.homeCity}
-          onChange={(value) => update("homeCity", value)}
+          onChange={(value) => setDraft((prev) => ({ ...prev, homeCity: value, homeCityGeo: undefined }))}
+          onSelect={({ country, latitude, longitude }) => update("homeCityGeo", { country, latitude, longitude })}
         />
       </div>
 

@@ -16,8 +16,12 @@ interface CityAutocompleteProps {
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;
+  /** Fires after `onChange` when a suggestion is picked, with what Google knows about the city. */
+  onSelect?: (place: SelectedCity) => void;
   className?: string;
 }
+
+export type SelectedCity = { name: string; country?: string; latitude?: number; longitude?: number };
 
 /**
  * City-scoped Google Places autocomplete input. Same script-loading pattern as
@@ -26,11 +30,13 @@ interface CityAutocompleteProps {
  * NEXT_PUBLIC_GOOGLE_MAPS_API_KEY — if that's already configured for Request a Place,
  * this works automatically with no extra setup.
  */
-export function CityAutocomplete({ id, placeholder, value, onChange, className }: CityAutocompleteProps) {
+export function CityAutocomplete({ id, placeholder, value, onChange, onSelect, className }: CityAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
 
   useEffect(() => {
     const inputEl = inputRef.current;
@@ -52,6 +58,13 @@ export function CityAutocomplete({ id, placeholder, value, onChange, className }
         const formatted = place.formatted_address ?? place.name ?? inputEl.value;
         inputEl.value = formatted;
         onChangeRef.current(formatted);
+        const location = place.geometry?.location;
+        onSelectRef.current?.({
+          name: place.name ?? formatted,
+          country: place.address_components?.find((c) => c.types.includes("country"))?.long_name,
+          latitude: location?.lat(),
+          longitude: location?.lng(),
+        });
       });
     };
 

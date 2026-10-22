@@ -16,9 +16,16 @@ export const webLoginResponseSchema = z
     access_token: z.string().min(1),
     session_id: z.string().min(1),
     expires_in: nullish(z.number()),
-    user: z.record(z.unknown()).nullish(),
+    /** User fields arrive flat in `data` (no nested `user`, no `is_new_user`). */
+    _id: nullish(z.union([z.string(), z.number()]).transform(String)),
+    id: nullish(z.union([z.string(), z.number()]).transform(String)),
+    first_name: nullish(z.string()),
+    last_name: nullish(z.string()),
+    email: nullish(z.string()),
+    phone: nullish(z.union([z.string(), z.number()]).transform(String)),
+    country_code: nullish(z.string()),
+    personalization: z.unknown().optional(),
     organizations: z.array(z.unknown()).nullish(),
-    is_new_user: nullish(z.boolean()),
   })
   .passthrough();
 

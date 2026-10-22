@@ -14,6 +14,7 @@ import type { LibraryUnlock } from "@/lib/api/schemas/library";
 import { fetchPersonalization, narratorLanguages } from "@/lib/account/personalization";
 import { useAuth } from "@/lib/auth/auth-context";
 import { apiMocksEnabled, webAccountsEnabled } from "@/lib/flags";
+import { isInsufficientCoins, isPriceMismatch, priceFromMismatch } from "@/lib/unlock/errors";
 import {
   daysLeft as unlockDaysLeft,
   deepLinkFor,
@@ -80,10 +81,10 @@ export function UnlockFlow({ item, source, children }: { item: UnlockItem; sourc
   const deepLink = deepLinkFor(item.kind, item.id);
 
   const begin = () => {
-    track("unlock_click", { kind: item.kind, source, price: item.price });
+    track("unlock_click", { type: item.kind, id: item.id, price: item.price, source });
     const current = balanceRef.current;
     if (current !== null && current < item.price) {
-      track("unlock_insufficient_coins", { kind: item.kind, source });
+      track("unlock_insufficient_coins", { type: item.kind, source });
       setStep({ name: "need-coins", needed: item.price - current });
       return;
     }
@@ -111,7 +112,7 @@ export function UnlockFlow({ item, source, children }: { item: UnlockItem; sourc
         }
       : {};
     try {
-      let res: { handoff?: HandoffResult | null } | null;
+      let res: { handoff?: HandoffResult | null; already_unlocked?: boolean } | null;
       if (item.kind === "place") {
         res = await apiFetch("/map/unlock", {
           method: "POST",
@@ -128,8 +129,14 @@ export function UnlockFlow({ item, source, children }: { item: UnlockItem; sourc
           headers: mockHeaders,
         });
       }
+      if (res?.already_unlocked) {
+        void library.invalidate();
+        toast({ title: "Already in your collection", description: "Open it in the Gamana app to listen." });
+        setStep({ name: "open-app" });
+        return;
+      }
       const handoff = res?.handoff ?? null;
-      track("unlock_success", { kind: item.kind, source, price });
+      track("unlock_success", { type: item.kind, push_sent: !!handoff?.push_sent, price, source });
       library.setLastHandoff(handoff);
       setStep({ name: "success", handoff });
       void refreshBalance();
@@ -141,20 +148,20 @@ export function UnlockFlow({ item, source, children }: { item: UnlockItem; sourc
       }
       const code = errorCode(err);
       const details = errorDetails(err);
-      if (err.status === 402 || code === "insufficient_coins") {
-        track("unlock_insufficient_coins", { kind: item.kind, source });
+      if (err.status === 402 || code === "insufficient_coins" || isInsufficientCoins(err.message)) {
+        track("unlock_insufficient_coins", { type: item.kind, source });
         const required = Number(details.required ?? price);
         const available = Number(details.available ?? balanceRef.current ?? 0);
-        setStep({ name: "need-coins", needed: Math.max(1, required - available) });
+        setStep({ name: "need-coins", needed: Math.max(1, Math.ceil(required - available)) });
         void refreshBalance();
       } else if (code === "already_unlocked" || err.status === 409) {
         void library.invalidate();
         toast({ title: "Already in your collection", description: "Open it in the Gamana app to listen." });
         setStep({ name: "open-app" });
-      } else if (/price/i.test(code) || /price/i.test(err.message)) {
+      } else if (isPriceMismatch(err.message) || /price/i.test(code)) {
         const raw = PRICE_KEYS.map((k) => details[k]).find((v) => v !== undefined && v !== null);
-        const next = Number(raw);
-        if (Number.isFinite(next) && next > 0) setStep({ name: "confirm", price: Math.round(next), changed: true });
+        const next = priceFromMismatch(err.message) ?? Number(raw);
+        if (Number.isFinite(next) && next > 0 && next !== price) setStep({ name: "confirm", price: next, changed: true });
         else setError("The price just changed. Please reload the page.");
       } else {
         setError(err.message || "Couldn't unlock this right now. Please try again.");

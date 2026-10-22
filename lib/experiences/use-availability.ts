@@ -273,7 +273,7 @@ export function useAvailability(experience: ExperienceDetail | null) {
     setSummary(null);
     setError(null);
     const travellers = selections.reduce((n, s) => n + s.quantity, 0);
-    track("availability_check", { slug, travellers });
+    track("availability_check", { slug, date: forDate, guests: travellers });
     try {
       const res = await getAvailabilitySlots(slug, { local_date: forDate, guests: selections });
       const options = res.slots.map(toSlotOption).filter((s) => s.vacancies !== 0);

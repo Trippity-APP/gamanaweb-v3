@@ -41,6 +41,9 @@ export type AnalyticsEvent =
   | "handoff_qr_view"
   | "handoff_open_app_click"
   | "pricing_buy_click"
+  | "pricing_checkout_dismissed"
+  | "pricing_purchase_success"
+  | "pricing_purchase_failed"
   | "home_shelf_impression"
   | "home_shelf_click";
 

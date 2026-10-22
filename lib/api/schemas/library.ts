@@ -17,6 +17,8 @@ export const libraryUnlockSchema = z
     expires_at: nullish(z.string()),
     activation_status: activationStatusSchema.optional().transform((value) => value ?? "active"),
     reserved_until: nullish(z.string()),
+    /** Only on `tours/mine` cards: a user's own tour can still be locked. */
+    is_unlocked: nullish(z.boolean()),
   })
   .passthrough();
 

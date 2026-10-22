@@ -95,11 +95,11 @@ const pickupListSchema = z
   });
 
 export function getPickupPlaces(slug: string): Promise<PickupPlace[]> {
-  return apiFetch(`/experiences/${encodeURIComponent(slug)}/pickup-places`, { auth: "optional", schema: pickupListSchema });
+  return apiFetch(`/experiences/${encodeURIComponent(slug)}/pickup-places`, { auth: "none", schema: pickupListSchema });
 }
 
 export function getBookingQuestions(slug: string): Promise<unknown> {
-  return apiFetch(`/experiences/${encodeURIComponent(slug)}/booking-questions`, { auth: "optional" });
+  return apiFetch(`/experiences/${encodeURIComponent(slug)}/booking-questions`, { auth: "none" });
 }
 
 export type StartCheckoutBody = {
@@ -209,7 +209,18 @@ export function checkoutFieldErrors(error: unknown): Record<string, string> {
   return {};
 }
 
-export const SITE_ORIGIN = (): string => window.location.origin;
+export const SITE_ORIGIN = (): string =>
+  (process.env.NEXT_PUBLIC_SITE_URL || window.location.origin).replace(/\/+$/, "");
+
+/** The confirm body takes the preferred payment option flat (spec §3.3). */
+export function paymentFields(preferred: CheckoutOptions["preferred_payment"]) {
+  return {
+    uti: preferred?.uti ?? undefined,
+    checkout_option_type: preferred?.checkout_option_type ?? undefined,
+    payment_method: preferred?.payment_method ?? "CARD",
+    send_notification_to_main_contact: true,
+  };
+}
 
 export function returnUrls(checkoutId: string, slug: string) {
   const base = `${SITE_ORIGIN()}/experiences/checkout/return/?checkout_id=${encodeURIComponent(checkoutId)}&exp=${encodeURIComponent(slug)}`;

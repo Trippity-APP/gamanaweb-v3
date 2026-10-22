@@ -9,7 +9,7 @@ import {
   searchPublicStoriesByCity,
 } from "@/lib/places-api";
 
-const DEFAULT_API_URL = "https://apidev.gamana.app/api/v1";
+const DEFAULT_API_URL = "https://api-beta.gamana.app/api/v1";
 export const DEFAULT_TOUR_IMAGE = "/taj-mahal-sunrise-reflection-central-pool-agra.jpg";
 
 export function getDefaultTourImage(): string {

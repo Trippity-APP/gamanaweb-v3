@@ -169,10 +169,11 @@ export function AvailabilityCard({ experience, state, className, bare = false }:
 
         {state.phase !== "idle" && state.phase !== "checking" && state.soldOut && (
           <div className="rounded-2xl bg-sand-100 p-4">
-            <p className="text-sm font-semibold text-ink">Sold out on this date</p>
+            <p className="text-sm font-semibold text-ink">
+              {state.nextDates.length > 0 ? "Sold out on this date. Try one of these:" : "Sold out on this date"}
+            </p>
             {state.nextDates.length > 0 ? (
               <>
-                <p className="mt-1 text-xs text-ink-soft">Next available:</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {state.nextDates.map((d) => (
                     <button
@@ -182,7 +183,7 @@ export function AvailabilityCard({ experience, state, className, bare = false }:
                         state.selectDate(d);
                         void state.checkAvailability(d);
                       }}
-                      className="focus-ring rounded-full border border-sand-200 bg-white px-3 py-1 text-sm font-medium text-ink hover:border-brand-300"
+                      className="focus-ring min-h-[44px] rounded-full border border-sand-200 bg-white px-4 text-sm font-medium text-ink hover:border-brand-300"
                     >
                       {formatDateLabel(d)}
                     </button>
@@ -298,7 +299,7 @@ function Stepper({
   onChange: (v: number) => void;
 }) {
   const btn =
-    "focus-ring grid h-9 w-9 place-items-center rounded-full border border-sand-200 text-ink transition-colors hover:border-brand-300 disabled:cursor-not-allowed disabled:opacity-40";
+    "focus-ring grid h-11 w-11 place-items-center rounded-full border border-sand-200 text-ink transition-colors hover:border-brand-300 disabled:cursor-not-allowed disabled:opacity-40";
   return (
     <div className="flex items-center gap-3">
       <button type="button" className={btn} disabled={!canDecrement} onClick={() => onChange(value - 1)} aria-label={`Remove one ${label}`}>

@@ -7,16 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/auth/auth-context';
 
-const CITY_REQUESTS_KEY = 'gamanaCityRequests';
-
-export type CityRequest = {
-  city: string;
-  email?: string;
-  /** Which surface the request came from — Tours vs Experiences empty state. */
-  source: string;
-  requestedAt: string;
-};
-
 /**
  * Shown in place of an empty results grid when a search returns nothing.
  *
@@ -31,8 +21,7 @@ export type CityRequest = {
  * sit-down task, and dropping it into a search dead end would ask far too much of someone
  * who just typed a city name. Anyone who wants that depth gets a link to it.
  *
- * Prototype storage: localStorage, same stand-in the FeedbackWidget uses. A real backend
- * would route these to the team — until then, requests stay on the visitor's own machine.
+ * Requests are not persisted until a backend endpoint exists (browser storage is off-limits).
  */
 export function CityNotCovered({ city, source }: { city: string; source: string }) {
   const { user } = useAuth();
@@ -54,26 +43,6 @@ export function CityNotCovered({ city, source }: { city: string; source: string 
 
   const submit = () => {
     if (!emailLooksValid) return;
-    const entry: CityRequest = {
-      city,
-      email: effectiveEmail || undefined,
-      source,
-      requestedAt: new Date().toISOString(),
-    };
-    try {
-      const raw = window.localStorage.getItem(CITY_REQUESTS_KEY);
-      const existing: CityRequest[] = raw ? JSON.parse(raw) : [];
-      // One entry per city per visitor — the card unmounts on any tab/filter change, so
-      // without this the same person re-requesting would inflate the demand count for a
-      // city and skew exactly the signal this list exists to provide.
-      const deduped = existing.filter(
-        (r) => r.city.trim().toLowerCase() !== city.trim().toLowerCase()
-      );
-      deduped.unshift(entry);
-      window.localStorage.setItem(CITY_REQUESTS_KEY, JSON.stringify(deduped));
-    } catch {
-      // Private browsing or storage disabled — still confirm, the ask was made.
-    }
     setSubmitted(true);
   };
 

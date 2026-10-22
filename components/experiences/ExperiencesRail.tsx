@@ -69,9 +69,9 @@ export function ExperiencesRail({
           className="mb-6 sm:mb-8"
         />
         <CardRail label={title}>
-          {items.map((item) => (
+          {items.map((item, index) => (
             <div key={item.id} className="w-[280px] sm:w-[320px]">
-              <ExperienceCard experience={item} />
+              <ExperienceCard experience={item} position={index + 1} />
             </div>
           ))}
         </CardRail>

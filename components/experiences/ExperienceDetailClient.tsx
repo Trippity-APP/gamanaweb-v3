@@ -27,6 +27,7 @@ import { ExperienceReviews } from "@/components/experiences/ExperienceReviews";
 import { ExperiencesRail } from "@/components/experiences/ExperiencesRail";
 import { PriceTag } from "@/components/experiences/PriceTag";
 import { RatingInline } from "@/components/experiences/RatingInline";
+import { StoriesNearbyRail, useExperienceStories } from "@/components/experiences/StoriesNearby";
 import { WishlistButton } from "@/components/experiences/WishlistButton";
 import { DetailGallery } from "@/components/marketplace/detail/DetailGallery";
 import { MarketplaceCoverImage } from "@/components/marketplace/marketplace-cover-image";
@@ -121,8 +122,9 @@ export function ExperienceDetailClient({ slugParam, initial, linkedStory }: Expe
   return <ExperienceDetailView experience={experience} linkedStory={linkedStory ?? null} />;
 }
 
-function ExperienceDetailView({ experience, linkedStory }: { experience: ExperienceDetail; linkedStory: LinkedStory | null }) {
+function ExperienceDetailView({ experience, linkedStory: initialStory }: { experience: ExperienceDetail; linkedStory: LinkedStory | null }) {
   const availability = useAvailability(experience);
+  const { stories: nearbyStories, linked: linkedStory } = useExperienceStories(experience.city, experience.linked_story_id, initialStory);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const slug = experience.slug ?? experience.id;
   const location = locationLabel(experience);
@@ -288,6 +290,7 @@ function ExperienceDetailView({ experience, linkedStory }: { experience: Experie
           excludeId={experience.id}
         />
       )}
+      {experience.city && <StoriesNearbyRail city={experience.city} stories={nearbyStories} />}
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm lg:hidden">
         <div className="flex items-center gap-3">

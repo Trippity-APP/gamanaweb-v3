@@ -38,10 +38,16 @@ export type BookingQuestion = {
   trigger?: { questionId: string; value: string };
 };
 
+export type PassengerSlot = { bookingId: string | null; pricingCategoryId: string | null };
+
 export type QuestionGroups = {
   mainContact: BookingQuestion[];
   perBooking: BookingQuestion[];
   perPassenger: BookingQuestion[];
+  /** Bókun activity booking id from the backend's `activities[0].booking_id`. */
+  activityBookingId?: string | null;
+  /** One per passenger Bókun created on the cart; answers are keyed by their `booking_id`. */
+  passengers?: PassengerSlot[];
 };
 
 export type AnswerValue = string | string[] | boolean;
@@ -126,7 +132,7 @@ export function normalizeQuestion(raw: unknown): BookingQuestion | null {
     label: str(raw.label) ?? str(raw.title) ?? str(raw.question) ?? id,
     kind: kindOf(raw, options),
     required: raw.required === true || raw.is_required === true,
-    help: str(raw.helpText) ?? str(raw.help_text) ?? str(raw.description),
+    help: str(raw.help) ?? str(raw.helpText) ?? str(raw.help_text) ?? str(raw.description),
     placeholder: str(raw.placeholder),
     options,
     maxLength: num(raw.maxLength ?? raw.max_length),
@@ -146,22 +152,31 @@ function listOf(raw: unknown): BookingQuestion[] {
     .filter((q): q is BookingQuestion => q !== null && !seen.has(q.id) && (seen.add(q.id), true));
 }
 
+const idOf = (v: unknown): string | null => (typeof v === "number" ? String(v) : str(v) ?? null);
+
 /**
- * Accepts the backend's grouped shape (`main_contact` / `per_booking` / `per_passenger`), the camel
- * variant, or Bókun's raw `mainContactDetails` + `activityBookings[0].questions/passengers`.
+ * Accepts the backend's mobile shape (`main_contact` + `activities[0].questions/passengers[]`),
+ * the flat grouped shape (`per_booking` / `per_passenger`), or Bókun's raw
+ * `mainContactDetails` + `activityBookings[0].questions/passengers`.
  */
 export function normalizeQuestionGroups(raw: unknown): QuestionGroups {
   if (!isRecord(raw)) return { mainContact: [], perBooking: [], perPassenger: [] };
   const inner = isRecord(raw.booking_questions) ? raw.booking_questions : raw;
-  const activity = Array.isArray(inner.activityBookings) && isRecord(inner.activityBookings[0]) ? inner.activityBookings[0] : null;
-  const firstPassenger =
-    activity && Array.isArray(activity.passengers) && isRecord(activity.passengers[0]) ? activity.passengers[0] : null;
+  const activities = inner.activities ?? inner.activityBookings;
+  const activity = Array.isArray(activities) && isRecord(activities[0]) ? activities[0] : null;
+  const paxList = activity && Array.isArray(activity.passengers) ? activity.passengers.filter(isRecord) : [];
+  const firstPassenger = paxList[0] ?? null;
   return {
     mainContact: listOf(inner.main_contact ?? inner.mainContact ?? inner.mainContactDetails),
     perBooking: listOf(inner.per_booking ?? inner.perBooking ?? activity?.questions),
     perPassenger: listOf(
       inner.per_passenger ?? inner.perPassenger ?? firstPassenger?.passengerDetails ?? firstPassenger?.questions,
     ),
+    activityBookingId: activity ? idOf(activity.booking_id ?? activity.bookingId) : null,
+    passengers: paxList.map((p) => ({
+      bookingId: idOf(p.booking_id ?? p.bookingId),
+      pricingCategoryId: idOf(p.pricing_category_id ?? p.pricingCategoryId),
+    })),
   };
 }
 
@@ -277,16 +292,30 @@ export function buildBookingAnswers(input: {
   passengers: PassengerAnswers[];
 }) {
   const { groups } = input;
+  const slots = groups.passengers ?? [];
+  const used = new Set<number>();
+  /** Same pricing category first, then whatever slot is left, so each traveller gets one Bókun passenger. */
+  const slotFor = (unitId: string, index: number): PassengerSlot | undefined => {
+    let i = slots.findIndex((s, n) => !used.has(n) && s.pricingCategoryId === unitId);
+    if (i < 0) i = used.has(index) || index >= slots.length ? slots.findIndex((_, n) => !used.has(n)) : index;
+    if (i < 0) return undefined;
+    used.add(i);
+    return slots[i];
+  };
   return {
     main_contact: serializeAnswers(groups.mainContact, input.mainContact),
     activities: [
       {
-        booking_id: input.bookingId ?? null,
+        booking_id: groups.activityBookingId ?? input.bookingId ?? null,
         answers: serializeAnswers(groups.perBooking, input.perBooking),
-        passengers: input.passengers.map((p) => ({
-          pricing_category_id: p.unitId,
-          answers: serializeAnswers(groups.perPassenger, p.answers),
-        })),
+        passengers: input.passengers.map((p, i) => {
+          const slot = slotFor(p.unitId, i);
+          return {
+            booking_id: slot?.bookingId ?? null,
+            pricing_category_id: slot?.pricingCategoryId ?? p.unitId,
+            answers: serializeAnswers(groups.perPassenger, p.answers),
+          };
+        }),
       },
     ],
   };

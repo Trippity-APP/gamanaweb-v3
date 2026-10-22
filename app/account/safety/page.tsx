@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Phone, Smartphone } from "@/components/icons";
 import { ErrorState } from "@/components/common/ErrorState";
 import { apiFetch } from "@/lib/api/client";
-import { fetchPersonalization } from "@/lib/account/personalization";
+import { fetchPersonalization, travelProfileHomeCity } from "@/lib/account/personalization";
 import { DIAL_CODES } from "@/lib/auth/dial-codes";
 import { useAuth } from "@/lib/auth/auth-context";
 
@@ -49,7 +49,7 @@ export default function SafetyPage() {
     fetchPersonalization()
       .then((doc) => {
         const tp = doc.travel_profile ?? {};
-        setCountry(countryFromCity((tp.home_city as string) ?? (tp.home_location as string)) ?? fromPhone ?? "IN");
+        setCountry(countryFromCity(travelProfileHomeCity(tp) ?? (tp.home_location as string)) ?? fromPhone ?? "IN");
       })
       .catch(() => setCountry(fromPhone ?? "IN"));
   }, [user?.countryCode]);

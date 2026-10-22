@@ -40,7 +40,7 @@ export interface FetchCitiesParams {
     page_size?: number;
 }
 
-const DEFAULT_API_URL = "https://apidev.gamana.app/api/v1";
+const DEFAULT_API_URL = "https://api-beta.gamana.app/api/v1";
 
 /**
  * City images are signed URLs that expire after 24h, so the browser must never reuse

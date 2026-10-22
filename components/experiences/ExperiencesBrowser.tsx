@@ -70,6 +70,7 @@ export function ExperiencesBrowser() {
   const [page, setPage] = useState(1);
   const [state, setState] = useState<LoadState>("loading");
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreFailed, setLoadMoreFailed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
   const loadedKey = useRef<string | null>(null);
@@ -97,6 +98,7 @@ export function ExperiencesBrowser() {
     const controller = new AbortController();
     const targetPage = urlPage;
     setState("loading");
+    setLoadMoreFailed(false);
     (async () => {
       try {
         const collected: ExperienceSummary[] = [];
@@ -112,7 +114,7 @@ export function ExperiencesBrowser() {
         setHasNext(!!last.has_next);
         setPage(last.page ?? targetPage);
         setState("ready");
-        track("experience_list_view", { results: last.total ?? collected.length, city: filters.city || undefined, category: filters.category || undefined });
+        track("experience_list_view", { filters: serializeFilters(filters), results: last.total ?? collected.length, city: filters.city || undefined, category: filters.category || undefined });
       } catch {
         if (!controller.signal.aborted) setState("error");
       }
@@ -123,6 +125,7 @@ export function ExperiencesBrowser() {
   const loadMore = async () => {
     const nextPage = page + 1;
     setLoadingMore(true);
+    setLoadMoreFailed(false);
     try {
       const res = await listExperiences(toListQuery(filters, nextPage));
       setItems((prev) => [...prev, ...res.items]);
@@ -131,7 +134,7 @@ export function ExperiencesBrowser() {
       loadedKey.current = `${filterKey}#${reloadToken}`;
       replaceUrl(filters, nextPage);
     } catch {
-      setState("error");
+      setLoadMoreFailed(true);
     } finally {
       setLoadingMore(false);
     }
@@ -248,16 +251,19 @@ export function ExperiencesBrowser() {
             ) : (
               <>
                 <ul className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                  {visible.map((item) => (
+                  {visible.map((item, index) => (
                     <li key={item.id}>
-                      <ExperienceCard experience={item} />
+                      <ExperienceCard experience={item} position={index + 1} />
                     </li>
                   ))}
                 </ul>
                 {hasNext && (
-                  <div className="mt-10 flex justify-center">
+                  <div className="mt-10 flex flex-col items-center gap-3">
+                    <p role="status" aria-live="polite" className="text-sm text-ink-soft">
+                      {loadMoreFailed ? "Couldn't load more experiences." : ""}
+                    </p>
                     <Button type="button" variant="outline" size="lg" className="rounded-full px-8" disabled={loadingMore} onClick={loadMore}>
-                      {loadingMore ? "Loading…" : "Load more"}
+                      {loadingMore ? "Loading…" : loadMoreFailed ? "Try again" : "Load more"}
                     </Button>
                   </div>
                 )}

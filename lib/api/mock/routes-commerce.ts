@@ -422,16 +422,19 @@ export const commerceRoutes: MockRoute[] = [
     method: "POST",
     path: "/experiences/:slug/reviews/photos",
     auth: true,
-    handle: ({ form }) => ok({ blob_names: form ? Array.from(form.getAll("files")).map((_, i) => `mock-review-photo-${Date.now()}-${i}.jpg`) : [] }),
+    handle: () => ({ status: 200, body: { success: true, blob_name: `mock-review-photo-${Date.now()}.jpg` } }),
   },
   {
     method: "POST",
     path: "/experiences/:slug/reviews",
     auth: true,
-    handle: ({ body }) => {
+    handle: ({ body, params }) => {
       const rating = Number(body.rating);
       if (!(rating >= 1 && rating <= 5)) return fail(422, "validation_error", "Choose a rating.");
-      return ok({ id: mockId("rev"), rating }, "Thanks for your review");
+      writeDb((d) => {
+        for (const b of d.bookings) if (b.experience_slug === params.slug) b.reviewed = true;
+      });
+      return { status: 200, body: { success: true, review: { id: mockId("rev"), rating } } };
     },
   },
   {
@@ -472,14 +475,18 @@ export const commerceRoutes: MockRoute[] = [
     version: "v2",
     path: "/library/unlocks",
     auth: true,
-    handle: ({ db }) => ok({ items: db.unlocks.filter((u) => u.kind === "place") }),
+    handle: ({ db }) =>
+      ok({
+        places: db.unlocks.filter((u) => u.kind === "place"),
+        storylists: db.unlocks.filter((u) => u.kind === "storylist"),
+      }),
   },
   {
     method: "GET",
     version: "v2",
     path: "/tours/mine",
     auth: true,
-    handle: ({ db }) => ok({ items: db.unlocks.filter((u) => u.kind === "storylist") }),
+    handle: () => ok([]),
   },
   {
     method: "GET",
@@ -499,6 +506,6 @@ export const commerceRoutes: MockRoute[] = [
     method: "POST",
     path: "/me/handoff/:kind/:id",
     auth: true,
-    handle: () => ok({ push_sent: true, device_count: 1 }, "Sent to your phone"),
+    handle: () => ok({ handoff: { push_sent: true, device_count: 1 } }, "Sent to your phone"),
   },
 ];

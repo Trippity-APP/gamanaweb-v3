@@ -98,7 +98,7 @@ function getBlogApiBaseUrl() {
     process.env.NEXT_PUBLIC_API_URL ||
     process.env.BLOG_API_URL ||
     process.env.GAMANA_API_URL ||
-    "https://apidev.gamana.app/api/v1"
+    "https://api-beta.gamana.app/api/v1"
   ).replace(/\/$/, "");
 }
 

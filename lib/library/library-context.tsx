@@ -2,9 +2,12 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { apiFetch } from "@/lib/api/client";
-import { libraryUnlockSchema, type LibraryUnlock } from "@/lib/api/schemas/library";
-import { listOf } from "@/lib/account/api";
+import type { LibraryUnlock } from "@/lib/api/schemas/library";
 import { useAuth } from "@/lib/auth/auth-context";
+import { fetchPublicTourById } from "@/lib/marketplace-api";
+import { fetchAllPublicPlaces, mapPublicPlaceToTour } from "@/lib/places-api";
+import type { Tour } from "@/lib/marketplace-data";
+import { mergeUnlocks, parseLibraryUnlocks, parseToursMine, withDisplayData, type DisplayData } from "@/lib/library/unlocks";
 
 export type UnlockKind = "place" | "storylist";
 
@@ -30,6 +33,30 @@ export function unlockTargetId(u: LibraryUnlock): string {
   return String(u.place_id ?? u.storylist_id ?? u.id ?? u._id ?? "");
 }
 
+function display(tour: Tour): DisplayData {
+  return { title: tour.title, image_url: tour.image || null, city: tour.location.split(",")[0]?.trim() || null };
+}
+
+async function catalogDisplayData(places: LibraryUnlock[], walks: LibraryUnlock[]): Promise<Map<string, DisplayData>> {
+  const lookup = new Map<string, DisplayData>();
+  const needs = (u: LibraryUnlock) => !u.title || !u.image_url;
+  const placeIds = new Set(places.filter(needs).map(unlockTargetId));
+  const walkIds = Array.from(new Set(walks.filter(needs).map(unlockTargetId))).filter(Boolean);
+
+  if (placeIds.size > 0) {
+    const catalogue = await fetchAllPublicPlaces().catch(() => []);
+    for (const place of catalogue) {
+      const tour = mapPublicPlaceToTour(place);
+      if (tour && placeIds.has(tour.id)) lookup.set(tour.id, display(tour));
+    }
+  }
+  const walkTours = await Promise.allSettled(walkIds.map((id) => fetchPublicTourById(id)));
+  for (const result of walkTours) {
+    if (result.status === "fulfilled" && result.value) lookup.set(result.value.id, display(result.value));
+  }
+  return lookup;
+}
+
 export function LibraryProvider({ children }: { children: ReactNode }) {
   const { status } = useAuth();
   const [places, setPlaces] = useState<LibraryUnlock[] | null>(null);
@@ -41,18 +68,24 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   const load = useCallback(async () => {
     lastLoad.current = Date.now();
     setLoading(true);
-    const [p, t] = await Promise.all([
-      apiFetch("/library/unlocks", { auth: "required", version: "v2", schema: listOf(libraryUnlockSchema) }).catch(() => null),
-      apiFetch("/tours/mine", {
-        auth: "required",
-        version: "v2",
-        query: { page: 1, page_size: 100 },
-        schema: listOf(libraryUnlockSchema),
-      }).catch(() => null),
+    const [unlocks, mine] = await Promise.all([
+      apiFetch<unknown>("/library/unlocks", { auth: "required", version: "v2" })
+        .then(parseLibraryUnlocks)
+        .catch(() => null),
+      apiFetch<unknown>("/tours/mine", { auth: "required", version: "v2", query: { skip: 0, limit: 10 } })
+        .then(parseToursMine)
+        .catch(() => null),
     ]);
-    if (p) setPlaces(p);
-    if (t) setTours(t);
+    const placeList = unlocks?.places ?? null;
+    const walkList = unlocks || mine ? mergeUnlocks(unlocks?.storylists ?? [], mine ?? []) : null;
+    if (placeList) setPlaces(placeList);
+    if (walkList) setTours(walkList);
     setLoading(false);
+
+    const lookup = await catalogDisplayData(placeList ?? [], walkList ?? []);
+    if (lookup.size === 0) return;
+    setPlaces((cur) => (cur === placeList && cur ? withDisplayData(cur, lookup) : cur));
+    setTours((cur) => (cur === walkList && cur ? withDisplayData(cur, lookup) : cur));
   }, []);
 
   useEffect(() => {
@@ -82,7 +115,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   const find = useCallback(
     (kind: UnlockKind, id: string) => {
       const list = kind === "place" ? places : tours;
-      return list?.find((u) => unlockTargetId(u) === id && !isExpired(u));
+      return list?.find((u) => unlockTargetId(u) === id && u.is_unlocked !== false && !isExpired(u));
     },
     [places, tours],
   );
@@ -137,6 +170,11 @@ export function deepLinkFor(kind: UnlockKind, id: string): string {
     : `https://www.gamana.app/storylist/${encodeURIComponent(id)}`;
 }
 
-export function sendToPhone(kind: UnlockKind, id: string): Promise<HandoffResult> {
-  return apiFetch<HandoffResult>(`/me/handoff/${kind}/${encodeURIComponent(id)}`, { method: "POST", auth: "required", body: {} });
+/** `POST /me/handoff/{kind}/{id}` → `data: { handoff: { push_sent, device_count } }`. */
+export async function sendToPhone(kind: UnlockKind, id: string): Promise<HandoffResult> {
+  const data = await apiFetch<{ handoff?: HandoffResult | null } & HandoffResult>(
+    `/me/handoff/${kind}/${encodeURIComponent(id)}`,
+    { method: "POST", auth: "required", body: {} },
+  );
+  return data?.handoff ?? data ?? {};
 }

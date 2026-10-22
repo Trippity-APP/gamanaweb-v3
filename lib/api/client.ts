@@ -125,6 +125,9 @@ export async function apiFetch<T = unknown>(path: string, options: ApiFetchOptio
     throw toApiError(res.status, payload);
   }
 
+  const failure = options.unwrap === false ? null : unsuccessfulPayload(payload);
+  if (failure) throw failure;
+
   const result = options.unwrap === false ? payload : unwrapEnvelope(payload);
 
   if (!options.schema) return result as T;
@@ -202,24 +205,64 @@ function unwrapEnvelope(payload: unknown): unknown {
   return looksLikeEnvelope ? payload.data : payload;
 }
 
-function messageFrom(payload: unknown): string | null {
-  if (typeof payload === "string" && payload.trim()) return payload.trim();
+function text(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+/**
+ * Error bodies come in two shapes: the envelope (`{ message, error: { error_type } }`) and the
+ * global handler's `{ error: { status_code, detail, error_code } }`, where `detail` may be an object.
+ */
+export function messageFrom(payload: unknown): string | null {
+  if (typeof payload === "string") return text(payload);
   if (!isRecord(payload)) return null;
+  const error = payload.error;
+  if (isRecord(error)) {
+    const detail = error.detail;
+    const fromDetail = text(detail) ?? (isRecord(detail) ? text(detail.message) ?? text(detail.detail) : null);
+    if (fromDetail) return fromDetail;
+  }
   for (const key of ["message", "detail", "error"] as const) {
     const value = payload[key];
-    if (typeof value === "string" && value.trim()) return value.trim();
-    if (isRecord(value) && typeof value.message === "string") return value.message;
+    if (text(value)) return text(value);
+    if (isRecord(value) && text(value.message)) return text(value.message);
   }
   return null;
 }
 
-function toApiError(status: number, payload: unknown): ApiError {
+function codeFrom(payload: unknown): string | number | null {
+  if (!isRecord(payload)) return null;
+  const error = payload.error;
+  if (isRecord(error)) {
+    const detail = isRecord(error.detail) ? error.detail : null;
+    const code = error.error_code ?? error.error_type ?? detail?.error_type ?? detail?.error_code;
+    if (typeof code === "string" && code) return code;
+  }
+  return typeof payload.code === "string" || typeof payload.code === "number" ? payload.code : null;
+}
+
+export function toApiError(status: number, payload: unknown): ApiError {
   const message = messageFrom(payload) ?? `Request failed (${status}).`;
   if (status === 429) return new RateLimitedError(message, payload);
-  const code = isRecord(payload) && (typeof payload.code === "string" || typeof payload.code === "number")
-    ? payload.code
-    : null;
-  return new ApiError(message, status, code, payload);
+  return new ApiError(message, status, codeFrom(payload), payload);
+}
+
+/**
+ * Some endpoints report failure with HTTP 200: `{ success: false, code, message }` (e.g. request-otp)
+ * or `{ data: { success: false, message } }` (invalid OTP, storylist unlock).
+ */
+export function unsuccessfulPayload(payload: unknown): ApiError | null {
+  if (!isRecord(payload)) return null;
+  if (payload.success === false) {
+    const status = typeof payload.code === "number" && payload.code >= 400 ? payload.code : 400;
+    const error = toApiError(status, payload);
+    return error.code === status || error.code === null ? new ApiError(error.message, status, "unsuccessful", payload) : error;
+  }
+  const data = payload.data;
+  if (isRecord(data) && data.success === false) {
+    return new ApiError(text(data.message) ?? text(payload.message) ?? "Request failed.", 400, "unsuccessful", payload);
+  }
+  return null;
 }
 
 function expired(): ApiError {

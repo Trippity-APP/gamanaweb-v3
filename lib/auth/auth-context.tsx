@@ -82,8 +82,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loginRequest, setLoginRequest] = useState<LoginRequest | null>(null);
   const [sheetLoaded, setSheetLoaded] = useState(false);
   const pendingSuccess = useRef<(() => void) | null>(null);
+  /** `/users/profile` doesn't return the login phone, so keep the one from the login response (memory only). */
+  const loginPhone = useRef<{ phone: string; countryCode: string } | null>(null);
+
+  const withLoginPhone = useCallback((next: AuthUser): AuthUser => {
+    const fromLogin = loginPhone.current;
+    if (next.phone || !fromLogin?.phone) return next;
+    return { ...next, phone: fromLogin.phone, countryCode: next.countryCode || fromLogin.countryCode };
+  }, []);
 
   const resetToAnonymous = useCallback(() => {
+    loginPhone.current = null;
     setUser(null);
     setBalance(null);
     setStatus("anonymous");
@@ -91,8 +100,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     const profile = await apiFetch("/users/profile", { auth: "required", schema: userProfileSchema });
-    setUser(toAuthUser(profile));
-  }, []);
+    setUser(withLoginPhone(toAuthUser(profile)));
+  }, [withLoginPhone]);
 
   const refreshBalance = useCallback(async () => {
     if (!getSession()) return;
@@ -195,9 +204,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sessionId: response.session_id,
         expiresIn: response.expires_in ?? null,
       });
+      const phone = response.phone == null ? "" : String(response.phone);
+      loginPhone.current = phone ? { phone, countryCode: response.country_code ?? "" } : null;
       try {
         const profile = await apiFetch("/users/profile", { auth: "required", schema: userProfileSchema });
-        const nextUser = toAuthUser(profile);
+        const nextUser = withLoginPhone(toAuthUser(profile));
         setUser(nextUser);
         setStatus("authenticated");
         void refreshBalance();
@@ -209,7 +220,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null;
       }
     },
-    [refreshBalance, resetToAnonymous, finishLogin],
+    [refreshBalance, resetToAnonymous, finishLogin, withLoginPhone],
   );
 
   const logout = useCallback(async () => {
