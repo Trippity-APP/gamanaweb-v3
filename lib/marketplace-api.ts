@@ -869,6 +869,17 @@ export async function fetchPublicTourById(id: string): Promise<Tour | null> {
   return storylist ? mapStorylistToTour(storylist) : null;
 }
 
+/** A walk's card data plus the place ids of its stops, from one storylist detail call. */
+export async function fetchWalkWithStopIds(id: string): Promise<{ tour: Tour; stopPlaceIds: string[] } | null> {
+  const storylist = await fetchStorylistDetailById(id);
+  const tour = storylist ? mapStorylistToTour(storylist) : null;
+  if (!storylist || !tour) return null;
+  const stopPlaceIds = (storylist.starting_points ?? [])
+    .map((point) => point.object_id || point.place?.id)
+    .filter((pid): pid is string => Boolean(pid));
+  return { tour, stopPlaceIds };
+}
+
 export async function fetchPublicWalkDetailById(id: string): Promise<WalkDetail | null> {
   const storylist = await fetchStorylistDetailById(id);
   if (!storylist) return null;

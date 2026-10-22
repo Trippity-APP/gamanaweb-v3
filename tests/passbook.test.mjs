@@ -38,3 +38,45 @@ test("passbookKind classifies beta transaction types", () => {
   assert.equal(passbookKind({ transaction_type: "system_debit" }), "unlock");
   assert.equal(passbookKind({ transaction_type: "adjustment" }), "other");
 });
+
+test("app store purchases read as purchases, never as raw product ids", () => {
+  const page = parsePassbookPage(
+    {
+      data: [
+        { transaction_id: "t1", transaction_type: "reward", coin_amount: 10, description: "Reward: iap_purchase_gamana_ten_coin" },
+        { transaction_id: "t2", transaction_type: "reward", coin_amount: 5, description: "Reward: daily_login_streak_bonus" },
+        { transaction_id: "t3", transaction_type: "reward", coin_amount: 5, description: "Welcome bonus" },
+      ],
+    },
+    1,
+  );
+  assert.deepEqual(
+    page.rows.map((r) => [r.kind, r.description, r.amount]),
+    [
+      ["purchase", "Coins purchased in the app", 10],
+      ["reward", "Reward", 5],
+      ["reward", "Welcome bonus", 5],
+    ],
+  );
+});
+
+test("unlock spends name what was unlocked instead of the backend reason code", () => {
+  const page = parsePassbookPage(
+    {
+      data: [
+        { transaction_id: "t1", transaction_type: "redemption", coin_amount: 2, description: "Redemption for storylist_unlock" },
+        { transaction_id: "t2", transaction_type: "redemption", coin_amount: 1, description: "Redemption for place_unlock" },
+        { transaction_id: "t3", transaction_type: "redemption", coin_amount: 1, description: "Redemption for content_hold" },
+      ],
+    },
+    1,
+  );
+  assert.deepEqual(
+    page.rows.map((r) => [r.kind, r.description, r.amount]),
+    [
+      ["unlock", "Unlocked an audio walk", -2],
+      ["unlock", "Unlocked an audio story", -1],
+      ["unlock", "Unlocked content", -1],
+    ],
+  );
+});

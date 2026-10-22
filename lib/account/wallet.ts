@@ -37,6 +37,7 @@ export function passbookKind(entry: Pick<PassbookEntry, "type" | "transaction_ty
   const raw = `${entry.type ?? ""} ${entry.transaction_type ?? ""}`.toLowerCase();
   if (/refund|revers/.test(raw)) return "refund";
   if (/promo|coupon/.test(raw)) return "promo";
+  if (IAP_PRODUCT.test(entry.description ?? "")) return "purchase";
   if (/unlock|spend|debit|redemption|redeem_content|purchase_content/.test(raw)) return "unlock";
   if (/reward|bonus|cashback|referral|gift|signup|welcome/.test(raw)) return "reward";
   if (/purchase|iap|buy|topup|top_up|credit/.test(raw)) return "purchase";
@@ -51,11 +52,24 @@ export function toPassbookRow(entry: PassbookEntry, index: number): PassbookRow 
   return {
     id: String(entry.transaction_id ?? entry.id ?? entry._id ?? `${createdAt || "row"}-${index}`),
     kind,
-    description: entry.description?.trim() || defaultDescription(kind),
+    description: readableDescription(entry.description, kind),
     amount,
     status: (entry.status ?? "completed").toLowerCase(),
     createdAt,
   };
+}
+
+/** App store purchases arrive as e.g. "Reward: iap_purchase_gamana_ten_coin". */
+const IAP_PRODUCT = /\biap_[a-z0-9_]+/i;
+const RAW_ID = /\b[a-z0-9]+(?:_[a-z0-9]+)+\b/i;
+
+function readableDescription(text: string | null | undefined, kind: PassbookKind): string {
+  const trimmed = text?.trim() ?? "";
+  if (IAP_PRODUCT.test(trimmed)) return "Coins purchased in the app";
+  if (/\bstorylist_unlock\b/i.test(trimmed)) return "Unlocked an audio walk";
+  if (/\b(place|story)_unlock\b/i.test(trimmed)) return "Unlocked an audio story";
+  if (!trimmed || RAW_ID.test(trimmed)) return defaultDescription(kind);
+  return trimmed;
 }
 
 function defaultDescription(kind: PassbookKind): string {
