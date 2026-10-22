@@ -27,13 +27,14 @@ const SPA_HTML = path.join(OUT, "blog", "__spa__", "index.html");
 
 const require = createRequire(import.meta.url);
 
-// Same target as the /api/v1 rewrite in next.config.js. The browser calls the
+// Same target as the /api/v1 and /api/v2 rewrites in next.config.js. The browser calls the
 // API same-origin (lib/api-base-url.ts) to avoid CORS, so production must proxy it too.
+// Upstream headers (including Set-Cookie for the web refresh cookie) pass through unchanged.
 const API_PROXY_TARGET = new URL(
   process.env.API_PROXY_TARGET ||
     process.env.NEXT_PUBLIC_MARKETPLACE_API_URL?.replace(/\/api\/v1\/?$/, "") ||
     process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, "") ||
-    "https://apidev.gamana.app"
+    "https://api-beta.gamana.app"
 );
 
 function proxyApi(request, response) {
@@ -97,7 +98,7 @@ function getBlogApiBaseUrl() {
     process.env.NEXT_PUBLIC_API_URL ||
     process.env.BLOG_API_URL ||
     process.env.GAMANA_API_URL ||
-    "https://apidev.gamana.app/api/v1"
+    "https://api-beta.gamana.app/api/v1"
   ).replace(/\/$/, "");
 }
 
@@ -334,13 +335,13 @@ async function materializeBlogPage(slug) {
 }
 
 /**
- * serve.json rewrites every /cities/:id, /marketplace/{tours,story}/:id (and the
+ * serve.json rewrites every /cities/:id, /marketplace/{tours,story}/:id, /experiences/:slug (and the
  * legacy /explore/... aliases) to a `__spa__` shell, and serve-handler applies
  * rewrites before looking for real files. Pages pre-rendered at build time have
  * their own title, canonical and JSON-LD, so serve those directly and leave the
  * shell for IDs published after the last deploy.
  */
-const PRERENDERED_DETAIL_ROUTE = /^\/(cities|marketplace\/tours|marketplace\/story)\/([^/]+)\/?$/;
+const PRERENDERED_DETAIL_ROUTE = /^\/(cities|marketplace\/tours|marketplace\/story|experiences)\/([^/]+)\/?$/;
 
 function prerenderedDetailPath(pathname) {
   const match = pathname.match(PRERENDERED_DETAIL_ROUTE);
@@ -381,8 +382,20 @@ const server = http.createServer(async (request, response) => {
     const url = new URL(request.url || "/", `http://${host}`);
     const pathname = url.pathname.replace(/\/+$/, "") || "/";
 
-    if (url.pathname.startsWith("/api/v1/")) {
+    if (url.pathname.startsWith("/api/v1/") || url.pathname.startsWith("/api/v2/")) {
       proxyApi(request, response);
+      return;
+    }
+
+    // Apple won't follow serve-handler's trailing-slash redirect for an extensionless file.
+    if (pathname === "/.well-known/apple-app-site-association" || pathname === "/apple-app-site-association") {
+      const body = fs.readFileSync(path.join(OUT, ".well-known", "apple-app-site-association"));
+      response.writeHead(200, {
+        "Content-Type": "application/json",
+        "Content-Length": body.length,
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      });
+      response.end(body);
       return;
     }
 

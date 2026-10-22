@@ -13,6 +13,9 @@ Disallow: /admin/
 # Auth flows — not ready for indexing yet
 Disallow: /start-your-journey
 Disallow: /account
+Disallow: /login
+Disallow: /experiences/checkout
+Disallow: /dev/
 
 # Sitemap location
 Sitemap: https://www.gamana.app/sitemap.xml

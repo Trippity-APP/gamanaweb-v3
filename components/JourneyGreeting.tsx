@@ -1,32 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useJourney } from "@/lib/journey-context";
 
-interface SavedJourney {
-  homeLocation?: string;
-  corridor?: "inbound" | "domestic" | "outbound" | null;
-  groupType?: string | null;
-  interestLabels?: string[];
-  savedAt?: string;
-}
-
-/**
- * Reads the lightweight personalization signal saved by /start-your-journey
- * (localStorage key "gamanaJourney") and, if present, renders a short greeting.
- * Prototype stand-in for real account-based personalization — once accounts and a
- * backend profile exist, this should read from the server instead of localStorage.
- */
+/** Short greeting built from what the traveller told Start Your Gamana Journey this visit. */
 export function JourneyGreeting() {
-  const [journey, setJourney] = useState<SavedJourney | null>(null);
-
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem("gamanaJourney");
-      if (raw) setJourney(JSON.parse(raw));
-    } catch {
-      // Private browsing or storage disabled — fall back to the generic hero.
-    }
-  }, []);
+  const { journey } = useJourney();
 
   if (!journey || (!journey.interestLabels?.length && !journey.groupType)) return null;
 

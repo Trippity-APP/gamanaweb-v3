@@ -8,6 +8,7 @@ import { CardRail } from "@/components/site/CardRail";
 import { DownloadBand } from "@/components/site/DownloadBand";
 import { RelatedRail } from "@/components/marketplace/detail/RelatedRail";
 import { CityCard } from "@/components/cities/CityCard";
+import { ExperiencesRail } from "@/components/experiences/ExperiencesRail";
 import type { Tour } from "@/lib/marketplace-data";
 import type { ApiCity } from "@/lib/services/cityService";
 import { getApiCityImageUrl, getCuratedCityImage, type CityImage } from "@/lib/city-image";
@@ -17,6 +18,7 @@ import { IconTile, toneFor } from "@/components/icons/IconTile";
 type CityDetailProps = {
     city: ApiCity;
     tours: Tour[];
+    stories: Tour[];
     relatedCities?: ApiCity[];
 };
 
@@ -32,7 +34,7 @@ function useHeroImage(city: ApiCity): { image: CityImage; onError: () => void } 
     return { image, onError: () => setFailed(true) };
 }
 
-export function CityDetail({ city, tours, relatedCities = [] }: CityDetailProps) {
+export function CityDetail({ city, tours, stories, relatedCities = [] }: CityDetailProps) {
     const { image, onError } = useHeroImage(city);
     const locationLabel = [city.state_name, city.country_name].filter(Boolean).join(", ");
     const exploreHref = `/marketplace/?q=${encodeURIComponent(city.name)}`;
@@ -118,7 +120,11 @@ export function CityDetail({ city, tours, relatedCities = [] }: CityDetailProps)
                     </div>
                     <ul className="grid grid-cols-3 gap-3 rounded-4xl border border-ink/5 bg-white p-5 shadow-card">
                         {[
-                            { icon: Headphones, value: tours.length >= 12 ? "12+" : tours.length > 0 ? String(tours.length) : "Soon", label: "Audio tours" },
+                            {
+                                icon: Headphones,
+                                value: stories.length >= 12 ? "12+" : stories.length + tours.length > 0 ? String(stories.length + tours.length) : "Soon",
+                                label: "Tours & stories",
+                            },
                             { icon: Languages, value: "7", label: "Languages" },
                             { icon: WifiOff, value: "Offline", label: "Ready" },
                         ].map(({ icon: Icon, value, label }, i) => (
@@ -132,18 +138,31 @@ export function CityDetail({ city, tours, relatedCities = [] }: CityDetailProps)
                 </div>
             </section>
 
+            <ExperiencesRail
+                title={`Things to do in ${city.name}`}
+                query={{ city: city.name, page_size: 12 }}
+                seeAllHref={`/experiences/?city=${encodeURIComponent(city.name)}`}
+            />
+
             {tours.length > 0 ? (
-                <RelatedRail title={`Audio tours in ${city.name}`} tours={tours} />
+                <RelatedRail title={`Audio Tours in ${city.name}`} tours={tours} />
             ) : (
                 <section className="section-tight border-t border-ink/5 bg-white">
                     <div className="container-site">
-                        <h2 className="text-h3 text-ink">Tours coming soon in {city.name}</h2>
+                        <h2 className="text-h3 text-ink">Audio Tours in {city.name}</h2>
                         <p className="mt-3 max-w-2xl text-ink-soft">
-                            We&apos;re adding audio tours for {city.name}. Check back soon or explore nearby cities below.
+                            We&apos;re adding audio tours for {city.name}.{" "}
+                            {stories.length > 0 ? "Until then, listen to the stories below or " : "Check back soon or "}
+                            <Link href="/marketplace/tours/" className="focus-ring rounded font-semibold text-brand-700 hover:underline">
+                                browse all audio tours
+                            </Link>
+                            .
                         </p>
                     </div>
                 </section>
             )}
+
+            <RelatedRail title={`Audio stories in ${city.name}`} tours={stories} />
 
             {relatedCities.length > 0 && (
                 <section className="section-tight">

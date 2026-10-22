@@ -8,7 +8,7 @@ import {
     type ApiCity,
 } from "@/lib/services/cityService";
 import type { Tour } from "@/lib/marketplace-data";
-import { fetchPublicTours, tourMatchesCity } from "@/lib/marketplace-api";
+import { cityCatalog, fetchPublicTours } from "@/lib/marketplace-api";
 import { STATIC_SPA_PARAM, isStaticSpaParam } from "@/lib/static-spa";
 import { JsonLd } from "@/components/site/JsonLd";
 import { breadcrumbJsonLd, touristDestinationJsonLd } from "@/lib/seo";
@@ -84,6 +84,7 @@ export default async function CityPage({
     const city = cityId ? await fetchCityById(cityId) : null;
 
     let tours: Tour[] = [];
+    let stories: Tour[] = [];
     let relatedCities: ApiCity[] = [];
 
     if (city) {
@@ -91,7 +92,7 @@ export default async function CityPage({
             fetchPublicTours(),
             fetchAllActiveCities(),
         ]);
-        tours = allTours.filter((tour) => tourMatchesCity(tour, city.name)).slice(0, 12);
+        ({ tours, stories } = cityCatalog(allTours, city.name));
         relatedCities = getRelatedCities(city, allCities);
     }
 
@@ -119,6 +120,7 @@ export default async function CityPage({
                 cityId={id}
                 city={city}
                 tours={tours}
+                stories={stories}
                 relatedCities={relatedCities}
             />
             <Footer />

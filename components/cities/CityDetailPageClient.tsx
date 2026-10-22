@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CityDetail } from "@/components/cities/CityDetail";
 import { fetchCityById, type ApiCity } from "@/lib/services/cityService";
-import { fetchPublicTours, tourMatchesCity } from "@/lib/marketplace-api";
+import { cityCatalog, fetchPublicTours } from "@/lib/marketplace-api";
 import type { Tour } from "@/lib/marketplace-data";
 import { isStaticSpaParam } from "@/lib/static-spa";
+import { writeLastCity } from "@/lib/home/last-city";
 
 function resolveCityId(paramId: string): string {
     if (!isStaticSpaParam(paramId)) return paramId;
@@ -20,6 +21,7 @@ type CityDetailPageClientProps = {
     cityId: string;
     city: ApiCity | null;
     tours: Tour[];
+    stories: Tour[];
     relatedCities: ApiCity[];
 };
 
@@ -27,10 +29,12 @@ export function CityDetailPageClient({
     cityId: paramCityId,
     city: initialCity,
     tours: initialTours,
+    stories: initialStories,
     relatedCities: initialRelatedCities,
 }: CityDetailPageClientProps) {
     const [city, setCity] = useState<ApiCity | null>(initialCity);
     const [tours, setTours] = useState<Tour[]>(initialTours);
+    const [stories, setStories] = useState<Tour[]>(initialStories);
     const [relatedCities, setRelatedCities] = useState<ApiCity[]>(initialRelatedCities);
     const [loading, setLoading] = useState(isStaticSpaParam(paramCityId) && !initialCity);
     const [error, setError] = useState<string | null>(
@@ -65,18 +69,21 @@ export function CityDetailPageClient({
                 if (!detail) {
                     setCity(null);
                     setTours([]);
+                    setStories([]);
                     setRelatedCities([]);
                     setError("This city is not available.");
                     return;
                 }
 
-                const allTours = await fetchPublicTours();
+                const catalog = cityCatalog(await fetchPublicTours(), detail.name);
                 setCity(detail);
-                setTours(allTours.filter((tour) => tourMatchesCity(tour, detail.name)).slice(0, 12));
+                setTours(catalog.tours);
+                setStories(catalog.stories);
                 setRelatedCities([]);
             } catch {
                 setCity(null);
                 setTours([]);
+                setStories([]);
                 setRelatedCities([]);
                 setError("We couldn't load this city right now.");
             } finally {
@@ -84,6 +91,8 @@ export function CityDetailPageClient({
             }
         })();
     }, [paramCityId, initialCity]);
+
+    useEffect(() => writeLastCity(city?.name), [city?.name]);
 
     if (loading) {
         return (
@@ -104,5 +113,5 @@ export function CityDetailPageClient({
         );
     }
 
-    return <CityDetail city={city} tours={tours} relatedCities={relatedCities} />;
+    return <CityDetail city={city} tours={tours} stories={stories} relatedCities={relatedCities} />;
 }

@@ -10,7 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CityAutocomplete } from "@/components/CityAutocomplete";
-import { useAccount } from "@/lib/account-context";
+import { useJourney } from "@/lib/journey-context";
+import { useAuth } from "@/lib/auth/auth-context";
+import { saveTravelProfile } from "@/lib/account/personalization";
+import { webAccountsEnabled } from "@/lib/flags";
+import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import {
@@ -20,11 +24,8 @@ import {
   MapPin,
   Plus,
   X,
-  Mail,
-  Lock,
   LogIn,
   Calendar as CalendarIcon,
-  User,
 } from "@/components/icons";
 import SiteHeader from "@/components/navigation/site-header";
 import Footer from "@/components/navigation/footer";
@@ -45,8 +46,6 @@ import {
   dietaryOptions,
 } from "@/lib/personalization";
 
-type AuthMethod = "google" | "apple" | "email" | null;
-
 interface Answers {
   homeLocation: string;
   corridor: Corridor;
@@ -58,9 +57,6 @@ interface Answers {
   walkingTolerance: string | null;
   heatSensitive: boolean;
   additionalNotes: string;
-  fullName: string;
-  email: string;
-  authMethod: AuthMethod;
 }
 
 const initialAnswers: Answers = {
@@ -74,9 +70,6 @@ const initialAnswers: Answers = {
   walkingTolerance: null,
   heatSensitive: false,
   additionalNotes: "",
-  fullName: "",
-  email: "",
-  authMethod: null,
 };
 
 // Narrator specialties, used to nominate a guide based on what the group told us they're
@@ -126,16 +119,13 @@ function StepShell({
 }
 
 export default function StartYourJourneyPage() {
-  const { login, updateJourney } = useAccount();
+  const { updateJourney } = useJourney();
+  const { status, user, openLogin } = useAuth();
+  const loggedIn = status === "authenticated";
+  const [savedToAccount, setSavedToAccount] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>(initialAnswers);
-  const [saveBanner, setSaveBanner] = useState({
-    dismissed: false,
-    saved: false,
-    email: "",
-    password: "",
-    mode: "new" as "new" | "existing",
-  });
+  const [saveBanner, setSaveBanner] = useState({ dismissed: false });
 
   const update = <K extends keyof Answers>(key: K, value: Answers[K]) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
@@ -258,22 +248,21 @@ export default function StartYourJourneyPage() {
   });
 
   // Hand off a light personalization signal to the marketplace so it can greet the user
-  // with what they told us. Prototype stand-in for a real account/session — once real
-  // accounts exist, this becomes a server-side profile instead of localStorage.
+  // with what they told us (held in memory for this visit only).
   useEffect(() => {
     if (step !== STEP_CONFIRMATION) return;
-    updateJourney(buildJourneyPayload());
-    if (answers.authMethod) {
-      const loginEmail =
-        answers.authMethod === "email"
-          ? answers.email.trim() || "you@example.com"
-          : answers.authMethod === "google"
-          ? "you@gmail.com"
-          : "you@icloud.com";
-      login(loginEmail, answers.authMethod, answers.fullName.trim() || undefined);
-    }
+    const payload = buildJourneyPayload();
+    updateJourney(payload);
+    if (!loggedIn || savedToAccount !== "idle") return;
+    setSavedToAccount("saving");
+    saveTravelProfile(payload)
+      .then(() => {
+        setSavedToAccount("saved");
+        toast({ title: "Saved to your Gamana account" });
+      })
+      .catch(() => setSavedToAccount("error"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
+  }, [step, loggedIn]);
 
   const canContinue = (() => {
     switch (step) {
@@ -300,10 +289,11 @@ export default function StartYourJourneyPage() {
   })();
 
   const showSaveBanner =
+    webAccountsEnabled &&
+    status === "anonymous" &&
     step >= STEP_TRAVELERS &&
     step <= STEP_PRACTICALITIES &&
-    !saveBanner.dismissed &&
-    !saveBanner.saved;
+    !saveBanner.dismissed;
 
   return (
     <main className="min-h-screen bg-sand-50 flex flex-col">
@@ -347,122 +337,21 @@ export default function StartYourJourneyPage() {
                 type="button"
                 aria-label="Dismiss"
                 onClick={() => setSaveBanner((prev) => ({ ...prev, dismissed: true }))}
-                className="absolute top-4 right-4 text-ink-muted hover:text-ink-soft"
+                className="focus-ring absolute top-2 right-2 grid h-11 w-11 place-items-center rounded-full text-ink-muted hover:text-ink-soft"
               >
                 <X className="h-4 w-4" />
               </button>
-
-              <p className="text-sm font-semibold text-ink pr-6">Don&apos;t lose this, save your progress</p>
+              <p className="text-sm font-semibold text-ink pr-10">Don&apos;t lose this, save your progress</p>
               <p className="text-xs text-ink-muted mt-1">
-                We&apos;ll keep everything you&apos;ve told us so far, tied to your Gamana account.
+                Log in and we&apos;ll keep everything you tell us, tied to your Gamana account.
               </p>
-
-              <div className="flex items-center gap-4 mt-4 text-xs font-semibold">
-                <button
-                  type="button"
-                  onClick={() => setSaveBanner((prev) => ({ ...prev, mode: "new" }))}
-                  className={`pb-1 border-b-2 transition-colors ${
-                    saveBanner.mode === "new"
-                      ? "text-brand-600 border-brand-600"
-                      : "text-ink-muted border-transparent hover:text-ink-soft"
-                  }`}
-                >
-                  Create a new account
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSaveBanner((prev) => ({ ...prev, mode: "existing" }))}
-                  className={`pb-1 border-b-2 transition-colors ${
-                    saveBanner.mode === "existing"
-                      ? "text-brand-600 border-brand-600"
-                      : "text-ink-muted border-transparent hover:text-ink-soft"
-                  }`}
-                >
-                  Log into an existing account
-                </button>
-              </div>
-
-              {saveBanner.mode === "existing" && (
-                <div className="mt-3 grid gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      login("you@gmail.com", "google");
-                      updateJourney(buildJourneyPayload());
-                      setSaveBanner((prev) => ({ ...prev, email: "you@gmail.com", saved: true }));
-                    }}
-                    className="justify-start gap-3 h-10 text-sm"
-                  >
-                    <span className="w-5 h-5 rounded-full bg-[#4285F4] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
-                      G
-                    </span>
-                    Continue with Google
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      login("you@icloud.com", "apple");
-                      updateJourney(buildJourneyPayload());
-                      setSaveBanner((prev) => ({ ...prev, email: "you@icloud.com", saved: true }));
-                    }}
-                    className="justify-start gap-3 h-10 text-sm"
-                  >
-                    <span className="w-5 h-5 rounded-full bg-black text-white text-[11px] font-bold flex items-center justify-center shrink-0">
-                      A
-                    </span>
-                    Continue with Apple
-                  </Button>
-                  <div className="flex items-center gap-2 py-1">
-                    <div className="flex-1 h-px bg-ink/10" />
-                    <span className="text-[10px] text-ink-muted uppercase tracking-wider">or use email</span>
-                    <div className="flex-1 h-px bg-ink/10" />
-                  </div>
-                </div>
-              )}
-
-              <div className="mt-3 space-y-2">
-                <Input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={saveBanner.email}
-                  onChange={(e) => setSaveBanner((prev) => ({ ...prev, email: e.target.value }))}
-                  className="h-9 text-sm"
-                />
-                {saveBanner.mode === "existing" && (
-                  <Input
-                    type="password"
-                    placeholder="Password"
-                    value={saveBanner.password}
-                    onChange={(e) => setSaveBanner((prev) => ({ ...prev, password: e.target.value }))}
-                    className="h-9 text-sm"
-                  />
-                )}
-              </div>
-
               <Button
-                onClick={() => {
-                  if (!saveBanner.email.trim()) return;
-                  setAnswers((prev) => ({ ...prev, email: saveBanner.email.trim() }));
-                  login(saveBanner.email.trim(), "email");
-                  updateJourney(buildJourneyPayload());
-                  setSaveBanner((prev) => ({ ...prev, saved: true }));
-                }}
-                className="w-full mt-4 bg-brand-700 hover:bg-brand-800"
+                type="button"
+                onClick={() => openLogin({ reason: "to save your journey" })}
+                className="focus-ring mt-4 h-11 rounded-full bg-brand-700 px-5 hover:bg-brand-800"
               >
-                Save Progress
+                <LogIn className="mr-2 h-4 w-4" /> Log in to save
               </Button>
-
-              <p className="text-[11px] text-ink-muted mt-2">
-                Prototype note: neither path creates a real account or verifies a password yet.
-              </p>
-            </div>
-          )}
-
-          {saveBanner.saved && step > STEP_TRAVELERS && step <= STEP_PRACTICALITIES && (
-            <div className="max-w-2xl mx-auto mb-6 text-xs text-brand-600 font-medium flex items-center gap-1">
-              <Check className="h-3.5 w-3.5" /> Progress saved to {saveBanner.email}
             </div>
           )}
 
@@ -867,89 +756,30 @@ export default function StartYourJourneyPage() {
                 title="Let's get this saved to your Gamana account"
                 subtitle="This is the same account you'll log into on the app, so everything you told us carries over."
               >
-                <div className="grid gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => update("authMethod", "google")}
-                    className={`justify-start gap-3 h-12 ${answers.authMethod === "google" ? "border-brand-600 bg-brand-600/5" : ""}`}
-                  >
-                    <span className="w-5 h-5 rounded-full bg-[#4285F4] text-white text-[11px] font-bold flex items-center justify-center">
-                      G
-                    </span>
-                    Continue with Google
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => update("authMethod", "apple")}
-                    className={`justify-start gap-3 h-12 ${answers.authMethod === "apple" ? "border-brand-600 bg-brand-600/5" : ""}`}
-                  >
-                    <span className="w-5 h-5 rounded-full bg-black text-white text-[11px] font-bold flex items-center justify-center">
-                      A
-                    </span>
-                    Continue with Apple
-                  </Button>
-                </div>
-
-                <div className="flex items-center gap-3 py-2">
-                  <div className="flex-1 h-px bg-ink/10" />
-                  <span className="text-xs text-ink-muted uppercase tracking-wider">or</span>
-                  <div className="flex-1 h-px bg-ink/10" />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => update("authMethod", "email")}
-                  className="text-sm font-semibold text-brand-600 hover:text-brand-800 flex items-center gap-1"
-                >
-                  <LogIn className="h-4 w-4" /> Continue with email instead
-                </button>
-
-                {answers.authMethod === "email" && (
-                  <div className="grid gap-4 pt-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="fullName">Full name</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted" />
-                        <Input
-                          id="fullName"
-                          type="text"
-                          placeholder="Your name"
-                          value={answers.fullName}
-                          onChange={(e) => update("fullName", e.target.value)}
-                          className="pl-9"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted" />
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="you@example.com"
-                          value={answers.email}
-                          onChange={(e) => update("email", e.target.value)}
-                          className="pl-9"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Create a password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted" />
-                        <Input id="password" type="password" placeholder="••••••••" className="pl-9" />
-                      </div>
-                    </div>
+                {loggedIn ? (
+                  <p className="flex items-center gap-2 rounded-2xl bg-brand-50 p-4 text-sm font-medium text-brand-800">
+                    <Check className="h-4 w-4" /> You&apos;re logged in{user?.firstName ? ` as ${user.firstName}` : ""}. We&apos;ll save
+                    this to your account when you continue.
+                  </p>
+                ) : webAccountsEnabled ? (
+                  <div className="space-y-3">
+                    <Button
+                      type="button"
+                      onClick={() => openLogin({ reason: "to save your journey", onSuccess: next })}
+                      className="focus-ring h-12 w-full rounded-full bg-gradient-to-r from-brand-600 to-brand-800 text-base font-semibold text-white"
+                    >
+                      <LogIn className="mr-2 h-4 w-4" /> Log in or sign up to save
+                    </Button>
+                    <p className="text-xs text-ink-muted">
+                      Or continue without saving, your answers are kept only for this visit.
+                    </p>
                   </div>
+                ) : (
+                  <p className="text-sm text-ink-soft">
+                    Gamana accounts on the web are coming soon. Your answers are kept for this visit, and you can set the
+                    same preferences in the Gamana app.
+                  </p>
                 )}
-
-                <p className="text-xs text-ink-muted pt-2">
-                  Prototype note: this step doesn&apos;t create a real account or OAuth session yet, it&apos;s
-                  here to show where account creation fits in the flow.
-                </p>
               </StepShell>
             )}
 
@@ -989,7 +819,7 @@ export default function StartYourJourneyPage() {
                     Traveling with:{" "}
                     {answers.travelerProfiles
                       .map((p, i) => ({
-                        displayName: i === 0 ? answers.fullName.trim() || "You" : p.name,
+                        displayName: i === 0 ? user?.firstName?.trim() || "You" : p.name,
                         engaged: i === 0 ? p.interests.length > 0 : p.name.trim().length > 0,
                         interests: p.interests,
                       }))
@@ -1026,7 +856,16 @@ export default function StartYourJourneyPage() {
                     </p>
                   )}
                   {answers.additionalNotes.trim() && <p>Anything else: {answers.additionalNotes.trim()}</p>}
-                  <p>Account: {answers.authMethod ? `Signed up via ${answers.authMethod}` : "Not created yet"}</p>
+                  <p>
+                    Account:{" "}
+                    {savedToAccount === "saved"
+                      ? "Saved to your Gamana account"
+                      : savedToAccount === "saving"
+                      ? "Saving…"
+                      : savedToAccount === "error"
+                      ? "Couldn't save, try again from your account preferences"
+                      : "Not saved, log in to keep it"}
+                  </p>
                 </div>
                 <p className="text-sm text-ink-muted">
                   This is just the start, explore your marketplace now, or download the Gamana app to keep

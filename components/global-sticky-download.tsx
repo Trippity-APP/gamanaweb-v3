@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { X } from "@/components/icons";
 
-const DISMISSED_KEY = "gamana_side_cta_dismissed";
+let dismissedThisSession = false;
 
 /**
  * The "Get App" panel of the right-edge rail. Positioning lives in the rail wrapper
@@ -15,14 +15,7 @@ const DISMISSED_KEY = "gamana_side_cta_dismissed";
 export default function GlobalStickyDownload() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (sessionStorage.getItem(DISMISSED_KEY) === "1") {
-      setDismissed(true);
-    }
-  }, []);
+  const [dismissed, setDismissed] = useState(dismissedThisSession);
 
   useEffect(() => {
     if (dismissed) return;
@@ -35,8 +28,8 @@ export default function GlobalStickyDownload() {
   }, [dismissed]);
 
   const handleDismiss = () => {
+    dismissedThisSession = true;
     setDismissed(true);
-    sessionStorage.setItem(DISMISSED_KEY, "1");
   };
 
   // Tour, story and blog post pages carry their own sticky app prompt.

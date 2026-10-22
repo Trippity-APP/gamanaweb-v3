@@ -4,14 +4,40 @@
     "details": [
       {
         "appIDs": [
-          "AB12CD34EF.com.agent.gamana"
+          "89V3FN4GV3.com.agent.gamana"
         ],
         "components": [
+          {
+            "/": "/experiences/checkout/*",
+            "exclude": true,
+            "comment": "Web-only booking flow"
+          },
+          {
+            "/": "/marketplace/*",
+            "exclude": true,
+            "comment": "Web catalog pages"
+          },
+          {
+            "/": "/place/*"
+          },
+          {
+            "/": "/tour/*"
+          },
+          {
+            "/": "/tours/*"
+          },
           {
             "/": "/storylist/*"
           },
           {
             "/": "/storylists/*"
+          },
+          {
+            "/": "/experience/?*"
+          },
+          {
+            "/": "/experiences/?*",
+            "comment": "Detail pages only; the /experiences/ hub stays on the web"
           }
         ]
       }

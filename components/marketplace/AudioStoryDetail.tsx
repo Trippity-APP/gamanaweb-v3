@@ -15,7 +15,6 @@ import { AudioStoryNarrator } from '@/components/marketplace/story-detail/AudioS
 import { AudioStoryNoticeList } from '@/components/marketplace/story-detail/AudioStoryNoticeList';
 import { AudioStorySources } from '@/components/marketplace/story-detail/AudioStorySources';
 import { DownloadAppDialog } from '@/components/DownloadAppDialog';
-import { useAccount } from '@/lib/account-context';
 import { getExploreBackHref } from '@/lib/explore-search';
 import { usePathname } from 'next/navigation';
 import {
@@ -24,21 +23,14 @@ import {
 } from '@/lib/marketplace-api';
 import type { StoryDetail } from '@/lib/marketplace-data';
 import { isStaticSpaParam } from '@/lib/static-spa';
-
-const ACCESS_WINDOW_DAYS = 30;
+import { useAuth } from '@/lib/auth/auth-context';
+import { daysLeft, useLibrary } from '@/lib/library/library-context';
 
 function resolveStoryId(paramId: string): string {
   if (!isStaticSpaParam(paramId)) return paramId;
   if (typeof window === 'undefined') return paramId;
   const match = window.location.pathname.match(/\/(?:explore|marketplace)\/story\/([^/]+)/);
   return match?.[1] ?? paramId;
-}
-
-function getDaysLeft(unlockedAt: string): number {
-  const expiry = new Date(unlockedAt);
-  expiry.setDate(expiry.getDate() + ACCESS_WINDOW_DAYS);
-  const diff = expiry.getTime() - Date.now();
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
 type AudioStoryDetailProps = {
@@ -50,7 +42,6 @@ export function AudioStoryDetail({
   tourId: paramTourId,
   story: initialStory,
 }: AudioStoryDetailProps) {
-  const { isUnlocked, unlockedItems } = useAccount();
   const pathname = usePathname();
   const backHref = getExploreBackHref(pathname);
   const [story, setStory] = useState<StoryDetail | null>(initialStory);
@@ -100,19 +91,14 @@ export function AudioStoryDetail({
     void loadStoryById(resolved);
   }, [paramTourId, initialStory]);
 
-  const unlockState = useMemo(() => {
-    if (!story) return 'locked' as const;
-    if (story.price === 0) return 'free' as const;
-    if (isUnlocked(story.id, 'tour')) return 'unlocked' as const;
-    return 'locked' as const;
-  }, [story, isUnlocked]);
-
-  const daysLeft = useMemo(() => {
-    if (!story || unlockState !== 'unlocked') return null;
-    const unlocked = unlockedItems.find((item) => item.id === story.id && item.type === 'tour');
-    if (!unlocked?.unlockedAt) return null;
-    return getDaysLeft(unlocked.unlockedAt);
-  }, [story, unlockState, unlockedItems]);
+  const { status: authStatus } = useAuth();
+  const library = useLibrary();
+  const unlock = story && authStatus === 'authenticated' ? library.find('place', story.id) : undefined;
+  const unlockState = useMemo(
+    () => (story?.price === 0 ? ('free' as const) : unlock ? ('unlocked' as const) : ('locked' as const)),
+    [story, unlock],
+  );
+  const unlockDays = unlock ? daysLeft(unlock) : null;
 
   const retry = () => {
     clearMarketplaceCache();
@@ -154,16 +140,12 @@ export function AudioStoryDetail({
         <AudioStoryHero
           story={story}
           unlockState={unlockState}
-          daysLeft={daysLeft}
+          daysLeft={unlockDays}
           onDownloadClick={() => setDownloadOpen(true)}
         />
 
         <div className="mt-6 lg:hidden">
-          <AudioStoryActionCard
-            story={story}
-            unlockState={unlockState}
-            daysLeft={daysLeft}
-          />
+          <AudioStoryActionCard story={story} />
         </div>
 
         <div className="mt-10 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
@@ -181,11 +163,7 @@ export function AudioStoryDetail({
           </div>
 
           <aside className="hidden lg:sticky lg:top-32 lg:block">
-            <AudioStoryActionCard
-              story={story}
-              unlockState={unlockState}
-              daysLeft={daysLeft}
-            />
+            <AudioStoryActionCard story={story} />
           </aside>
         </div>
       </div>

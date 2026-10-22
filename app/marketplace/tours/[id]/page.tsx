@@ -5,6 +5,7 @@ import SiteHeader from '@/components/navigation/site-header';
 import { JsonLd } from '@/components/site/JsonLd';
 import { DownloadBand } from '@/components/site/DownloadBand';
 import { RelatedRail } from '@/components/marketplace/detail/RelatedRail';
+import { ExperiencesRail } from '@/components/experiences/ExperiencesRail';
 import { fetchPublicStoriesCatalog } from '@/lib/places-api';
 import { breadcrumbJsonLd } from '@/lib/seo';
 import Footer from '@/components/navigation/footer';
@@ -135,6 +136,13 @@ export default async function MarketplaceTourPage({
             relatedTours={relatedTours.slice(0, 3)}
           />
         </Suspense>
+        {tour && city && (
+          <ExperiencesRail
+            title="Experiences nearby"
+            query={{ city, page_size: 12 }}
+            seeAllHref={`/experiences/?city=${encodeURIComponent(city)}`}
+          />
+        )}
         {isWalk && <RelatedRail title={city ? `More to explore in ${city}` : 'More to explore'} tours={related} />}
         <DownloadBand
           title="Take this walk with Gamana"

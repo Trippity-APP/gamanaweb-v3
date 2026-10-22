@@ -5,17 +5,7 @@ import Link from 'next/link';
 import { MapPinOff, Check, ArrowRight } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAccount } from '@/lib/account-context';
-
-const CITY_REQUESTS_KEY = 'gamanaCityRequests';
-
-export type CityRequest = {
-  city: string;
-  email?: string;
-  /** Which surface the request came from — Tours vs Experiences empty state. */
-  source: string;
-  requestedAt: string;
-};
+import { useAuth } from '@/lib/auth/auth-context';
 
 /**
  * Shown in place of an empty results grid when a search returns nothing.
@@ -31,11 +21,11 @@ export type CityRequest = {
  * sit-down task, and dropping it into a search dead end would ask far too much of someone
  * who just typed a city name. Anyone who wants that depth gets a link to it.
  *
- * Prototype storage: localStorage, same stand-in the FeedbackWidget uses. A real backend
- * would route these to the team — until then, requests stay on the visitor's own machine.
+ * Requests are not persisted until a backend endpoint exists (browser storage is off-limits).
  */
 export function CityNotCovered({ city, source }: { city: string; source: string }) {
-  const { account } = useAccount();
+  const { user } = useAuth();
+  const accountEmail = user?.email || '';
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
@@ -46,33 +36,13 @@ export function CityNotCovered({ city, source }: { city: string; source: string 
     setEmail('');
   }, [city]);
 
-  const effectiveEmail = email.trim() || account?.email || '';
+  const effectiveEmail = email.trim() || accountEmail;
   // Deliberately loose — this is a "tell me when it's ready" field, not an auth flow, so
   // it only catches obvious typos rather than rejecting unusual but valid addresses.
   const emailLooksValid = !effectiveEmail || /^\S+@\S+\.\S+$/.test(effectiveEmail);
 
   const submit = () => {
     if (!emailLooksValid) return;
-    const entry: CityRequest = {
-      city,
-      email: effectiveEmail || undefined,
-      source,
-      requestedAt: new Date().toISOString(),
-    };
-    try {
-      const raw = window.localStorage.getItem(CITY_REQUESTS_KEY);
-      const existing: CityRequest[] = raw ? JSON.parse(raw) : [];
-      // One entry per city per visitor — the card unmounts on any tab/filter change, so
-      // without this the same person re-requesting would inflate the demand count for a
-      // city and skew exactly the signal this list exists to provide.
-      const deduped = existing.filter(
-        (r) => r.city.trim().toLowerCase() !== city.trim().toLowerCase()
-      );
-      deduped.unshift(entry);
-      window.localStorage.setItem(CITY_REQUESTS_KEY, JSON.stringify(deduped));
-    } catch {
-      // Private browsing or storage disabled — still confirm, the ask was made.
-    }
     setSubmitted(true);
   };
 
@@ -116,7 +86,7 @@ export function CityNotCovered({ city, source }: { city: string; source: string 
       </p>
 
       <div className="mx-auto mt-5 flex max-w-md flex-col gap-2 sm:flex-row">
-        {!account && (
+        {!accountEmail && (
           <Input
             type="email"
             inputMode="email"
@@ -140,10 +110,10 @@ export function CityNotCovered({ city, source }: { city: string; source: string 
       <p className="mt-2 text-xs text-gray-400">
         {!emailLooksValid
           ? 'That email doesn’t look right, check it, or clear it to request anyway.'
-          : account
+          : accountEmail
             // Signed-in visitors get told which address this will use, rather than having
             // it taken silently just because the input is hidden for them.
-            ? `We’ll notify ${account.email}.`
+            ? `We’ll notify ${accountEmail}.`
             : 'Email is optional, the request still counts without it.'}
       </p>
 

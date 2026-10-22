@@ -9,7 +9,7 @@ import {
   searchPublicStoriesByCity,
 } from "@/lib/places-api";
 
-const DEFAULT_API_URL = "https://apidev.gamana.app/api/v1";
+const DEFAULT_API_URL = "https://api-beta.gamana.app/api/v1";
 export const DEFAULT_TOUR_IMAGE = "/taj-mahal-sunrise-reflection-central-pool-agra.jpg";
 
 export function getDefaultTourImage(): string {
@@ -601,6 +601,19 @@ export function tourMatchesCity(tour: Pick<Tour, 'searchTerms' | 'location' | 't
 
   const aliases = CITY_ALIASES[query] ?? [];
   return aliases.some((alias) => terms.some((term) => term.includes(alias)));
+}
+
+/** City page shelves: recommended audio tours (walks) and audio stories, kept separate. */
+export function cityCatalog<T extends Pick<Tour, 'searchTerms' | 'location' | 'title' | 'contentKind' | 'isRecommended'>>(
+  all: T[],
+  cityName: string,
+  limit = 12,
+): { tours: T[]; stories: T[] } {
+  const inCity = all.filter((tour) => tourMatchesCity(tour, cityName));
+  return {
+    tours: inCity.filter((tour) => (tour.contentKind ?? 'walk') === 'walk' && tour.isRecommended === true).slice(0, limit),
+    stories: inCity.filter((tour) => tour.contentKind === 'story').slice(0, limit),
+  };
 }
 
 export function getExploreSearchQuery(params: URLSearchParams | { get(name: string): string | null }): string {

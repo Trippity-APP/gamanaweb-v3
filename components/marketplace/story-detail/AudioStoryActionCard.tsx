@@ -6,6 +6,7 @@ import {
   CirclePlay,
   Clock,
   Globe,
+  Lock,
   MapPin,
   Navigation,
   Share2,
@@ -13,6 +14,7 @@ import {
   User,
 } from '@/components/icons';
 import { DownloadAppDialog } from '@/components/DownloadAppDialog';
+import { UnlockFlow } from '@/components/unlock/UnlockFlow';
 import { GamanaCoinIcon } from '@/components/GamanaCoinIcon';
 import { Button } from '@/components/ui/button';
 import { StoreBadges } from '@/components/site/StoreBadges';
@@ -20,12 +22,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { formatStoryDurationLabel } from '@/lib/marketplace-api';
 import type { StoryDetail } from '@/lib/marketplace-data';
 
-type UnlockState = 'free' | 'unlocked' | 'locked';
-
 type AudioStoryActionCardProps = {
   story: StoryDetail;
-  unlockState: UnlockState;
-  daysLeft?: number | null;
   className?: string;
 };
 
@@ -42,12 +40,7 @@ function activeLanguageLabel(story: StoryDetail): string {
   return active?.label ?? 'English';
 }
 
-export function AudioStoryActionCard({
-  story,
-  unlockState,
-  daysLeft,
-  className = '',
-}: AudioStoryActionCardProps) {
+export function AudioStoryActionCard({ story, className = '' }: AudioStoryActionCardProps) {
   const [downloadOpen, setDownloadOpen] = useState(false);
   const durationLabel = formatStoryDurationLabel(story);
 
@@ -80,40 +73,63 @@ export function AudioStoryActionCard({
       <Card className={`rounded-3xl border-0 shadow-card ${className}`}>
         <CardContent className="space-y-5 p-5 sm:p-6">
           <p className="eyebrow">Listen in the app</p>
-          <div className="space-y-1">
-            {unlockState === 'free' ? (
-              <p className="text-sm font-semibold text-emerald-700">Free to listen</p>
-            ) : unlockState === 'unlocked' ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="text-sm font-semibold text-emerald-700">Unlocked in your account</p>
-                {daysLeft != null && daysLeft > 0 && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
-                    <Clock className="h-3 w-3" />
-                    {daysLeft} days remaining
-                  </span>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <GamanaCoinIcon className="h-5 w-5" aria-hidden />
-                <p className="text-xl font-bold text-ink">{story.price} Coins</p>
-              </div>
-            )}
-            <p className="text-sm text-ink-muted">
-              {unlockState === 'locked'
-                ? 'Unlock in the Gamana app with the same account.'
-                : 'Open in the Gamana app to play and listen offline.'}
-            </p>
-          </div>
-
-          <Button
-            type="button"
-            onClick={openDownload}
-            className="h-12 w-full rounded-full bg-gradient-to-r from-sunset-400 to-sunset-500 text-base font-semibold text-white shadow-card hover:from-sunset-500 hover:to-sunset-500"
+          <UnlockFlow
+            item={{ kind: 'place', id: story.id, title: story.title, price: story.price, image: story.image, city: story.location, narrator: story.narrator }}
+            source="audio-story-detail"
           >
-            <CirclePlay className="mr-2 h-5 w-5" />
-            Play
-          </Button>
+            {({ state, status, start }) => (
+              <>
+                <div className="space-y-1">
+                  {state === 'free' ? (
+                    <p className="text-sm font-semibold text-emerald-700">Free to listen</p>
+                  ) : state === 'unlocked' ? (
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-emerald-700">Unlocked in your account</p>
+                      {status && (
+                        <p className={`flex items-center gap-1 text-xs font-semibold ${status.urgent ? 'text-sunset-600' : 'text-ink-soft'}`}>
+                          <Clock className="h-3 w-3" aria-hidden />
+                          {status.text}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <GamanaCoinIcon className="h-5 w-5" aria-hidden />
+                      <p className="text-xl font-bold text-ink">{story.price} Coins</p>
+                    </div>
+                  )}
+                  <p className="text-sm text-ink-muted">
+                    {state === 'locked'
+                      ? 'Unlock with your coins, then listen in the Gamana app.'
+                      : 'Open in the Gamana app to play and listen offline.'}
+                  </p>
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={state === 'free' ? openDownload : start}
+                  className="h-12 w-full rounded-full bg-gradient-to-r from-sunset-400 to-sunset-500 text-base font-semibold text-white shadow-card hover:from-sunset-500 hover:to-sunset-500"
+                >
+                  {state === 'locked' ? (
+                    <>
+                      <Lock className="mr-2 h-5 w-5" aria-hidden />
+                      Unlock for <GamanaCoinIcon className="mx-1 h-5 w-5" aria-hidden /> {story.price}
+                    </>
+                  ) : state === 'unlocked' ? (
+                    <>
+                      <Smartphone className="mr-2 h-5 w-5" aria-hidden />
+                      Open in app
+                    </>
+                  ) : (
+                    <>
+                      <CirclePlay className="mr-2 h-5 w-5" aria-hidden />
+                      Play
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+          </UnlockFlow>
 
           <div className="grid grid-cols-3 gap-2">
             <button

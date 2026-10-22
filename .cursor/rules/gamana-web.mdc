@@ -1,0 +1,20 @@
+---
+description: Gamana website non-negotiables for the web accounts, wallet, collection and experiences build
+alwaysApply: true
+---
+
+# Gamana Web — non-negotiables
+
+1. **Design system stays intact.** Reuse existing tokens (`brand-*`, `sand-*`, `sunset-*`, `ink`, `ink-soft`, `shadow-card`, `shadow-lift`, `rounded-3xl`, `ease-out-expo`), type (`font-display` = Plus Jakarta Sans, body Inter, `text-h2`, `text-h3`, `eyebrow`, `text-lead`), layout utilities (`section`, `section-tight`, `container-site`, `focus-ring`) and components (`components/ui/*`, `components/site/*`, `components/marketplace/detail/*`). **Do not** add a new UI library, color, font, radius or shadow. If something is missing, compose it from existing primitives.
+2. **Flutter app is untouched.** Every backend change must be **additive and backward compatible**: new optional fields, new endpoints, new branches gated on a web-only signal. Never change the shape of a response the app parses.
+3. **Server is the source of truth.** The website stores **no** balances, unlocks, orders, bookings or profile data in `localStorage`/`sessionStorage`. Allowed browser storage: UI conveniences (pricing currency choice, last-viewed city, a `gmn_session_hint` boolean, an in-flight `checkout_id`).
+4. **Static export.** `next.config.js` has `output: 'export'`. No API routes, no middleware, no `cookies()`/`headers()` in server components. All authenticated UI is client components. Dynamic routes need `generateStaticParams` plus the `__spa__` fallback (`lib/static-spa.ts`).
+5. **Two payment lanes, never mixed.** Coins buy digital content only. Experiences are paid to the operator through the backend's Bókun checkout. Coins never pay for experiences; experiences never go through Gamana's own payment.
+6. **Accessibility:** WCAG 2.1 AA. Every interactive element is keyboard reachable with `focus-ring`; dialogs trap focus; touch targets ≥ 44px; form errors are announced (`aria-live`).
+7. **Private pages are `noindex`** and absent from `app/sitemap.ts`: everything under `/account/`, `/login/`, `/experiences/checkout/`.
+
+## Project rules
+
+- All backend calls go through `lib/api/client.ts`.
+- Never import `lib/account-context` mock APIs that were removed.
+- Never commit or push to `main`/`beta`/`dev`/`webux`; work only on `web-accounts/*` branches per §0.4 of the build spec.

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "@/components/icons";
-import { useAccount } from "@/lib/account-context";
+import { hasSavedJourney, useJourney } from "@/lib/journey-context";
 
 /**
  * "Start Your Gamana Journey" only makes sense for a signed-in visitor who hasn't
@@ -15,17 +15,9 @@ import { useAccount } from "@/lib/account-context";
  * screen, not a genuine hero-level action.
  */
 export function JourneyCTA() {
-  const { journey } = useAccount();
+  const { journey } = useJourney();
 
-  const hasJourney = Boolean(
-    journey &&
-      (journey.homeLocation ||
-        journey.corridor ||
-        journey.groupType ||
-        (journey.interestLabels && journey.interestLabels.length > 0))
-  );
-
-  if (hasJourney) {
+  if (hasSavedJourney(journey)) {
     return null;
   }
 
