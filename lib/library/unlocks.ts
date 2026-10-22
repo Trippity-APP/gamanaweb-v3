@@ -71,6 +71,15 @@ export function mergeUnlocks(...lists: LibraryUnlock[][]): LibraryUnlock[] {
   return Array.from(byId.values());
 }
 
+/**
+ * Unlocking a walk also unlocks each stop as a place, and `/library/unlocks` doesn't say which
+ * places came from a walk. Those stops belong to the walk row, not the Stories list.
+ */
+export function withoutWalkStops(places: LibraryUnlock[], walkStopIds: Set<string>): LibraryUnlock[] {
+  if (walkStopIds.size === 0) return places;
+  return places.filter((u) => !walkStopIds.has(key(u)));
+}
+
 export type DisplayData = { title?: string | null; image_url?: string | null; city?: string | null };
 
 /** Unlock rows carry only ids; fill title, image and city from the public catalogue. */

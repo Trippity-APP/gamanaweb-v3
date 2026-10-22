@@ -4,10 +4,17 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { apiFetch } from "@/lib/api/client";
 import type { LibraryUnlock } from "@/lib/api/schemas/library";
 import { useAuth } from "@/lib/auth/auth-context";
-import { fetchPublicTourById } from "@/lib/marketplace-api";
+import { fetchWalkWithStopIds } from "@/lib/marketplace-api";
 import { fetchAllPublicPlaces, mapPublicPlaceToTour } from "@/lib/places-api";
 import type { Tour } from "@/lib/marketplace-data";
-import { mergeUnlocks, parseLibraryUnlocks, parseToursMine, withDisplayData, type DisplayData } from "@/lib/library/unlocks";
+import {
+  mergeUnlocks,
+  parseLibraryUnlocks,
+  parseToursMine,
+  withDisplayData,
+  withoutWalkStops,
+  type DisplayData,
+} from "@/lib/library/unlocks";
 
 export type UnlockKind = "place" | "storylist";
 
@@ -37,22 +44,27 @@ function display(tour: Tour): DisplayData {
   return { title: tour.title, image_url: tour.image || null, city: tour.location.split(",")[0]?.trim() || null };
 }
 
-async function catalogDisplayData(places: LibraryUnlock[], walks: LibraryUnlock[]): Promise<Map<string, DisplayData>> {
+async function walkDetails(walks: LibraryUnlock[]): Promise<{ lookup: Map<string, DisplayData>; stopIds: Set<string> }> {
   const lookup = new Map<string, DisplayData>();
-  const needs = (u: LibraryUnlock) => !u.title || !u.image_url;
-  const placeIds = new Set(places.filter(needs).map(unlockTargetId));
-  const walkIds = Array.from(new Set(walks.filter(needs).map(unlockTargetId))).filter(Boolean);
-
-  if (placeIds.size > 0) {
-    const catalogue = await fetchAllPublicPlaces().catch(() => []);
-    for (const place of catalogue) {
-      const tour = mapPublicPlaceToTour(place);
-      if (tour && placeIds.has(tour.id)) lookup.set(tour.id, display(tour));
-    }
+  const stopIds = new Set<string>();
+  const walkIds = Array.from(new Set(walks.map(unlockTargetId))).filter(Boolean);
+  const results = await Promise.allSettled(walkIds.map((id) => fetchWalkWithStopIds(id)));
+  for (const result of results) {
+    if (result.status !== "fulfilled" || !result.value) continue;
+    lookup.set(result.value.tour.id, display(result.value.tour));
+    for (const id of result.value.stopPlaceIds) stopIds.add(id);
   }
-  const walkTours = await Promise.allSettled(walkIds.map((id) => fetchPublicTourById(id)));
-  for (const result of walkTours) {
-    if (result.status === "fulfilled" && result.value) lookup.set(result.value.id, display(result.value));
+  return { lookup, stopIds };
+}
+
+async function placeDisplayData(places: LibraryUnlock[]): Promise<Map<string, DisplayData>> {
+  const lookup = new Map<string, DisplayData>();
+  const placeIds = new Set(places.filter((u) => !u.title || !u.image_url).map(unlockTargetId));
+  if (placeIds.size === 0) return lookup;
+  const catalogue = await fetchAllPublicPlaces().catch(() => []);
+  for (const place of catalogue) {
+    const tour = mapPublicPlaceToTour(place);
+    if (tour && placeIds.has(tour.id)) lookup.set(tour.id, display(tour));
   }
   return lookup;
 }
@@ -76,16 +88,17 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
         .then(parseToursMine)
         .catch(() => null),
     ]);
-    const placeList = unlocks?.places ?? null;
-    const walkList = unlocks || mine ? mergeUnlocks(unlocks?.storylists ?? [], mine ?? []) : null;
+    const rawWalks = unlocks || mine ? mergeUnlocks(unlocks?.storylists ?? [], mine ?? []) : null;
+    const walks = await walkDetails(rawWalks ?? []);
+    const placeList = unlocks ? withoutWalkStops(unlocks.places, walks.stopIds) : null;
+    const walkList = rawWalks ? withDisplayData(rawWalks, walks.lookup) : null;
     if (placeList) setPlaces(placeList);
     if (walkList) setTours(walkList);
     setLoading(false);
 
-    const lookup = await catalogDisplayData(placeList ?? [], walkList ?? []);
+    const lookup = await placeDisplayData(placeList ?? []);
     if (lookup.size === 0) return;
     setPlaces((cur) => (cur === placeList && cur ? withDisplayData(cur, lookup) : cur));
-    setTours((cur) => (cur === walkList && cur ? withDisplayData(cur, lookup) : cur));
   }, []);
 
   useEffect(() => {

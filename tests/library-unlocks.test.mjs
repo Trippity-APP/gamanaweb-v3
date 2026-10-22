@@ -1,6 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mergeUnlocks, parseLibraryUnlocks, parseToursMine, withDisplayData } from "../lib/library/unlocks.ts";
+import { mergeUnlocks, parseLibraryUnlocks, parseToursMine, withDisplayData, withoutWalkStops } from "../lib/library/unlocks.ts";
+
+test("withoutWalkStops hides places that came with an unlocked walk", () => {
+  const places = [{ place_id: "stop1" }, { place_id: "story1" }, { place_id: "stop2" }];
+  assert.deepEqual(withoutWalkStops(places, new Set(["stop1", "stop2"])).map((u) => u.place_id), ["story1"]);
+  assert.equal(withoutWalkStops(places, new Set()), places);
+});
 
 test("parseLibraryUnlocks keeps paid and pending unlocks, drops free places", () => {
   const { places, storylists } = parseLibraryUnlocks({
