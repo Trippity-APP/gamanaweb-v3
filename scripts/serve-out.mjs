@@ -40,6 +40,13 @@ const API_PROXY_TARGET = new URL(
 function proxyApi(request, response) {
   const client = API_PROXY_TARGET.protocol === "http:" ? http : https;
   const headers = { ...request.headers, host: API_PROXY_TARGET.host };
+  // The upstream is also behind Cloudflare, which rejects requests already carrying
+  // its edge headers (cf-connecting-ip) as a loop: Error 1000 "dns_loop".
+  for (const name of Object.keys(headers)) {
+    if (name.startsWith("cf-") || name === "cdn-loop" || name === "true-client-ip") {
+      delete headers[name];
+    }
+  }
   delete headers.connection;
   const upstream = client.request(
     {
