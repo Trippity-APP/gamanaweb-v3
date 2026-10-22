@@ -13,6 +13,7 @@ import { ErrorState } from "@/components/common/ErrorState";
 import { AlertCircle, ArrowLeft, Calendar, Clock, Loader2, Lock, MapPin, Search, Users } from "@/components/icons";
 import { FIELD_INPUT, FieldError, QuestionField } from "@/components/experiences/checkout/QuestionField";
 import { track } from "@/lib/analytics";
+import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getExperienceDetail, getOrderSummary } from "@/lib/experiences/api";
 import {
@@ -33,6 +34,7 @@ import {
   getBookingQuestions,
   getCheckoutOptions,
   getPickupPlaces,
+  isPaymentBookable,
   parseCheckoutQuery,
   readStoredCheckout,
   paymentFields,
@@ -295,12 +297,18 @@ export function CheckoutClient() {
     }
     setAnnounce("");
     setSubmitError(null);
+    if (!isPaymentBookable(options)) {
+      setSubmitError("This experience can’t be paid online right now. Please try another experience or check back later.");
+      setAnnounce("This experience can’t be paid online right now.");
+      return;
+    }
     setSubmitting(true);
     track("checkout_step_complete", { step: "details" });
     track("checkout_pay_click", { experience: sel.slug, currency: options.currency ?? experience.currency ?? undefined });
     try {
+      const payFields = paymentFields(options.preferred_payment);
       const redirect = await confirmCheckout(checkoutId, {
-        ...paymentFields(options.preferred_payment),
+        ...payFields,
         currency: options.currency ?? experience.currency ?? undefined,
         contact_name: `${contact.firstName} ${contact.lastName}`.trim(),
         contact_email: contact.email.trim(),
@@ -322,6 +330,14 @@ export function CheckoutClient() {
         setExpired(true);
         return;
       }
+      if (code === "payment_unavailable" || code === "missing_uti") {
+        setSubmitError(
+          error instanceof ApiError && error.message.trim()
+            ? error.message.trim()
+            : "This experience can’t be paid online right now. Please try another experience or check back later.",
+        );
+        return;
+      }
       const fieldMap: Record<string, string> = {
         contact_email: "contact-email",
         contact_name: "contact-firstName",
@@ -335,7 +351,10 @@ export function CheckoutClient() {
         setAnnounce("Please check the highlighted fields.");
         focusFirstError(apiErrors);
       } else {
-        setSubmitError("We couldn't start the payment. Your details are saved — please try again.");
+        const apiMessage = error instanceof ApiError ? error.message.trim() : "";
+        setSubmitError(
+          apiMessage || "We couldn't start the payment. Your details are saved — please try again.",
+        );
       }
     }
   };

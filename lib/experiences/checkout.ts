@@ -143,12 +143,29 @@ export const checkoutOptionsSchema = z
 
 export type CheckoutOptions = z.infer<typeof checkoutOptionsSchema>;
 
-export function getCheckoutOptions(checkoutId: string, currency: string | null | undefined): Promise<CheckoutOptions> {
-  return apiFetch(`/experiences/checkout/${encodeURIComponent(checkoutId)}/options`, {
-    auth: "required",
-    query: { currency: currency ?? undefined },
-    schema: checkoutOptionsSchema,
-  });
+export async function getCheckoutOptions(checkoutId: string, currency: string | null | undefined): Promise<CheckoutOptions> {
+  const rawEnvelope = await apiFetch<Record<string, unknown>>(
+    `/experiences/checkout/${encodeURIComponent(checkoutId)}/options`,
+    {
+      auth: "required",
+      query: { currency: currency ?? undefined },
+      unwrap: false,
+    },
+  );
+  if (rawEnvelope && typeof rawEnvelope === "object" && rawEnvelope.success === false) {
+    throw new ApiError(
+      String(rawEnvelope.message ?? "Could not load checkout options."),
+      typeof rawEnvelope.code === "number" ? rawEnvelope.code : 400,
+      "unsuccessful",
+      rawEnvelope,
+    );
+  }
+  const rawData = (rawEnvelope?.data ?? rawEnvelope) as Record<string, unknown> | null;
+  const parsed = checkoutOptionsSchema.safeParse(rawData);
+  if (!parsed.success) {
+    throw new ApiError("Unexpected response from Gamana.", 200, "invalid_response", parsed.error.issues);
+  }
+  return parsed.data;
 }
 
 const redirectSchema = z.object({ redirect_url: z.string() }).passthrough();
@@ -212,12 +229,33 @@ export function checkoutFieldErrors(error: unknown): Record<string, string> {
 export const SITE_ORIGIN = (): string =>
   (process.env.NEXT_PUBLIC_SITE_URL || window.location.origin).replace(/\/+$/, "");
 
-/** The confirm body takes the preferred payment option flat (spec §3.3). */
+/** True when Bókun offered a card checkout option with a uti (paid online). */
+export function isPaymentBookable(options: CheckoutOptions | null | undefined): boolean {
+  if (!options) return false;
+  const preferredUti = options.preferred_payment?.uti;
+  if (typeof preferredUti === "string" && preferredUti.trim().length > 0) return true;
+  const list = (options as { options?: unknown }).options;
+  if (!Array.isArray(list)) return false;
+  for (const opt of list) {
+    if (!opt || typeof opt !== "object") continue;
+    const pay = (opt as { payment_methods?: Record<string, unknown> }).payment_methods;
+    if (!pay || typeof pay !== "object") continue;
+    const allowed = Array.isArray(pay.allowed) ? pay.allowed.map((m) => String(m).toUpperCase()) : [];
+    if (!allowed.includes("CARD")) continue;
+    const card = pay.card_provider as Record<string, unknown> | null | undefined;
+    const uti = card?.uti != null ? String(card.uti).trim() : "";
+    if (uti) return true;
+  }
+  return false;
+}
+
+/** The confirm body takes the preferred payment option flat (spec §3.3).
+ * Always emit Flutter-parity keys so JSON.stringify keeps them (null when absent). */
 export function paymentFields(preferred: CheckoutOptions["preferred_payment"]) {
   return {
-    uti: preferred?.uti ?? undefined,
-    checkout_option_type: preferred?.checkout_option_type ?? undefined,
-    payment_method: preferred?.payment_method ?? "CARD",
+    uti: preferred?.uti ?? null,
+    checkout_option_type: preferred?.checkout_option_type ?? null,
+    payment_method: preferred?.payment_method ?? null,
     send_notification_to_main_contact: true,
   };
 }
