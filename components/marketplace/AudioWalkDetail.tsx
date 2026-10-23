@@ -17,19 +17,18 @@ import {
   fetchPublicWalkDetailById,
 } from '@/lib/marketplace-api';
 import type { WalkDetail } from '@/lib/marketplace-data';
-import { isStaticSpaParam } from '@/lib/static-spa';
+import {
+  isStaticSpaParam,
+  resolveDetailIdFromPath,
+  shouldClientFetchDetail,
+} from '@/lib/static-spa';
 import { useAuth } from '@/lib/auth/auth-context';
 import { daysLeft, useLibrary } from '@/lib/library/library-context';
 
-function resolveTourId(paramId: string): string {
-  if (!isStaticSpaParam(paramId)) return paramId;
-  if (typeof window === 'undefined') return paramId;
-  const match = window.location.pathname.match(/\/(?:explore|marketplace)\/tours\/([^/]+)/);
-  return match?.[1] ?? paramId;
-}
+const TOUR_PATH = /\/(?:explore|marketplace)\/tours\/([^/]+)/;
 
-function isObjectId(id: string): boolean {
-  return /^[a-f0-9]{24}$/i.test(id);
+function resolveTourId(paramId: string): string {
+  return resolveDetailIdFromPath(paramId, TOUR_PATH);
 }
 
 type AudioWalkDetailProps = {
@@ -41,15 +40,10 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
   const pathname = usePathname();
   const backHref = getExploreBackHref(pathname);
   const [walk, setWalk] = useState<WalkDetail | null>(initialWalk);
-  const [loading, setLoading] = useState(
-    !initialWalk && (isStaticSpaParam(paramTourId) || isObjectId(paramTourId)),
-  );
+  const needsFetch = shouldClientFetchDetail(paramTourId, Boolean(initialWalk), TOUR_PATH);
+  const [loading, setLoading] = useState(needsFetch);
   const [error, setError] = useState<string | null>(
-    initialWalk
-      ? null
-      : isStaticSpaParam(paramTourId) || isObjectId(paramTourId)
-        ? null
-        : 'This walk is not available.',
+    initialWalk || needsFetch ? null : 'This walk is not available.',
   );
 
   const loadWalkById = async (id: string) => {
@@ -86,10 +80,13 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
   }, [initialWalk]);
 
   useEffect(() => {
-    if (initialWalk) return;
+    if (!shouldClientFetchDetail(paramTourId, Boolean(initialWalk), TOUR_PATH)) return;
     const resolved = resolveTourId(paramTourId);
-    if (isStaticSpaParam(resolved)) return;
-    if (!isStaticSpaParam(paramTourId) && !isObjectId(resolved)) return;
+    if (isStaticSpaParam(resolved)) {
+      setLoading(false);
+      setError('This walk is not available.');
+      return;
+    }
     void loadWalkById(resolved);
   }, [paramTourId, initialWalk]);
 

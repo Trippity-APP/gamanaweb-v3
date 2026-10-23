@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { Suspense } from 'react';
 import SiteHeader from '@/components/navigation/site-header';
 import { JsonLd } from '@/components/site/JsonLd';
 import { DownloadBand } from '@/components/site/DownloadBand';
@@ -122,20 +121,12 @@ export default async function MarketplaceTourPage({
             ])}
           />
         )}
-        <Suspense
-          fallback={
-            <div className="container-site py-16 text-center text-ink-muted">
-              Loading...
-            </div>
-          }
-        >
-          <ExploreTourDetailClient
-            tourId={id}
-            walk={walk}
-            tour={isWalk ? null : tour}
-            relatedTours={relatedTours.slice(0, 3)}
-          />
-        </Suspense>
+        <ExploreTourDetailClient
+          tourId={id}
+          walk={walk}
+          tour={isWalk ? null : tour}
+          relatedTours={relatedTours.slice(0, 3)}
+        />
         {tour && city && (
           <ExperiencesRail
             title="Experiences nearby"

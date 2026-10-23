@@ -7,13 +7,16 @@ import {
   fetchPublicStoryDetailById,
 } from '@/lib/marketplace-api';
 import type { StoryDetail } from '@/lib/marketplace-data';
-import { isStaticSpaParam } from '@/lib/static-spa';
+import {
+  isStaticSpaParam,
+  resolveDetailIdFromPath,
+  shouldClientFetchDetail,
+} from '@/lib/static-spa';
+
+const STORY_PATH = /\/(?:explore|marketplace)\/story\/([^/]+)/;
 
 function resolveStoryId(paramId: string): string {
-  if (!isStaticSpaParam(paramId)) return paramId;
-  if (typeof window === 'undefined') return paramId;
-  const match = window.location.pathname.match(/\/(?:explore|marketplace)\/story\/([^/]+)/);
-  return match?.[1] ?? paramId;
+  return resolveDetailIdFromPath(paramId, STORY_PATH);
 }
 
 type ExploreStoryDetailClientProps = {
@@ -26,13 +29,21 @@ export function ExploreStoryDetailClient({
   story: initialStory,
 }: ExploreStoryDetailClientProps) {
   const [story, setStory] = useState<StoryDetail | null>(initialStory);
-  const [resolving, setResolving] = useState(isStaticSpaParam(storyId) && !initialStory);
+  const [resolving, setResolving] = useState(
+    shouldClientFetchDetail(storyId, Boolean(initialStory), STORY_PATH),
+  );
 
   useEffect(() => {
-    if (!isStaticSpaParam(storyId) || initialStory) return;
+    if (!shouldClientFetchDetail(storyId, Boolean(initialStory), STORY_PATH)) {
+      setResolving(false);
+      return;
+    }
 
     const resolved = resolveStoryId(storyId);
-    if (isStaticSpaParam(resolved)) return;
+    if (isStaticSpaParam(resolved)) {
+      setResolving(false);
+      return;
+    }
 
     let cancelled = false;
 
@@ -60,7 +71,7 @@ export function ExploreStoryDetailClient({
     );
   }
 
-  return <AudioStoryDetail tourId={storyId} story={story} />;
+  return <AudioStoryDetail tourId={resolveStoryId(storyId)} story={story} />;
 }
 
 export function clearStoryDetailCache() {

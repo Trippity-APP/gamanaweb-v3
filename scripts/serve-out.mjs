@@ -34,7 +34,7 @@ const API_PROXY_TARGET = new URL(
   process.env.API_PROXY_TARGET ||
     process.env.NEXT_PUBLIC_MARKETPLACE_API_URL?.replace(/\/api\/v1\/?$/, "") ||
     process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, "") ||
-    "https://api-beta.gamana.app"
+    "https://apidev.gamana.app"
 );
 
 function proxyApi(request, response) {
@@ -105,7 +105,7 @@ function getBlogApiBaseUrl() {
     process.env.NEXT_PUBLIC_API_URL ||
     process.env.BLOG_API_URL ||
     process.env.GAMANA_API_URL ||
-    "https://api-beta.gamana.app/api/v1"
+    "https://apidev.gamana.app/api/v1"
   ).replace(/\/$/, "");
 }
 
@@ -347,10 +347,16 @@ async function materializeBlogPage(slug) {
  * rewrites before looking for real files. Pages pre-rendered at build time have
  * their own title, canonical and JSON-LD, so serve those directly and leave the
  * shell for IDs published after the last deploy.
+ *
+ * Serving the raw `__spa__` HTML at a real id URL breaks Next.js hydration (Suspense
+ * hangs on Loading…). For non-prerendered ids we clone the shell and rewrite every
+ * `__spa__` token to the requested id so the flight payload matches the URL.
  */
-const PRERENDERED_DETAIL_ROUTE = /^\/(cities|marketplace\/tours|marketplace\/story|experiences)\/([^/]+)\/?$/;
+const PRERENDERED_DETAIL_ROUTE =
+  /^\/(cities|marketplace\/tours|marketplace\/story|experiences|place|storylist|storylists)\/([^/]+)\/?$/;
+const SAFE_DETAIL_ID = /^[A-Za-z0-9_-]{1,200}$/;
 
-function prerenderedDetailPath(pathname) {
+function parseDetailRoute(pathname) {
   const match = pathname.match(PRERENDERED_DETAIL_ROUTE);
   if (!match) return null;
   let id;
@@ -359,9 +365,40 @@ function prerenderedDetailPath(pathname) {
   } catch {
     return null;
   }
-  if (!id || id === "__spa__" || id.includes("..") || id.includes("/")) return null;
-  const file = path.join(OUT, match[1], id, "index.html");
+  if (!id || id === "__spa__" || id.includes("..") || id.includes("/") || !SAFE_DETAIL_ID.test(id)) {
+    return null;
+  }
+  return { kind: match[1], id };
+}
+
+function prerenderedDetailPath(pathname) {
+  const parsed = parseDetailRoute(pathname);
+  if (!parsed) return null;
+  const file = path.join(OUT, parsed.kind, parsed.id, "index.html");
   return fs.existsSync(file) ? file : null;
+}
+
+/**
+ * Clone the static-export SPA shell for a concrete id so Next hydrates against the
+ * URL the browser actually requested. Persist under out/ when the FS is writable
+ * (same pattern as blog materialization).
+ */
+function materializeSpaDetailShell(kind, id) {
+  const spaFile = path.join(OUT, kind, "__spa__", "index.html");
+  if (!fs.existsSync(spaFile)) return null;
+
+  const html = fs.readFileSync(spaFile, "utf8").split("__spa__").join(id);
+  const destDir = path.join(OUT, kind, id);
+  const destFile = path.join(destDir, "index.html");
+  try {
+    fs.mkdirSync(destDir, { recursive: true });
+    fs.writeFileSync(destFile, html);
+    return { file: destFile, html };
+  } catch (err) {
+    // Read-only filesystem (some deploys): still serve rewritten HTML from memory.
+    console.warn(`[spa] could not persist ${kind}/${id}:`, err.message);
+    return { html };
+  }
 }
 
 function sendHtml(response, html) {
@@ -428,6 +465,22 @@ const server = http.createServer(async (request, response) => {
       }
       sendHtml(response, fs.readFileSync(detailFile, "utf8"));
       return;
+    }
+
+    // Non-prerendered detail URLs: rewrite __spa__ shell so hydration matches the URL.
+    // Otherwise serve-handler would serve the raw shell and the page hangs on Loading…
+    const spaDetail = parseDetailRoute(url.pathname);
+    if (spaDetail) {
+      if (!url.pathname.endsWith("/")) {
+        response.writeHead(301, { Location: `${url.pathname}/${url.search}` });
+        response.end();
+        return;
+      }
+      const materialized = materializeSpaDetailShell(spaDetail.kind, spaDetail.id);
+      if (materialized?.html) {
+        sendHtml(response, materialized.html);
+        return;
+      }
     }
 
     const slug = blogSlugFromPathname(url.pathname);

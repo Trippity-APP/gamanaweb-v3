@@ -7,14 +7,17 @@ import { CityDetail } from "@/components/cities/CityDetail";
 import { fetchCityById, type ApiCity } from "@/lib/services/cityService";
 import { cityCatalog, fetchPublicTours } from "@/lib/marketplace-api";
 import type { Tour } from "@/lib/marketplace-data";
-import { isStaticSpaParam } from "@/lib/static-spa";
+import {
+    isStaticSpaParam,
+    resolveDetailIdFromPath,
+    shouldClientFetchDetail,
+} from "@/lib/static-spa";
 import { writeLastCity } from "@/lib/home/last-city";
 
+const CITY_PATH = /\/cities\/([^/]+)/;
+
 function resolveCityId(paramId: string): string {
-    if (!isStaticSpaParam(paramId)) return paramId;
-    if (typeof window === "undefined") return paramId;
-    const match = window.location.pathname.match(/\/cities\/([^/]+)/);
-    return match?.[1] ?? paramId;
+    return resolveDetailIdFromPath(paramId, CITY_PATH);
 }
 
 type CityDetailPageClientProps = {
@@ -36,9 +39,10 @@ export function CityDetailPageClient({
     const [tours, setTours] = useState<Tour[]>(initialTours);
     const [stories, setStories] = useState<Tour[]>(initialStories);
     const [relatedCities, setRelatedCities] = useState<ApiCity[]>(initialRelatedCities);
-    const [loading, setLoading] = useState(isStaticSpaParam(paramCityId) && !initialCity);
+    const needsFetch = shouldClientFetchDetail(paramCityId, Boolean(initialCity), CITY_PATH);
+    const [loading, setLoading] = useState(needsFetch);
     const [error, setError] = useState<string | null>(
-        initialCity ? null : isStaticSpaParam(paramCityId) ? null : "This city is not available."
+        initialCity || needsFetch ? null : "This city is not available."
     );
 
     // Pre-rendered pages carry image URLs signed at build time, which expire after 24h.
@@ -56,10 +60,14 @@ export function CityDetailPageClient({
     }, [initialCity]);
 
     useEffect(() => {
-        if (initialCity || !isStaticSpaParam(paramCityId)) return;
+        if (!shouldClientFetchDetail(paramCityId, Boolean(initialCity), CITY_PATH)) return;
 
         const resolved = resolveCityId(paramCityId);
-        if (isStaticSpaParam(resolved)) return;
+        if (isStaticSpaParam(resolved)) {
+            setLoading(false);
+            setError("This city is not available.");
+            return;
+        }
 
         void (async () => {
             setLoading(true);

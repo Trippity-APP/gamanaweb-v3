@@ -50,7 +50,7 @@ import {
   refundText,
 } from "@/lib/experiences/format";
 import { useAvailability } from "@/lib/experiences/use-availability";
-import { isStaticSpaParam } from "@/lib/static-spa";
+import { isStaticSpaParam, resolveDetailIdFromPath } from "@/lib/static-spa";
 import { cn } from "@/lib/utils";
 
 const MeetingPointMap = dynamic(() => import("@/components/experiences/MeetingPointMap"), {
@@ -58,10 +58,10 @@ const MeetingPointMap = dynamic(() => import("@/components/experiences/MeetingPo
   loading: () => <Skeleton className="h-64 w-full rounded-3xl" />,
 });
 
+const EXPERIENCE_PATH = /\/experiences\/([^/]+)/;
+
 function resolveSlug(param: string): string {
-  if (!isStaticSpaParam(param) || typeof window === "undefined") return param;
-  const match = window.location.pathname.match(/\/experiences\/([^/]+)/);
-  return match ? decodeURIComponent(match[1]) : param;
+  return resolveDetailIdFromPath(param, EXPERIENCE_PATH);
 }
 
 export type LinkedStory = {

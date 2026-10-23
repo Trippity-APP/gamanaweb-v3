@@ -22,15 +22,18 @@ import {
   fetchPublicStoryDetailById,
 } from '@/lib/marketplace-api';
 import type { StoryDetail } from '@/lib/marketplace-data';
-import { isStaticSpaParam } from '@/lib/static-spa';
+import {
+  isStaticSpaParam,
+  resolveDetailIdFromPath,
+  shouldClientFetchDetail,
+} from '@/lib/static-spa';
 import { useAuth } from '@/lib/auth/auth-context';
 import { daysLeft, useLibrary } from '@/lib/library/library-context';
 
+const STORY_PATH = /\/(?:explore|marketplace)\/story\/([^/]+)/;
+
 function resolveStoryId(paramId: string): string {
-  if (!isStaticSpaParam(paramId)) return paramId;
-  if (typeof window === 'undefined') return paramId;
-  const match = window.location.pathname.match(/\/(?:explore|marketplace)\/story\/([^/]+)/);
-  return match?.[1] ?? paramId;
+  return resolveDetailIdFromPath(paramId, STORY_PATH);
 }
 
 type AudioStoryDetailProps = {
@@ -45,9 +48,10 @@ export function AudioStoryDetail({
   const pathname = usePathname();
   const backHref = getExploreBackHref(pathname);
   const [story, setStory] = useState<StoryDetail | null>(initialStory);
-  const [loading, setLoading] = useState(isStaticSpaParam(paramTourId) && !initialStory);
+  const needsFetch = shouldClientFetchDetail(paramTourId, Boolean(initialStory), STORY_PATH);
+  const [loading, setLoading] = useState(needsFetch);
   const [error, setError] = useState<string | null>(
-    initialStory ? null : isStaticSpaParam(paramTourId) ? null : 'This story is not available.',
+    initialStory || needsFetch ? null : 'This story is not available.',
   );
   const [downloadOpen, setDownloadOpen] = useState(false);
 
@@ -85,9 +89,13 @@ export function AudioStoryDetail({
   }, [initialStory]);
 
   useEffect(() => {
-    if (initialStory || !isStaticSpaParam(paramTourId)) return;
+    if (!shouldClientFetchDetail(paramTourId, Boolean(initialStory), STORY_PATH)) return;
     const resolved = resolveStoryId(paramTourId);
-    if (isStaticSpaParam(resolved)) return;
+    if (isStaticSpaParam(resolved)) {
+      setLoading(false);
+      setError('This story is not available.');
+      return;
+    }
     void loadStoryById(resolved);
   }, [paramTourId, initialStory]);
 

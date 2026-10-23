@@ -8,13 +8,16 @@ import {
   fetchPublicTourById,
   fetchPublicWalkDetailById,
 } from '@/lib/marketplace-api';
-import { isStaticSpaParam } from '@/lib/static-spa';
+import {
+  isStaticSpaParam,
+  resolveDetailIdFromPath,
+  shouldClientFetchDetail,
+} from '@/lib/static-spa';
+
+const TOUR_PATH = /\/(?:explore|marketplace)\/tours\/([^/]+)/;
 
 function resolveTourId(paramId: string): string {
-  if (!isStaticSpaParam(paramId)) return paramId;
-  if (typeof window === 'undefined') return paramId;
-  const match = window.location.pathname.match(/\/(?:explore|marketplace)\/tours\/([^/]+)/);
-  return match?.[1] ?? paramId;
+  return resolveDetailIdFromPath(paramId, TOUR_PATH);
 }
 
 type ExploreTourDetailClientProps = {
@@ -34,14 +37,20 @@ export function ExploreTourDetailClient({
   const [tour, setTour] = useState(initialTour);
   const [relatedTours, setRelatedTours] = useState(initialRelatedTours);
   const [resolving, setResolving] = useState(
-    isStaticSpaParam(tourId) && !initialWalk && !initialTour,
+    shouldClientFetchDetail(tourId, Boolean(initialWalk || initialTour), TOUR_PATH),
   );
 
   useEffect(() => {
-    if (!isStaticSpaParam(tourId) || initialWalk || initialTour) return;
+    if (!shouldClientFetchDetail(tourId, Boolean(initialWalk || initialTour), TOUR_PATH)) {
+      setResolving(false);
+      return;
+    }
 
     const resolved = resolveTourId(tourId);
-    if (isStaticSpaParam(resolved)) return;
+    if (isStaticSpaParam(resolved)) {
+      setResolving(false);
+      return;
+    }
 
     let cancelled = false;
 
@@ -70,8 +79,10 @@ export function ExploreTourDetailClient({
     };
   }, [tourId, initialWalk, initialTour]);
 
+  const resolvedId = resolveTourId(tourId);
+
   if (walk?.contentKind === 'walk') {
-    return <AudioWalkDetail tourId={tourId} walk={walk} />;
+    return <AudioWalkDetail tourId={resolvedId} walk={walk} />;
   }
 
   if (resolving) {
@@ -84,7 +95,7 @@ export function ExploreTourDetailClient({
 
   return (
     <MarketplaceTourDetail
-      tourId={tourId}
+      tourId={resolvedId}
       tour={tour}
       relatedTours={relatedTours}
     />

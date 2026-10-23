@@ -417,8 +417,30 @@ export async function buildPlaceAudioDurationLookup(): Promise<Map<string, numbe
 }
 
 export async function fetchPublicPlaceById(id: string): Promise<ApiPublicPlace | null> {
-  const places = await fetchAllPublicPlaces();
-  return places.find((place) => placeId(place) === id) ?? null;
+  const needle = id.trim();
+  if (!needle) return null;
+
+  // Prefer the in-memory catalog when already warmed (listing → detail).
+  if (cachedPublicPlaces) {
+    return cachedPublicPlaces.find((place) => placeId(place) === needle) ?? null;
+  }
+
+  // Detail pages must not wait on the full catalog — page until the id is found.
+  const limit = 100;
+  const firstPage = await fetchPublicPlacesPage(0, limit);
+  const matchIn = (page: ApiPlacesListResponse) =>
+    (page.data ?? []).find((place) => placeId(place) === needle) ?? null;
+
+  const hit = matchIn(firstPage);
+  if (hit) return hit;
+
+  const total = firstPage.pagination?.total ?? firstPage.data?.length ?? 0;
+  for (let skip = limit; skip < total; skip += limit) {
+    const page = await fetchPublicPlacesPage(skip, limit);
+    const found = matchIn(page);
+    if (found) return found;
+  }
+  return null;
 }
 
 /** Live stories for one city from any country. The places API only allows the production origin. */

@@ -107,15 +107,7 @@ export default async function ExploreStoryPage({
             ])}
           />
         )}
-        <Suspense
-          fallback={
-            <div className="container-site py-16 text-center text-ink-muted">
-              Loading...
-            </div>
-          }
-        >
-          <ExploreStoryDetailClient storyId={id} story={story} />
-        </Suspense>
+        <ExploreStoryDetailClient storyId={id} story={story} />
         {story && (hasCoords || city) && (
           <ExperiencesRail
             title="Experiences nearby"
