@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, MapPin } from "@/components/icons";
+import { MarketplaceCoverImage } from "@/components/marketplace/marketplace-cover-image";
 import { cn } from "@/lib/utils";
 
 type TourCardProps = {
@@ -37,12 +37,11 @@ export function TourCard({
       )}
     >
       <div className="relative aspect-[4/3] overflow-hidden">
-        <Image
+        <MarketplaceCoverImage
           src={image}
           alt={imageAlt}
           title={imageTitle}
           fill
-          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
           className="object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105"
         />
         {badge && (
