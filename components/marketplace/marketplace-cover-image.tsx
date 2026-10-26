@@ -7,6 +7,7 @@ import { DEFAULT_TOUR_IMAGE } from '@/lib/marketplace-api';
 type MarketplaceCoverImageProps = {
   src: string;
   alt: string;
+  title?: string;
   className?: string;
   fill?: boolean;
   priority?: boolean;
@@ -25,6 +26,7 @@ function isRemoteSrc(src: string) {
 export function MarketplaceCoverImage({
   src,
   alt,
+  title,
   className = '',
   fill = false,
   priority = false,
@@ -79,6 +81,7 @@ export function MarketplaceCoverImage({
         ref={imgRef}
         src={currentSrc}
         alt={alt}
+        title={title}
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
         referrerPolicy="no-referrer"
@@ -97,6 +100,7 @@ export function MarketplaceCoverImage({
       <Image
         src={encodeURI(currentSrc)}
         alt={alt}
+        title={title}
         fill
         priority={priority}
         onError={handleError}
@@ -109,6 +113,7 @@ export function MarketplaceCoverImage({
     <Image
       src={encodeURI(currentSrc)}
       alt={alt}
+      title={title}
       width={width ?? 400}
       height={height ?? 300}
       priority={priority}

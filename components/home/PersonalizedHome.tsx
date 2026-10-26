@@ -30,19 +30,22 @@ import { cityLabel, readLastCity, writeLastCity } from "@/lib/home/last-city";
 import { isExpired, unlockTargetId, useLibrary } from "@/lib/library/library-context";
 import {
   cityCatalog,
+  fetchPublicTours,
   getDefaultTourImage,
   getTourHref,
   mapStorylistToTour,
   type ApiStorylist,
 } from "@/lib/marketplace-api";
 import type { SearchTour, Tour } from "@/lib/marketplace-data";
-import { loadSearchCatalog } from "@/lib/search-catalog";
 import { fetchAllActiveCities, getCityHref, type ApiCity } from "@/lib/services/cityService";
 
 type Place = { city: string | null; country: string | null };
 
 const SHELF_SIZE = 10;
 const CARD_WIDTH = "w-[260px] sm:w-[300px]";
+
+type CityShelves = { tours: Tour[]; stories: Tour[] };
+const NO_CITY_SHELVES: CityShelves = { tours: [], stories: [] };
 
 /** Decision 18: profile home city → last city opened → country from pricing currency → none. */
 function resolvePlace(doc: PersonalizationDoc | null): Place {
@@ -204,11 +207,13 @@ function Feed() {
 
   const languages = doc ? narratorLanguages(doc) : [];
   const { places: unlockedPlaces, tours: unlockedTours } = useLibrary();
-  const [catalog, setCatalog] = useState<SearchTour[] | null>(null);
+  const [catalog, setCatalog] = useState<Tour[] | null>(null);
 
+  // Live catalog, same source as the city page: image URLs are signed per request and expire,
+  // so they can't come from anything generated at build time (e.g. /search-catalog.json).
   useEffect(() => {
     let cancelled = false;
-    loadSearchCatalog()
+    fetchPublicTours()
       .then((all) => !cancelled && setCatalog(all))
       .catch(() => !cancelled && setCatalog([]));
     return () => {
@@ -217,7 +222,7 @@ function Feed() {
   }, []);
 
   const inCity = useMemo(
-    () => (place?.city && catalog ? cityCatalog(catalog, place.city, SHELF_SIZE) : { tours: [], stories: [] }),
+    () => (place?.city && catalog ? cityCatalog(catalog, place.city, SHELF_SIZE) : NO_CITY_SHELVES),
     [catalog, place?.city],
   );
 
@@ -484,10 +489,10 @@ function PickedForYou({
 }: {
   city: string | null;
   languages: string[];
-  catalog: SearchTour[] | null;
+  catalog: Tour[] | null;
   exclude: Set<string>;
 }) {
-  const [recommended, setRecommended] = useState<SearchTour[] | null>(null);
+  const [recommended, setRecommended] = useState<Tour[] | null>(null);
   const langKey = languages.join(",");
 
   useEffect(() => {
@@ -534,7 +539,7 @@ function useCityHref(city: string): string {
 }
 
 /** Same split as the city page: recommended audio tours, then audio stories. */
-function InCityShelves({ city, tours, stories }: { city: string; tours: SearchTour[]; stories: SearchTour[] }) {
+function InCityShelves({ city, tours, stories }: { city: string; tours: Tour[]; stories: Tour[] }) {
   const cityHref = useCityHref(city);
   const explore = { href: cityHref, label: `Explore ${city}` };
 
