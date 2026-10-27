@@ -50,6 +50,10 @@ export type ApiPublicPlace = {
   is_published?: boolean;
   is_active?: boolean;
   is_deleted?: boolean;
+  is_featured?: boolean | null;
+  is_verified?: boolean | null;
+  is_legend?: boolean | null;
+  created_at?: string | null;
   audios?: ApiPlaceAudio[] | null;
 };
 
@@ -289,7 +293,20 @@ export function mapPublicPlaceToTour(place: ApiPublicPlace): Tour | null {
     searchTerms: buildPlaceSearchTerms(place),
     contentKind: "story",
     isRecommended: true,
+    geo: geoFromLngLat(place.location?.coordinates),
+    durationMinutes,
+    createdAt: place.created_at ?? undefined,
+    isFeatured: place.is_featured === true,
+    isVerified: place.is_verified === true,
+    isLegend: place.is_legend === true,
   };
+}
+
+export function geoFromLngLat(coords?: [number, number] | null): { lat: number; lng: number } | undefined {
+  if (!coords || coords.length < 2) return undefined;
+  const [lng, lat] = coords;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || (lat === 0 && lng === 0)) return undefined;
+  return { lat, lng };
 }
 
 export function mapPublicPlaceToStoryDetail(place: ApiPublicPlace): StoryDetail | null {
@@ -445,7 +462,7 @@ export async function fetchPublicPlaceById(id: string): Promise<ApiPublicPlace |
 
 /** Live stories for one city from any country. The places API only allows the production origin. */
 export async function searchPublicStoriesByCity(city: string, signal?: AbortSignal): Promise<Tour[]> {
-  const params = new URLSearchParams({ skip: "0", limit: "50", city: city.trim() });
+  const params = new URLSearchParams({ skip: "0", limit: "100", city: city.trim() });
   const response = await fetch(`${getMarketplaceApiBaseUrl()}/places/search/public/location?${params}`, {
     ...getCatalogFetchInit(),
     signal,

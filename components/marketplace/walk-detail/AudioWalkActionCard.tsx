@@ -120,7 +120,7 @@ export function AudioWalkActionCard({ walk, className = '' }: AudioWalkActionCar
 
           <p className="flex items-start gap-2 border-t border-ink/5 pt-4 text-xs text-ink-muted">
             <Smartphone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-600" />
-            Audio walks play in the Gamana app. Download once and listen with no signal.
+            Audio tours play in the Gamana app. Download once and listen with no signal.
           </p>
         </CardContent>
       </Card>

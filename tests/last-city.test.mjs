@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cityLabel, readLastCity, writeLastCity } from "../lib/home/last-city.ts";
+import { cityLabel, readLastCity, readLastCityId, writeLastCity } from "../lib/home/last-city.ts";
 
 test("cityLabel keeps the city part of an autocomplete label", () => {
   assert.equal(cityLabel("Jaipur, Rajasthan, India"), "Jaipur");
@@ -9,5 +9,7 @@ test("cityLabel keeps the city part of an autocomplete label", () => {
 
 test("storage helpers are safe without a window", () => {
   assert.equal(readLastCity(), null);
+  assert.equal(readLastCityId(), null);
   assert.doesNotThrow(() => writeLastCity("Jaipur"));
+  assert.doesNotThrow(() => writeLastCity("Jaipur", 12345));
 });

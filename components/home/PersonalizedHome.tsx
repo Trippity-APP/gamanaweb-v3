@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CardRail } from "@/components/site/CardRail";
+import { CitySelect } from "@/components/site/CitySelect";
 import { SectionHeader } from "@/components/site/SectionHeader";
-import { TourCard } from "@/components/site/TourCard";
 import { UnlockCard } from "@/components/account/UnlockCard";
-import { CityAutocomplete } from "@/components/CityAutocomplete";
+import { CatalogCard } from "@/components/marketplace/CatalogCard";
 import { ExperienceCard } from "@/components/experiences/ExperienceCard";
 import { ExperiencesRail } from "@/components/experiences/ExperiencesRail";
 import { AppHandoffSheet } from "@/components/handoff/AppHandoffSheet";
@@ -19,41 +19,75 @@ import { track } from "@/lib/analytics";
 import { apiFetch } from "@/lib/api/client";
 import { hasSessionHint } from "@/lib/api/session";
 import { experienceSummarySchema, type ExperienceSummary } from "@/lib/api/schemas/experiences";
+import {
+  bestPicksSchema,
+  lenientList,
+  placeCardSchema,
+  placeCardToTour,
+  tourCardSchema,
+  tourCardToTour,
+} from "@/lib/api/schemas/mobile-v2";
 import type { BookingSummary } from "@/lib/api/schemas/bookings";
 import type { LibraryUnlock } from "@/lib/api/schemas/library";
 import { bookingId, fetchBookings, isUpcoming, listOf } from "@/lib/account/api";
 import { fetchPersonalization, narratorLanguages, travelProfileHomeCity, type PersonalizationDoc } from "@/lib/account/personalization";
 import { useAuth } from "@/lib/auth/auth-context";
-import { detectPricingCurrency } from "@/lib/coin-pricing";
 import { formatDateLabel, formatTimeLabel } from "@/lib/experiences/format";
-import { cityLabel, readLastCity, writeLastCity } from "@/lib/home/last-city";
+import { cityLabel, readLastCity, readLastCityId, writeLastCity } from "@/lib/home/last-city";
 import { isExpired, unlockTargetId, useLibrary } from "@/lib/library/library-context";
-import {
-  cityCatalog,
-  fetchPublicTours,
-  getDefaultTourImage,
-  getTourHref,
-  mapStorylistToTour,
-  type ApiStorylist,
-} from "@/lib/marketplace-api";
-import type { SearchTour, Tour } from "@/lib/marketplace-data";
-import { fetchAllActiveCities, getCityHref, type ApiCity } from "@/lib/services/cityService";
-
-type Place = { city: string | null; country: string | null };
+import { cityQueryVariants } from "@/lib/marketplace-api";
+import type { Tour } from "@/lib/marketplace-data";
+import { cityCoordinates, loadActiveCities, type ApiCity } from "@/lib/services/cityService";
 
 const SHELF_SIZE = 10;
 const CARD_WIDTH = "w-[260px] sm:w-[300px]";
+/** The app's recommended-tours box: the city's coordinates ± 1°. */
+const TOUR_BOX_DEGREES = 1;
+/** The app's nearby-stories radius for Home. */
+const NEARBY_RADIUS_METERS = 100_000;
 
-type CityShelves = { tours: Tour[]; stories: Tour[] };
-const NO_CITY_SHELVES: CityShelves = { tours: [], stories: [] };
+function matchCity(cities: ApiCity[], name: string | null | undefined): ApiCity | null {
+  if (!name?.trim()) return null;
+  const variants = cityQueryVariants(cityLabel(name));
+  return cities.find((c) => variants.includes(c.name.trim().toLowerCase())) ?? null;
+}
 
-/** Decision 18: profile home city → last city opened → country from pricing currency → none. */
-function resolvePlace(doc: PersonalizationDoc | null): Place {
-  const home = travelProfileHomeCity(doc?.travel_profile);
-  if (home) return { city: cityLabel(home), country: null };
-  const last = readLastCity();
-  if (last) return { city: cityLabel(last), country: null };
-  return { city: null, country: detectPricingCurrency() === "INR" ? "India" : null };
+function currentPosition(): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
+    if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
+      reject(new Error("unavailable"));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(resolve, reject, { maximumAge: 600_000, timeout: 10_000 });
+  });
+}
+
+async function geolocationAllowed(): Promise<boolean> {
+  if (typeof navigator === "undefined" || !("geolocation" in navigator)) return false;
+  try {
+    const status = await navigator.permissions?.query({ name: "geolocation" as PermissionName });
+    return status ? status.state !== "denied" : true;
+  } catch {
+    return true;
+  }
+}
+
+/** Profile home city → last city picked → browser location (nearest Gamana city) → none. */
+async function resolveCity(doc: PersonalizationDoc | null, cities: ApiCity[]): Promise<ApiCity | null> {
+  const home = matchCity(cities, travelProfileHomeCity(doc?.travel_profile));
+  if (home) return home;
+
+  const lastId = readLastCityId();
+  const last = (lastId && cities.find((c) => String(c.id) === lastId)) || matchCity(cities, readLastCity());
+  if (last) return last;
+
+  if (!(await geolocationAllowed())) return null;
+  try {
+    const { coords } = await currentPosition();
+    return nearestCity(cities, coords.latitude, coords.longitude);
+  } catch {
+    return null;
+  }
 }
 
 function daysUntil(isoDate: string): number {
@@ -97,6 +131,16 @@ export function AnonymousOnly({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+function RailSkeleton() {
+  return (
+    <div className="flex gap-5 overflow-hidden" role="status" aria-label="Loading">
+      {Array.from({ length: 4 }, (_, i) => (
+        <Skeleton key={i} className="h-80 w-[260px] shrink-0 rounded-3xl sm:w-[300px]" />
+      ))}
+    </div>
+  );
+}
+
 function FeedSkeleton() {
   return (
     <div role="status" aria-label="Loading your home">
@@ -110,11 +154,7 @@ function FeedSkeleton() {
         <div key={row} className="section-tight border-t border-ink/5 bg-white">
           <div className="container-site space-y-6">
             <Skeleton className="h-8 w-64 rounded-xl" />
-            <div className="flex gap-5 overflow-hidden">
-              {Array.from({ length: 4 }, (_, i) => (
-                <Skeleton key={i} className="h-72 w-[260px] shrink-0 rounded-3xl sm:w-[300px]" />
-              ))}
-            </div>
+            <RailSkeleton />
           </div>
         </div>
       ))}
@@ -181,176 +221,151 @@ function Shelf({
   );
 }
 
+function CatalogRail({ label, tours }: { label: string; tours: Tour[] }) {
+  return (
+    <CardRail label={label}>
+      {tours.map((tour, index) => (
+        <div key={tour.id} className={CARD_WIDTH}>
+          <CatalogCard tour={tour} index={index} />
+        </div>
+      ))}
+    </CardRail>
+  );
+}
+
 function Feed() {
-  const [doc, setDoc] = useState<PersonalizationDoc | null | undefined>(undefined);
-  const [place, setPlace] = useState<Place | null>(null);
+  const [doc, setDoc] = useState<PersonalizationDoc | null>(null);
+  const [cities, setCities] = useState<ApiCity[] | null>(null);
+  /** `undefined` while resolving; `null` when nothing matched and the visitor needs to pick. */
+  const [city, setCity] = useState<ApiCity | null | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
-    fetchPersonalization()
-      .catch(() => null)
-      .then((d) => {
-        if (cancelled) return;
-        setDoc(d);
-        setPlace(resolvePlace(d));
-      });
+    (async () => {
+      const [personalization, list] = await Promise.all([
+        fetchPersonalization().catch(() => null),
+        loadActiveCities().catch(() => [] as ApiCity[]),
+      ]);
+      if (cancelled) return;
+      setDoc(personalization);
+      setCities(list);
+      const resolved = await resolveCity(personalization, list);
+      if (!cancelled) setCity((current) => (current === undefined ? resolved : current));
+    })();
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const changeCity = (name: string) => {
-    const city = cityLabel(name);
-    writeLastCity(city);
-    setPlace({ city, country: null });
+  const changeCity = (next: ApiCity | null) => {
+    if (!next) return;
+    writeLastCity(next.name, next.id);
+    setCity(next);
   };
 
-  const languages = doc ? narratorLanguages(doc) : [];
-  const { places: unlockedPlaces, tours: unlockedTours } = useLibrary();
-  const [catalog, setCatalog] = useState<Tour[] | null>(null);
-
-  // Live catalog, same source as the city page: image URLs are signed per request and expire,
-  // so they can't come from anything generated at build time (e.g. /search-catalog.json).
-  useEffect(() => {
-    let cancelled = false;
-    fetchPublicTours()
-      .then((all) => !cancelled && setCatalog(all))
-      .catch(() => !cancelled && setCatalog([]));
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const inCity = useMemo(
-    () => (place?.city && catalog ? cityCatalog(catalog, place.city, SHELF_SIZE) : NO_CITY_SHELVES),
-    [catalog, place?.city],
-  );
-
-  const exclude = useMemo(() => {
-    const ids = new Set<string>();
-    for (const u of [...(unlockedPlaces ?? []), ...(unlockedTours ?? [])]) ids.add(unlockTargetId(u));
-    for (const t of [...inCity.tours, ...inCity.stories]) ids.add(t.id);
-    return ids;
-  }, [unlockedPlaces, unlockedTours, inCity]);
+  const languages = narratorLanguages(doc);
 
   return (
     <div>
-      <Welcome place={place} onCityChange={changeCity} />
+      <Welcome city={city} cities={cities} onCityChange={changeCity} />
       <NextExperience />
       <YourCollection />
-      {place && (
+      {city === undefined ? (
+        <div className="section-tight border-t border-ink/5 bg-white">
+          <div className="container-site space-y-6">
+            <Skeleton className="h-8 w-64 rounded-xl" />
+            <RailSkeleton />
+          </div>
+        </div>
+      ) : city ? (
         <>
-          {place.city && <InCityShelves city={place.city} tours={inCity.tours} stories={inCity.stories} />}
-          <PickedForYou city={place.city} languages={languages} catalog={catalog} exclude={exclude} />
+          <BestPicks key={`picks-${city.id}`} city={city} languages={languages} />
+          <CityTours key={`tours-${city.id}`} city={city} languages={languages} />
+          <CityStories key={`stories-${city.id}`} city={city} languages={languages} />
           <Tracked shelf="experiences">
             <ExperiencesRail
               eyebrow="Book a local experience"
-              title={place.city ? `Experiences in ${place.city}` : "Experiences for you"}
-              query={place.city ? { city: place.city, page_size: SHELF_SIZE } : place.country ? { country: place.country, page_size: SHELF_SIZE } : { featured: true, page_size: SHELF_SIZE }}
-              fallbackQuery={{ featured: true, page_size: SHELF_SIZE }}
-              seeAllHref={place.city ? `/experiences/?city=${encodeURIComponent(place.city)}` : "/experiences/"}
+              title={`Experiences in ${city.name}`}
+              query={{ city: city.name, page_size: SHELF_SIZE }}
+              fallbackQuery={{ country: city.country_name, page_size: SHELF_SIZE }}
+              seeAllHref={`/experiences/?city=${encodeURIComponent(city.name)}`}
             />
           </Tracked>
         </>
-      )}
+      ) : null}
       <Saved />
     </div>
   );
 }
 
-function Welcome({ place, onCityChange }: { place: Place | null; onCityChange: (city: string) => void }) {
+function Welcome({
+  city,
+  cities,
+  onCityChange,
+}: {
+  city: ApiCity | null | undefined;
+  cities: ApiCity[] | null;
+  onCityChange: (city: ApiCity | null) => void;
+}) {
   const { user } = useAuth();
   const { places, tours } = useLibrary();
   const tracking = useShelfTracking("welcome");
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState("");
   const [locating, setLocating] = useState(false);
   const [handoffOpen, setHandoffOpen] = useState(false);
 
   const pending = [...(places ?? []), ...(tours ?? [])].filter((u) => u.activation_status === "pending" && !isExpired(u)).length;
 
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!draft.trim()) return;
-    onCityChange(draft);
-    setEditing(false);
-    setDraft("");
-  };
-
-  const useMyLocation = () => {
+  const useMyLocation = async () => {
     if (!("geolocation" in navigator)) {
       toast({ title: "Location isn't available in this browser." });
       return;
     }
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords }) => {
-        try {
-          const nearest = nearestCity(await fetchAllActiveCities(), coords.latitude, coords.longitude);
-          if (nearest) {
-            onCityChange(nearest.name);
-            setEditing(false);
-          } else {
-            toast({ title: "We couldn't find a Gamana city near you yet." });
-          }
-        } catch {
-          toast({ title: "Couldn't look up cities right now.", variant: "destructive" });
-        } finally {
-          setLocating(false);
-        }
-      },
-      () => {
-        setLocating(false);
-        toast({ title: "Location permission was denied." });
-      },
-      { maximumAge: 600_000, timeout: 10_000 },
-    );
+    try {
+      const { coords } = await currentPosition();
+      const nearest = nearestCity(cities ?? (await loadActiveCities()), coords.latitude, coords.longitude);
+      if (nearest) onCityChange(nearest);
+      else toast({ title: "We couldn't find a Gamana city near you yet." });
+    } catch (error) {
+      const denied = typeof GeolocationPositionError !== "undefined" && error instanceof GeolocationPositionError;
+      toast(denied ? { title: "Location permission was denied." } : { title: "Couldn't look up cities right now.", variant: "destructive" });
+    } finally {
+      setLocating(false);
+    }
   };
 
   return (
     <section ref={tracking.ref} onClickCapture={tracking.onClickCapture} className="section-tight bg-sand-50">
       <div className="container-site">
-        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="text-h2 text-ink">Welcome back{user?.firstName ? `, ${user.firstName}` : ""}</h1>
-            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-ink-soft">
-              {place?.city ? (
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="h-4 w-4 text-brand-700" aria-hidden /> Showing {place.city}
-                </span>
-              ) : place?.country ? (
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="h-4 w-4 text-brand-700" aria-hidden /> Showing {place.country}
-                </span>
-              ) : null}
-              <button
-                type="button"
-                onClick={() => setEditing((v) => !v)}
-                aria-expanded={editing}
-                className="focus-ring min-h-[44px] rounded px-1 font-semibold text-brand-700 hover:text-brand-800"
-              >
-                {place?.city ? "Change city" : "Pick a city"}
-              </button>
-            </div>
-          </div>
+        <h1 className="text-h2 text-ink">Welcome back{user?.firstName ? `, ${user.firstName}` : ""}</h1>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <label htmlFor="home-city" className="text-sm font-semibold text-ink-soft">
+            Showing
+          </label>
+          <CitySelect
+            id="home-city"
+            value={city ?? null}
+            onChange={onCityChange}
+            cities={cities ?? undefined}
+            placeholder={city === undefined ? "Finding your city…" : "Pick a city"}
+            className="w-full sm:w-64"
+          />
+          <Button type="button" variant="ghost" onClick={useMyLocation} disabled={locating} className="h-11 w-fit rounded-full px-4">
+            {locating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Navigation className="h-4 w-4" aria-hidden />}
+            Use my location
+          </Button>
         </div>
 
-        {editing && (
-          <form onSubmit={submit} className="mt-4 flex max-w-xl flex-col gap-3 sm:flex-row sm:items-center">
-            <label htmlFor="home-city" className="sr-only">
-              City
-            </label>
-            <CityAutocomplete id="home-city" placeholder="Search a city" value={draft} onChange={setDraft} className="h-11 flex-1 rounded-full" />
-            <div className="flex gap-2">
-              <Button type="submit" className="h-11 rounded-full px-5">
-                Show
-              </Button>
-              <Button type="button" variant="ghost" onClick={useMyLocation} disabled={locating} className="h-11 rounded-full px-4">
-                {locating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Navigation className="h-4 w-4" aria-hidden />}
-                Use my location
-              </Button>
+        {city === null && (
+          <div className="mt-6 flex items-center gap-3 rounded-3xl bg-white p-5 shadow-card" role="status">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand-50 text-brand-700">
+              <MapPin className="h-6 w-6" aria-hidden />
+            </span>
+            <div>
+              <p className="font-display font-bold text-ink">Pick your city</p>
+              <p className="text-sm text-ink-soft">We&apos;ll show audio tours, stories and experiences for it, just like in the Gamana app.</p>
             </div>
-          </form>
+          </div>
         )}
 
         {pending > 0 && (
@@ -388,12 +403,11 @@ function nearestCity(cities: ApiCity[], lat: number, lng: number): ApiCity | nul
   let best: ApiCity | null = null;
   let bestDist = Infinity;
   for (const c of cities) {
-    const clat = Number(c.latitude);
-    const clng = Number(c.longitude);
-    if (!Number.isFinite(clat) || !Number.isFinite(clng)) continue;
-    const dLat = ((clat - lat) * Math.PI) / 180;
-    const dLng = ((clng - lng) * Math.PI) / 180;
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat * Math.PI) / 180) * Math.cos((clat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+    const coords = cityCoordinates(c);
+    if (!coords) continue;
+    const dLat = ((coords.lat - lat) * Math.PI) / 180;
+    const dLng = ((coords.lng - lng) * Math.PI) / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat * Math.PI) / 180) * Math.cos((coords.lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
     const dist = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     if (dist < bestDist) {
       bestDist = dist;
@@ -401,6 +415,164 @@ function nearestCity(cities: ApiCity[], lat: number, lng: number): ApiCity | nul
     }
   }
   return bestDist <= 150 ? best : null;
+}
+
+type ShelfProps = { city: ApiCity; languages: string[] };
+
+/** Loads one v2 shelf; `null` while loading, `[]` when empty or failed (the shelf then hides). */
+function useCityShelf<T>(load: () => Promise<T[]>, deps: unknown[], label: string): T[] | null {
+  const [items, setItems] = useState<T[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setItems(null);
+    load()
+      .then((list) => !cancelled && setItems(list))
+      .catch((error) => {
+        if (cancelled) return;
+        console.warn(`Home shelf "${label}" failed`, error);
+        setItems([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+  return items;
+}
+
+function ShelfBody({ items, label }: { items: Tour[] | null; label: string }) {
+  if (items === null) return <RailSkeleton />;
+  return <CatalogRail label={label} tours={items} />;
+}
+
+/** `GET /api/v2/cities/best-picks` — the app's "Today's best picks" (one tour, one story, one experience). */
+function BestPicks({ city, languages }: ShelfProps) {
+  const langKey = languages.join(",");
+  type Pick = { key: string; node: ReactNode };
+  const picks = useCityShelf<Pick>(
+    async () => {
+      const data = await apiFetch("/cities/best-picks", {
+        version: "v2",
+        auth: "required",
+        query: { city: city.name, country: city.country_name, audio_language: languages },
+        schema: bestPicksSchema,
+      });
+      const out: Pick[] = [];
+      if (data.tour) {
+        const tour = tourCardToTour(data.tour, city.name);
+        out.push({ key: `tour-${tour.id}`, node: <CatalogCard tour={tour} eyebrow="Best audio tour" /> });
+      }
+      if (data.place) {
+        const story = placeCardToTour(data.place, city.name);
+        out.push({ key: `story-${story.id}`, node: <CatalogCard tour={story} eyebrow="Best audio story" /> });
+      }
+      const experience = experienceSummarySchema.safeParse(data.experience);
+      if (experience.success) out.push({ key: `exp-${experience.data.id}`, node: <ExperienceCard experience={experience.data} /> });
+      return out;
+    },
+    [city.id, langKey],
+    "best_picks",
+  );
+
+  if (picks !== null && picks.length === 0) return null;
+  return (
+    <Shelf shelf="best_picks" eyebrow="Today's best picks" title={`Best of ${city.name} today`} className="bg-sand-50">
+      {picks === null ? (
+        <RailSkeleton />
+      ) : (
+        <CardRail label={`Best of ${city.name} today`}>
+          {picks.map((p) => (
+            <div key={p.key} className={CARD_WIDTH}>
+              {p.node}
+            </div>
+          ))}
+        </CardRail>
+      )}
+    </Shelf>
+  );
+}
+
+/** `GET /api/v2/tours/recommended` over the city's ±1° box, as the app's Home does. */
+function CityTours({ city, languages }: ShelfProps) {
+  const coords = cityCoordinates(city);
+  const langKey = languages.join(",");
+  const tours = useCityShelf<Tour>(
+    async () => {
+      if (!coords) return [];
+      const cards = await apiFetch("/tours/recommended", {
+        version: "v2",
+        auth: "required",
+        query: {
+          min_lat: coords.lat - TOUR_BOX_DEGREES,
+          max_lat: coords.lat + TOUR_BOX_DEGREES,
+          min_lon: coords.lng - TOUR_BOX_DEGREES,
+          max_lon: coords.lng + TOUR_BOX_DEGREES,
+          limit: SHELF_SIZE * 2,
+          audio_language: languages,
+        },
+        schema: lenientList(tourCardSchema),
+      });
+      return cards.map((card) => tourCardToTour(card, city.name)).slice(0, SHELF_SIZE);
+    },
+    [city.id, langKey],
+    "city_tours",
+  );
+
+  if (tours !== null && tours.length === 0) return null;
+  const title = `Audio Tours in ${city.name}`;
+  return (
+    <Shelf
+      shelf="city_tours"
+      eyebrow="Audio tours"
+      title={title}
+      action={{ href: `/marketplace/tours/?city=${encodeURIComponent(city.id)}`, label: "See all" }}
+    >
+      <ShelfBody items={tours} label={title} />
+    </Shelf>
+  );
+}
+
+/** `GET /api/v2/places/nearby` around the city's coordinates, as the app's Home does. */
+function CityStories({ city, languages }: ShelfProps) {
+  const coords = cityCoordinates(city);
+  const langKey = languages.join(",");
+  const stories = useCityShelf<Tour>(
+    async () => {
+      if (!coords) return [];
+      const cards = await apiFetch("/places/nearby", {
+        version: "v2",
+        auth: "required",
+        query: {
+          latitude: coords.lat,
+          longitude: coords.lng,
+          radius: NEARBY_RADIUS_METERS,
+          skip: 0,
+          limit: SHELF_SIZE,
+          sort_by: "distance",
+          sort_order: "asc",
+          audio_language: languages,
+        },
+        schema: lenientList(placeCardSchema),
+      });
+      return cards.map((card) => placeCardToTour(card, city.name));
+    },
+    [city.id, langKey],
+    "city_stories",
+  );
+
+  if (stories !== null && stories.length === 0) return null;
+  const title = `Audio Stories in ${city.name}`;
+  return (
+    <Shelf
+      shelf="city_stories"
+      eyebrow="Audio stories"
+      title={title}
+      action={{ href: `/marketplace/story/?city=${encodeURIComponent(city.id)}`, label: "See all" }}
+      className="bg-sand-50"
+    >
+      <ShelfBody items={stories} label={title} />
+    </Shelf>
+  );
 }
 
 function NextExperience() {
@@ -456,112 +628,6 @@ function NextExperience() {
         </div>
       </Link>
     </Shelf>
-  );
-}
-
-function TourRail({ label, tours }: { label: string; tours: SearchTour[] }) {
-  return (
-    <CardRail label={label}>
-      {tours.map((t) => (
-        <div key={t.id} className={CARD_WIDTH}>
-          <TourCard
-            href={getTourHref(t)}
-            title={t.title}
-            location={t.location}
-            image={t.image || getDefaultTourImage()}
-            imageAlt={t.title}
-            badge={t.price > 0 ? `${t.price} coins` : "Free"}
-            cta={t.contentKind === "walk" ? "View walk" : "Listen"}
-          />
-        </div>
-      ))}
-    </CardRail>
-  );
-}
-
-const storylistItem = z.custom<ApiStorylist>((v) => typeof v === "object" && v !== null);
-
-function PickedForYou({
-  city,
-  languages,
-  catalog,
-  exclude,
-}: {
-  city: string | null;
-  languages: string[];
-  catalog: Tour[] | null;
-  exclude: Set<string>;
-}) {
-  const [recommended, setRecommended] = useState<Tour[] | null>(null);
-  const langKey = languages.join(",");
-
-  useEffect(() => {
-    let cancelled = false;
-    apiFetch("/tours/recommended", {
-      auth: "required",
-      version: "v2",
-      query: { audio_language: langKey || undefined, city: city ?? undefined, page_size: SHELF_SIZE * 2 },
-      schema: listOf(storylistItem),
-    })
-      .then((raw) => !cancelled && setRecommended(raw.map(mapStorylistToTour).filter((t): t is Tour => t !== null)))
-      .catch(() => !cancelled && setRecommended([]));
-    return () => {
-      cancelled = true;
-    };
-  }, [city, langKey]);
-
-  const source = recommended?.length ? recommended : (catalog ?? []).filter((t) => t.isRecommended);
-  const tours = source.filter((t) => !exclude.has(t.id)).slice(0, SHELF_SIZE);
-
-  if (recommended === null || !tours.length) return null;
-  return (
-    <Shelf shelf="picked_for_you" eyebrow="Audio tours & stories" title="Picked for you" action={{ href: "/marketplace/", label: "See all" }}>
-      <TourRail label="Picked for you" tours={tours} />
-    </Shelf>
-  );
-}
-
-function useCityHref(city: string): string {
-  const [href, setHref] = useState("/cities/");
-  useEffect(() => {
-    let cancelled = false;
-    fetchAllActiveCities()
-      .then((list) => {
-        const match = list.find((c) => c.name.toLowerCase() === city.toLowerCase());
-        if (!cancelled) setHref(match ? getCityHref(match) : "/cities/");
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [city]);
-  return href;
-}
-
-/** Same split as the city page: recommended audio tours, then audio stories. */
-function InCityShelves({ city, tours, stories }: { city: string; tours: Tour[]; stories: Tour[] }) {
-  const cityHref = useCityHref(city);
-  const explore = { href: cityHref, label: `Explore ${city}` };
-
-  return (
-    <>
-      {tours.length > 0 && (
-        <Shelf
-          shelf="city_tours"
-          eyebrow="Audio tours"
-          title={`Audio Tours in ${city}`}
-          action={stories.length ? undefined : explore}
-          className="bg-sand-50"
-        >
-          <TourRail label={`Audio Tours in ${city}`} tours={tours} />
-        </Shelf>
-      )}
-      {stories.length > 0 && (
-        <Shelf shelf="city_stories" eyebrow="Audio stories" title={`Audio stories in ${city}`} action={explore}>
-          <TourRail label={`Audio stories in ${city}`} tours={stories} />
-        </Shelf>
-      )}
-    </>
   );
 }
 

@@ -59,7 +59,11 @@ const primaryButton =
   "focus-ring group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-600 to-brand-800 px-8 py-4 text-base font-semibold text-white shadow-card transition-all duration-300 ease-spring hover:-translate-y-0.5 hover:shadow-lift active:scale-95";
 
 export default async function HomePage() {
-  const latestStories = await getLatestPostSummaries(3);
+  // The blog section is optional; a slow or unreachable blog API must not take the home page down.
+  const latestStories = await getLatestPostSummaries(3).catch((err: unknown) => {
+    console.warn("[home] latest blog posts unavailable:", err instanceof Error ? err.message : err);
+    return [];
+  });
 
   return (
     <>

@@ -49,7 +49,7 @@ export function TourRouteTimeline({ stops, loading = false }: TourRouteTimelineP
 
       <CardContent>
         {stops.length === 0 ? (
-          <p className="text-sm text-ink-muted">Stop details are not available for this walk yet.</p>
+          <p className="text-sm text-ink-muted">Stop details are not available for this tour yet.</p>
         ) : (
           <ol className="relative space-y-0">
             {stops.map((stop, index) => {

@@ -127,7 +127,7 @@ export function ExploreHeroSearch({
   containerClassName = "relative w-full max-w-xl mx-auto",
   urlQuery = "",
   size = "md",
-  placeholder = "Search stories, walks, or cities…",
+  placeholder = "Search stories, tours, or cities…",
 }: ExploreHeroSearchProps) {
   const router = useRouter();
   const pathname = usePathname();

@@ -4,7 +4,7 @@ import { Building2, CloudDownload, Footprints, Headphones, Mic } from "@/compone
 import { IconTile, type IconTone, type TileIcon } from "@/components/icons/IconTile";
 
 const TILES: { label: string; href: string; icon: TileIcon; tone: IconTone }[] = [
-  { label: "Audio Walks", href: "/marketplace/tours/", icon: Footprints, tone: "teal" },
+  { label: "Audio Tours", href: "/marketplace/tours/", icon: Footprints, tone: "teal" },
   { label: "Audio Stories", href: "/marketplace/story/", icon: Headphones, tone: "sunset" },
   { label: "Cities", href: "/cities/", icon: Building2, tone: "lilac" },
   { label: "Virtual Guides", href: "/features/virtual-travel-guides/", icon: Mic, tone: "mint" },

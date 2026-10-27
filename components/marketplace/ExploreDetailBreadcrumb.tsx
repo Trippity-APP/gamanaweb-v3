@@ -10,7 +10,7 @@ export function ExploreDetailBreadcrumb({ title }: { title?: string }) {
   const pathname = usePathname();
   const listHref = getExploreBackHref(pathname);
   const listLabel =
-    listHref === '/marketplace/tours' ? 'Audio Walks' : listHref === '/marketplace/story' ? 'Audio Stories' : null;
+    listHref === '/marketplace/tours' ? 'Audio Tours' : listHref === '/marketplace/story' ? 'Audio Stories' : null;
 
   const crumbs = [
     { label: 'Home', href: '/' },

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CardRail } from "@/components/site/CardRail";
 import { SectionHeader } from "@/components/site/SectionHeader";
-import { TourCard } from "@/components/site/TourCard";
+import { CatalogCard } from "@/components/marketplace/CatalogCard";
 import type { LinkedStory } from "@/components/experiences/ExperienceDetailClient";
 import { fetchPublicTourById, getDefaultTourImage, getTourHref } from "@/lib/marketplace-api";
 import { searchPublicStoriesByCity } from "@/lib/places-api";
@@ -59,17 +59,9 @@ export function StoriesNearbyRail({ city, stories }: { city: string; stories: To
           className="mb-6 sm:mb-8"
         />
         <CardRail label={title}>
-          {stories.slice(0, 12).map((tour) => (
+          {stories.slice(0, 12).map((tour, index) => (
             <div key={tour.id} className="w-[280px] sm:w-[320px]">
-              <TourCard
-                href={getTourHref(tour)}
-                title={tour.title}
-                location={tour.location}
-                image={tour.image || getDefaultTourImage()}
-                imageAlt={tour.title}
-                badge={tour.price > 0 ? `${tour.price} coins` : "Free"}
-                cta="Listen"
-              />
+              <CatalogCard tour={tour} kind="story" index={index} />
             </div>
           ))}
         </CardRail>

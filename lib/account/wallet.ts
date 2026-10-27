@@ -66,7 +66,7 @@ const RAW_ID = /\b[a-z0-9]+(?:_[a-z0-9]+)+\b/i;
 function readableDescription(text: string | null | undefined, kind: PassbookKind): string {
   const trimmed = text?.trim() ?? "";
   if (IAP_PRODUCT.test(trimmed)) return "Coins purchased in the app";
-  if (/\bstorylist_unlock\b/i.test(trimmed)) return "Unlocked an audio walk";
+  if (/\bstorylist_unlock\b/i.test(trimmed)) return "Unlocked an audio tour";
   if (/\b(place|story)_unlock\b/i.test(trimmed)) return "Unlocked an audio story";
   if (!trimmed || RAW_ID.test(trimmed)) return defaultDescription(kind);
   return trimmed;

@@ -118,7 +118,7 @@ const CITY_ROW_LIMIT = 3;
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 function tourSubtitle(tour: SearchTour): string {
-  const kind = (tour.contentKind ?? "walk") === "story" ? "Audio story" : "Audio walk";
+  const kind = (tour.contentKind ?? "walk") === "story" ? "Audio story" : "Audio tour";
   const extra = (tour.contentKind ?? "walk") === "story" ? tour.duration : tour.price > 0 ? `${tour.price} coins` : "Free";
   return [kind, tour.location, extra].filter(Boolean).join(" · ");
 }
@@ -154,12 +154,12 @@ export function buildSearchRows<T extends SearchTour>(
       const count = inCity.filter((tour) => (tour.contentKind ?? "walk") === contentKind).length;
       if (!count) continue;
       const walk = contentKind === "walk";
-      const noun = walk ? (count === 1 ? "audio walk" : "audio walks") : count === 1 ? "audio story" : "audio stories";
+      const noun = walk ? (count === 1 ? "audio tour" : "audio tours") : count === 1 ? "audio story" : "audio stories";
       rows.push({
         key: `collection-${contentKind}-${city.id}`,
         kind: "collection",
         contentKind,
-        title: `${walk ? "Audio walks" : "Audio stories"} in ${city.name}`,
+        title: `${walk ? "Audio tours" : "Audio stories"} in ${city.name}`,
         subtitle: `${count} ${noun} · ${city.name}, ${city.country_name}`,
         select: {
           type: "href",
