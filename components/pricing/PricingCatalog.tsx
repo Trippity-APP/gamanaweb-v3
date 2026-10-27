@@ -2,7 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Building2, Check, Loader2, Lock, Smartphone, Sparkles, Wallet } from "@/components/icons";
+import {
+  AlertCircle,
+  ArrowRight,
+  Building2,
+  Check,
+  CheckCircle2,
+  Clock,
+  Loader2,
+  Lock,
+  RefreshCw,
+  Smartphone,
+  Sparkles,
+  Wallet,
+  X,
+} from "@/components/icons";
 import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
 import { AppHandoffSheet } from "@/components/handoff/AppHandoffSheet";
 import { Reveal } from "@/components/motion/Reveal";
@@ -26,9 +40,97 @@ function packPriceLabel(pack: WebPack, currency: PricingCurrency): string {
 function packBullets(pack: WebPack): string[] {
   const bullets: string[] = [];
   if (pack.poiRange) bullets.push(`Unlock ${pack.poiRange} stories`);
-  if (pack.tourRange) bullets.push(`Or ${pack.tourRange} audio walks`);
+  if (pack.tourRange) bullets.push(`Or ${pack.tourRange} audio tours`);
   bullets.push("Unused coins stay in your wallet");
   return bullets;
+}
+
+type PayResult =
+  | { kind: "success"; coins: number; balance: number | null }
+  | { kind: "pending" }
+  | { kind: "cancelled"; pack: WebPack }
+  | { kind: "failed"; message: string; pack: WebPack };
+
+function PayResultCard({
+  result,
+  balance,
+  onRetry,
+  onDismiss,
+}: {
+  result: PayResult;
+  balance: number | null;
+  onRetry: (pack: WebPack) => void;
+  onDismiss: () => void;
+}) {
+  const tone =
+    result.kind === "success"
+      ? { box: "border-brand-100 bg-brand-50", icon: "text-brand-700", Icon: CheckCircle2 }
+      : result.kind === "failed"
+        ? { box: "border-sunset-100 bg-sunset-100/60", icon: "text-sunset-700", Icon: AlertCircle }
+        : { box: "border-ink/5 bg-sand-100", icon: "text-ink-soft", Icon: Clock };
+  const shownBalance = result.kind === "success" ? (result.balance ?? balance) : null;
+
+  let title: string;
+  let body: string;
+  switch (result.kind) {
+    case "success":
+      title = `${result.coins} coins added to your wallet`;
+      body =
+        shownBalance != null
+          ? `Your balance is now ${shownBalance.toLocaleString("en-US")} coins. They're in the Gamana app too.`
+          : "They're in the Gamana app too.";
+      break;
+    case "pending":
+      title = "Payment received";
+      body = "Your coins will appear in your wallet within a few minutes. If they don't, write to support@gamana.app.";
+      break;
+    case "cancelled":
+      title = "Payment cancelled";
+      body = "You weren't charged. Pick a pack whenever you're ready.";
+      break;
+    case "failed":
+      title = "Payment didn't go through";
+      body = result.message;
+      break;
+  }
+
+  return (
+    <div className={cn("flex items-start gap-3 rounded-3xl border px-5 py-4 shadow-card", tone.box)}>
+      <tone.Icon className={cn("mt-0.5 h-5 w-5 shrink-0", tone.icon)} aria-hidden />
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold text-ink">{title}</p>
+        <p className="mt-1 text-sm text-ink-soft">{body}</p>
+        {result.kind === "success" && (
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm font-semibold">
+            <Link href="/account/wallet/" className="focus-ring inline-flex min-h-11 items-center rounded text-brand-700 hover:text-brand-800">
+              View wallet
+            </Link>
+            <Link href="/marketplace/" className="focus-ring inline-flex min-h-11 items-center rounded text-brand-700 hover:text-brand-800">
+              Explore stories and tours
+            </Link>
+          </div>
+        )}
+        {result.kind === "failed" && (
+          <button
+            type="button"
+            onClick={() => onRetry(result.pack)}
+            className="focus-ring mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-ink px-5 text-sm font-semibold text-white"
+          >
+            <RefreshCw className="h-4 w-4" aria-hidden />
+            Try again
+          </button>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={onDismiss}
+        aria-label="Dismiss"
+        className="focus-ring -mr-2 -mt-2 grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-soft hover:text-ink"
+      >
+        <X className="h-4 w-4" aria-hidden />
+      </button>
+    </div>
+  );
 }
 
 export function PricingCatalog() {
@@ -39,6 +141,8 @@ export function PricingCatalog() {
   const [buying, setBuying] = useState<WebPack | null>(null);
   const [paying, setPaying] = useState<string | null>(null);
   const [payStatus, setPayStatus] = useState("");
+  const [result, setResult] = useState<PayResult | null>(null);
+  const [queued, setQueued] = useState<WebPack | null>(null);
   const userRef = useRef(user);
   userRef.current = user;
 
@@ -65,6 +169,7 @@ export function PricingCatalog() {
   const checkout = async (pack: WebPack) => {
     const coins = pack.coins + pack.bonusCoins;
     setPaying(pack.id);
+    setResult(null);
     setPayStatus(`Opening secure payment for ${coins} coins…`);
     let paid = false;
     try {
@@ -77,40 +182,52 @@ export function PricingCatalog() {
       });
       if (outcome.kind === "dismissed") {
         track("pricing_checkout_dismissed", { pack: pack.id });
-        setPayStatus("Payment cancelled.");
+        setPayStatus("");
+        setResult({ kind: "cancelled", pack });
         return;
       }
       if (outcome.kind === "failed") {
         track("pricing_purchase_failed", { pack: pack.id, reason: outcome.message });
-        setPayStatus(outcome.message);
-        toast({ title: "Payment didn't go through", description: outcome.message, variant: "destructive" });
+        setPayStatus("");
+        setResult({ kind: "failed", message: outcome.message, pack });
         return;
       }
       paid = true;
       setPayStatus("Payment received. Adding your coins…");
-      const result = await verifyPackPayment(outcome.result);
-      await refreshBalance();
-      track("pricing_purchase_success", { pack: pack.id, coins: result.coins_credited, value: pack.amountInr, currency: "INR" });
-      const done = `${result.coins_credited} coins added to your wallet. They're in the Gamana app too.`;
-      setPayStatus(done);
-      toast({ title: "Coins added", description: done });
+      const verified = await verifyPackPayment(outcome.result);
+      track("pricing_purchase_success", { pack: pack.id, coins: verified.coins_credited, value: pack.amountInr, currency: "INR" });
+      setPayStatus("");
+      setResult({
+        kind: "success",
+        coins: Math.floor(verified.coins_credited),
+        balance: verified.new_balance != null ? Math.floor(verified.new_balance) : null,
+      });
+      void refreshBalance();
+      toast({ title: "Coins added", description: `${Math.floor(verified.coins_credited)} coins are in your wallet.` });
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Something went wrong. Please try again.";
       track("pricing_purchase_failed", { pack: pack.id, reason: paid ? "verify" : "order" });
+      setPayStatus("");
       if (paid) {
-        const pending =
-          "Payment received. Your coins will appear in your wallet within a few minutes. If they don't, write to support@gamana.app.";
-        setPayStatus(pending);
-        toast({ title: "Payment received", description: pending });
+        setResult({ kind: "pending" });
         window.setTimeout(() => void refreshBalance(), 15000);
       } else {
-        setPayStatus(message);
-        toast({ title: "Couldn't start the payment", description: message, variant: "destructive" });
+        setResult({ kind: "failed", message, pack });
       }
     } finally {
       setPaying(null);
     }
   };
+  const checkoutRef = useRef(checkout);
+  checkoutRef.current = checkout;
+
+  // A returning user's session may still be restoring; wait for it instead of showing the login sheet.
+  useEffect(() => {
+    if (status === "loading" || !queued) return;
+    const pack = queued;
+    setQueued(null);
+    requireAuth(() => void checkoutRef.current(pack), "to buy coins");
+  }, [status, queued, requireAuth]);
 
   const buy = (pack: WebPack) => {
     track("pricing_buy_click", { pack: pack.id, currency });
@@ -118,7 +235,11 @@ export function PricingCatalog() {
       setBuying(pack);
       return;
     }
-    if (paying) return;
+    if (paying || queued) return;
+    if (status === "loading") {
+      setQueued(pack);
+      return;
+    }
     requireAuth(() => void checkout(pack), "to buy coins");
   };
 
@@ -184,6 +305,20 @@ export function PricingCatalog() {
           {payStatus}
         </p>
 
+        <div role="status" aria-live="polite" className={cn(result && "mb-8")}>
+          {result && (
+            <PayResultCard
+              result={result}
+              balance={balance}
+              onRetry={(pack) => {
+                setResult(null);
+                buy(pack);
+              }}
+              onDismiss={() => setResult(null)}
+            />
+          )}
+        </div>
+
         {packs.length === 0 ? (
           <p className="rounded-3xl bg-white p-8 text-center text-ink-soft shadow-card">
             Coin packs are available in the Gamana app.
@@ -194,7 +329,8 @@ export function PricingCatalog() {
               const price = packPriceLabel(pack, currency);
               const chargeLabel = webCoinCheckoutEnabled ? formatMoney(pack.amountInr, "INR") : price;
               const featured = pack.highlighted;
-              const isPaying = paying === pack.id;
+              const isPaying = paying === pack.id || queued?.id === pack.id;
+              const chargedInInr = webCoinCheckoutEnabled && currency !== "INR";
 
               return (
                 <Reveal
@@ -248,6 +384,11 @@ export function PricingCatalog() {
                       <p key={currency} className="mt-3 animate-fade-in font-display text-3xl font-bold">
                         {price}
                       </p>
+                      {chargedInInr && (
+                        <p className={cn("mt-1 text-xs", featured ? "text-white/75" : "text-ink-muted")}>
+                          Charged in INR: {formatMoney(pack.amountInr, "INR")}
+                        </p>
+                      )}
                       {pack.description && (
                         <p className={cn("mt-3 text-sm leading-relaxed", featured ? "text-white/80" : "text-ink-soft")}>
                           {pack.description}
@@ -274,7 +415,7 @@ export function PricingCatalog() {
                       <button
                         type="button"
                         onClick={() => buy(pack)}
-                        disabled={paying !== null}
+                        disabled={paying !== null || queued !== null}
                         aria-busy={isPaying || undefined}
                         className={cn(
                           "focus-ring mt-7 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-transform duration-300 ease-spring hover:-translate-y-0.5 active:scale-95 disabled:pointer-events-none disabled:opacity-70",
