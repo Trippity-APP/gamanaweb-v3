@@ -115,7 +115,7 @@ export default function AccountOverviewPage() {
             <Library className="h-8 w-8 text-brand-700" aria-hidden />
             {unlockCount === null ? <Skeleton className="h-9 w-12 rounded-lg" /> : unlockCount}
           </p>
-          <p className="mt-2 text-sm text-ink-soft">Stories and audio walks you&apos;ve unlocked.</p>
+          <p className="mt-2 text-sm text-ink-soft">Stories and audio tours you&apos;ve unlocked.</p>
           <Link href="/account/collection/" className={CARD_LINK}>
             Open My Collection <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>

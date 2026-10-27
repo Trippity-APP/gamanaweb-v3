@@ -43,7 +43,7 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
   const needsFetch = shouldClientFetchDetail(paramTourId, Boolean(initialWalk), TOUR_PATH);
   const [loading, setLoading] = useState(needsFetch);
   const [error, setError] = useState<string | null>(
-    initialWalk || needsFetch ? null : 'This walk is not available.',
+    initialWalk || needsFetch ? null : 'This tour is not available.',
   );
 
   const loadWalkById = async (id: string) => {
@@ -53,13 +53,13 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
       const detail = await fetchPublicWalkDetailById(id);
       if (!detail) {
         setWalk(null);
-        setError('This walk is not available.');
+        setError('This tour is not available.');
         return;
       }
       setWalk(detail);
     } catch {
       setWalk(null);
-      setError("We couldn't load this walk right now.");
+      setError("We couldn't load this tour right now.");
     } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
     const resolved = resolveTourId(paramTourId);
     if (isStaticSpaParam(resolved)) {
       setLoading(false);
-      setError('This walk is not available.');
+      setError('This tour is not available.');
       return;
     }
     void loadWalkById(resolved);
@@ -118,7 +118,7 @@ export function AudioWalkDetail({ tourId: paramTourId, walk: initialWalk }: Audi
   if (error || !walk) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
-        <p className="text-ink-muted">{error ?? 'Walk not found.'}</p>
+        <p className="text-ink-muted">{error ?? 'Tour not found.'}</p>
         <div className="mt-4 flex items-center justify-center gap-3">
           <Button variant="outline" onClick={retry}>
             Try again

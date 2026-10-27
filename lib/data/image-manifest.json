@@ -182,7 +182,7 @@
     }
   },
   "dest-mumbai": {
-    "alt": "Gateway of India under a pink evening sky in Mumbai, on a self-guided audio walk",
+    "alt": "Gateway of India under a pink evening sky in Mumbai, on a self-guided audio tour",
     "title": "Mumbai Gateway of India audio tour",
     "tile": {
       "src": "/images/destinations/mumbai-gateway-of-india-audio-tour-tile-1200.jpg",
@@ -209,7 +209,7 @@
   },
   "dest-new-orleans": {
     "alt": "Colourful balconies on a French Quarter street in New Orleans",
-    "title": "New Orleans audio walk",
+    "title": "New Orleans audio tour",
     "tile": {
       "src": "/images/destinations/new-orleans-french-quarter-audio-tour-tile-1200.jpg",
       "width": 1200,
@@ -974,7 +974,7 @@
     }
   },
   "slide-rome": {
-    "alt": "The Colosseum in Rome at golden hour, a stop on the Colosseum and Roman Forum audio walk",
+    "alt": "The Colosseum in Rome at golden hour, a stop on the Colosseum and Roman Forum audio tour",
     "title": "Rome Colosseum audio tour",
     "hero": {
       "src": "/images/heroes/rome-colosseum-golden-hour-audio-tour-2400.jpg",

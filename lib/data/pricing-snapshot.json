@@ -1,5 +1,5 @@
 {
-  "source": "https://api-beta.gamana.app/api/v1",
+  "source": "https://apidev.gamana.app/api/v1",
   "packages": [
     {
       "product_id": "gamana_two_coin",

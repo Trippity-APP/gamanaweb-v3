@@ -132,3 +132,23 @@ export async function fetchAllActiveCities(): Promise<ApiCity[]> {
 
     return cities;
 }
+
+let activeCitiesPromise: Promise<ApiCity[]> | null = null;
+
+/** Browser-side memo of the active city list, shared by every city picker on the page. */
+export function loadActiveCities(): Promise<ApiCity[]> {
+    if (!activeCitiesPromise) {
+        activeCitiesPromise = fetchAllActiveCities().catch((error) => {
+            activeCitiesPromise = null;
+            throw error;
+        });
+    }
+    return activeCitiesPromise;
+}
+
+export function cityCoordinates(city: Pick<ApiCity, "latitude" | "longitude">): { lat: number; lng: number } | null {
+    const lat = Number(city.latitude);
+    const lng = Number(city.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || (lat === 0 && lng === 0)) return null;
+    return { lat, lng };
+}

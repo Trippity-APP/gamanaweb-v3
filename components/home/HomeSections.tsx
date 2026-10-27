@@ -90,7 +90,7 @@ export const FEATURED_TOURS = [
     image: "/varanasi ghats golden hour river boats temple spires panoramic view.jpg",
     imageAlt: "Varanasi Ghats Audio Tour with Expert Tourist Guide",
     imageTitle: "Varanasi Ghats Audio Tour – Tourist Guide Experience",
-    badge: "Audio walk",
+    badge: "Audio tour",
   },
   {
     href: "/cities/131679/",

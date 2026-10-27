@@ -21,7 +21,7 @@ type Tab = "stories" | "walks" | "tours" | "bookings";
 
 const TABS: { value: Tab; label: string }[] = [
   { value: "stories", label: "Stories" },
-  { value: "walks", label: "Audio Walks" },
+  { value: "walks", label: "Audio Tours" },
   { value: "tours", label: "Tours" },
   { value: "bookings", label: "Bookings" },
 ];
@@ -119,16 +119,16 @@ function UnlockList({ kind }: { kind: UnlockKind }) {
     return (
       <EmptyState
         icon={kind === "place" ? Headphones : Route}
-        title={kind === "place" ? "No stories yet" : "No audio walks yet"}
+        title={kind === "place" ? "No stories yet" : "No audio tours yet"}
         hint={
           kind === "place"
             ? "Unlock an audio story with your coins and it shows up here and in your Gamana app."
-            : "Unlock an audio walk and it shows up here and in your Gamana app."
+            : "Unlock an audio tour and it shows up here and in your Gamana app."
         }
         action={
           <Button asChild className="h-11 rounded-full px-6">
             <Link href={kind === "place" ? "/marketplace/story/" : "/marketplace/tours/"}>
-              {kind === "place" ? "Browse audio stories" : "Browse audio walks"}
+              {kind === "place" ? "Browse audio stories" : "Browse audio tours"}
             </Link>
           </Button>
         }

@@ -21,7 +21,7 @@ const steps = [
   },
   {
     title: "Unlock as you walk",
-    text: "Use coins on premium stories and walks. Free stories stay free.",
+    text: "Use coins on premium stories and tours. Free stories stay free.",
   },
 ];
 
@@ -29,7 +29,7 @@ const faqs: FaqItem[] = [
   {
     question: "Where do my coins appear?",
     answer:
-      "After a successful purchase, coins are credited to your Gamana account. Use them in the app or on the website to unlock premium stories and walks.",
+      "After a successful purchase, coins are credited to your Gamana account. Use them in the app or on the website to unlock premium stories and tours.",
   },
   {
     question: "Can I get a refund?",
@@ -45,9 +45,9 @@ const faqs: FaqItem[] = [
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.gamana.app"),
-  title: "Gamana Coins Pricing | Unlock Audio Stories & Walks",
+  title: "Gamana Coins Pricing | Unlock Audio Stories & Tours",
   description:
-    "Buy Gamana Coins in INR or USD: 2, 10, 15, or 25 coins. Unlock premium audio stories and walks. Larger volumes are Enterprise — contact us.",
+    "Buy Gamana Coins in INR or USD: 2, 10, 15, or 25 coins. Unlock premium audio stories and tours. Larger volumes are Enterprise — contact us.",
   alternates: {
     canonical: "https://www.gamana.app/pricing/",
   },
@@ -103,7 +103,7 @@ export default function PricingPage() {
           eyebrow="Gamana Coins"
           breadcrumbs={[{ label: "Pricing", href: "/pricing/" }]}
           heading="Pay once. Hear the city as you walk."
-          subtitle="Coins unlock premium audio stories and walks. Free stories stay free. Prices show in INR if you are in India, USD everywhere else — switch anytime."
+          subtitle="Coins unlock premium audio stories and tours. Free stories stay free. Prices show in INR if you are in India, USD everywhere else — switch anytime."
         />
 
         <PricingCatalog />

@@ -29,7 +29,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
     faqs: [
       {
         question: "How does the pricing work?",
-        answer: "You can access a limited selection of content for free. To unlock premium stories and walks, buy a one-time coin pack. There's no subscription, and unused coins stay in your wallet.",
+        answer: "You can access a limited selection of content for free. To unlock premium stories and tours, buy a one-time coin pack. There's no subscription, and unused coins stay in your wallet.",
       },
       {
         question: "What currencies can I pay with?",

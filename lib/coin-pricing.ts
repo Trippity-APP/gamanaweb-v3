@@ -19,7 +19,7 @@ export const coinPacks: CoinPack[] = [
     coins: 2,
     priceInr: 200,
     priceUsd: 3,
-    blurb: "Try a couple of premium stories on your next walk.",
+    blurb: "Try a couple of premium stories on your next tour.",
     bullets: ["About 2 premium audio stories", "Keep unused coins in your wallet", "Free stories stay free"],
   },
   {
@@ -27,8 +27,8 @@ export const coinPacks: CoinPack[] = [
     coins: 10,
     priceInr: 1000,
     priceUsd: 12,
-    blurb: "A typical audio walk, or several stories in one city.",
-    bullets: ["A typical audio walk", "Or several premium stories", "Best value for a city day"],
+    blurb: "A typical audio tour, or several stories in one city.",
+    bullets: ["A typical audio tour", "Or several premium stories", "Best value for a city day"],
     popular: true,
   },
   {
@@ -36,8 +36,8 @@ export const coinPacks: CoinPack[] = [
     coins: 15,
     priceInr: 1500,
     priceUsd: 18,
-    blurb: "Stories and walks for a longer city stay.",
-    bullets: ["A walk plus extra stories", "Enough for a 2–3 day stay", "One-time pack, not a plan"],
+    blurb: "Stories and tours for a longer city stay.",
+    bullets: ["A tour plus extra stories", "Enough for a 2–3 day stay", "One-time pack, not a plan"],
   },
   {
     id: "coins-25",
@@ -45,7 +45,7 @@ export const coinPacks: CoinPack[] = [
     priceInr: 2500,
     priceUsd: 30,
     blurb: "The largest self-serve pack for a full trip.",
-    bullets: ["Multiple walks and stories", "Built for a full trip", "Share one wallet across the journey"],
+    bullets: ["Multiple tours and stories", "Built for a full trip", "Share one wallet across the journey"],
   },
 ];
 

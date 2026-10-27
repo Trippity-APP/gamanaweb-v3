@@ -124,7 +124,7 @@ export default function WalletPage() {
           </Button>
         </div>
         <p className="mt-6 rounded-2xl bg-brand-50 px-4 py-3 text-sm text-brand-800">
-          Coins are shared with your Gamana app. Spend them on premium stories and audio walks.
+          Coins are shared with your Gamana app. Spend them on premium stories and audio tours.
         </p>
       </section>
 

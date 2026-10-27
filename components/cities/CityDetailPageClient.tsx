@@ -100,7 +100,7 @@ export function CityDetailPageClient({
         })();
     }, [paramCityId, initialCity]);
 
-    useEffect(() => writeLastCity(city?.name), [city?.name]);
+    useEffect(() => writeLastCity(city?.name, city?.id), [city?.name, city?.id]);
 
     if (loading) {
         return (

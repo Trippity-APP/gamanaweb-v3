@@ -74,7 +74,7 @@ test("unlock spends name what was unlocked instead of the backend reason code", 
   assert.deepEqual(
     page.rows.map((r) => [r.kind, r.description, r.amount]),
     [
-      ["unlock", "Unlocked an audio walk", -2],
+      ["unlock", "Unlocked an audio tour", -2],
       ["unlock", "Unlocked an audio story", -1],
       ["unlock", "Unlocked content", -1],
     ],

@@ -66,7 +66,7 @@ export function AudioWalkHero({ walk, unlockState, daysLeft }: AudioWalkHeroProp
       <div className="mt-6 space-y-4 sm:mt-8">
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-800">
-            Audio Walk
+            Audio Tour
           </span>
           <UnlockBadge unlockState={unlockState} price={walk.price} daysLeft={daysLeft} />
         </div>

@@ -6,6 +6,7 @@ import {
   buildPlaceAudioDurationLookup,
   fetchPublicStoriesCatalog,
   fetchPublicStoryDetailByPlaceId,
+  geoFromLngLat,
   searchPublicStoriesByCity,
 } from "@/lib/places-api";
 
@@ -63,6 +64,8 @@ export type ApiStorylist = {
   starting_points?: ApiStartingPoint[] | null;
   type?: string | null;
   is_recommended?: boolean | string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
 type ApiListResponse = {
@@ -328,7 +331,7 @@ function mapIsRecommended(value: ApiStorylist['is_recommended']): boolean {
   return false;
 }
 
-/** Audio Walks catalog: only items flagged recommended in the CMS/database. */
+/** Audio Tours catalog: only items flagged recommended in the CMS/database. */
 export function isWalkCatalogVisible(tour: Pick<Tour, 'contentKind' | 'isRecommended'>): boolean {
   if ((tour.contentKind ?? 'walk') !== 'walk') return true;
   return tour.isRecommended === true;
@@ -349,18 +352,16 @@ export function mapStorylistToTour(storylist: ApiStorylist): Tour | null {
   const placeRating = storylist.starting_points?.[0]?.place?.rating;
   const placeReviews = storylist.starting_points?.[0]?.place?.reviews_count;
   const contentKind = mapContentKind(storylist);
+  const durationMinutes =
+    contentKind === "walk" ? resolveWalkAudioDurationMinutes(storylist) : storylist.estimated_duration ?? undefined;
+  const firstStop = sortedStartingPoints(storylist)[0];
 
   return {
     id,
     title: storylist.title,
     description: storylist.description?.trim() || "Explore this curated audio tour.",
     location: country && city !== country ? `${city}, ${country}` : city,
-    duration: formatDuration(
-      contentKind === "walk"
-        ? resolveWalkAudioDurationMinutes(storylist)
-        : storylist.estimated_duration,
-      storylist.stops_count,
-    ),
+    duration: formatDuration(durationMinutes, storylist.stops_count),
     price: coinsPrice,
     rating: placeRating && placeRating > 0 ? placeRating : 4.7,
     reviews: placeReviews && placeReviews > 0 ? placeReviews : storylist.purchase_count ?? 0,
@@ -376,6 +377,10 @@ export function mapStorylistToTour(storylist: ApiStorylist): Tour | null {
     searchTerms: buildSearchTerms(storylist, city, country),
     contentKind,
     isRecommended: mapIsRecommended(storylist.is_recommended),
+    geo: geoFromLngLat(firstStop?.coordinates),
+    durationMinutes: durationMinutes && durationMinutes > 0 ? durationMinutes : undefined,
+    stopsCount: storylist.stops_count ?? (storylist.starting_points?.length || undefined),
+    createdAt: storylist.created_at ?? storylist.updated_at ?? undefined,
   };
 }
 
@@ -616,8 +621,16 @@ export function cityCatalog<T extends Pick<Tour, 'searchTerms' | 'location' | 't
   };
 }
 
+/** `?city=<id>` selects a city from /locations/cities; any other value is a legacy free-text search. */
+export function getExploreCityId(params: { get(name: string): string | null }): string | null {
+  const raw = params.get("city")?.trim() ?? "";
+  return /^(\d+|[a-f0-9]{24})$/i.test(raw) ? raw : null;
+}
+
 export function getExploreSearchQuery(params: URLSearchParams | { get(name: string): string | null }): string {
-  return (params.get("q") ?? params.get("city") ?? "").trim();
+  const q = params.get("q");
+  if (q !== null) return q.trim();
+  return getExploreCityId(params) ? "" : (params.get("city") ?? "").trim();
 }
 
 export function tourMatchesSearch(tour: SearchTour, query: string): boolean {
@@ -797,12 +810,22 @@ const LIVE_SEARCH_MIN_LENGTH = 3;
 export async function searchLiveCatalog(query: string, signal?: AbortSignal): Promise<Tour[]> {
   const q = query.trim();
   if (q.length < LIVE_SEARCH_MIN_LENGTH) return [];
+  return liveCatalogLookup(q, true, signal);
+}
 
+/** Every story and recommended tour the database has for one city (any country). Never throws. */
+export async function fetchCityCatalog(city: string, signal?: AbortSignal): Promise<Tour[]> {
+  const name = city.trim();
+  if (!name) return [];
+  return liveCatalogLookup(name, false, signal);
+}
+
+async function liveCatalogLookup(q: string, includeTitleSearch: boolean, signal?: AbortSignal): Promise<Tour[]> {
   const settle = <T,>(p: Promise<T[]>) => p.catch(() => [] as T[]);
   const cities = cityQueryVariants(q).slice(0, 3);
   const [byTitle, byCity, storyLists] = await Promise.all([
-    settle(searchStorylists({ search: q }, signal)),
-    Promise.all(cities.map((city) => settle(searchStorylists({ city }, signal)))),
+    includeTitleSearch ? settle(searchStorylists({ search: q }, signal)) : Promise.resolve([] as ApiStorylist[]),
+    Promise.all(cities.map((city) => settle(searchStorylists({ city, limit: "100" }, signal)))),
     Promise.all(cities.map((city) => settle(searchPublicStoriesByCity(city, signal)))),
   ]);
   const stories = storyLists.flat();

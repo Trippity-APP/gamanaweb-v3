@@ -34,10 +34,19 @@ export interface Tour {
   searchTerms?: string[];
   /** URL slug derived from tour title — populated by lib/marketplace-api.ts */
   slug?: string;
-  /** Audio Stories (single-stop) vs Audio Walks (multi-stop) — from API storylist type/stops */
+  /** Audio Stories (single-stop) vs Audio Tours (multi-stop) — from API storylist type/stops */
   contentKind?: 'story' | 'walk';
   /** Curated for catalog — from API is_recommended */
   isRecommended?: boolean;
+  /** Story place or a tour's first stop; drives radius filters and distance sorts. */
+  geo?: { lat: number; lng: number };
+  durationMinutes?: number;
+  stopsCount?: number;
+  /** ISO timestamp for "Newest" sorts. */
+  createdAt?: string;
+  isFeatured?: boolean;
+  isVerified?: boolean;
+  isLegend?: boolean;
 }
 
 /** Fields the hero search reads; keeps the serialized home-page catalog small. */

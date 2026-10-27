@@ -44,7 +44,7 @@ export async function generateMetadata({
   const { id } = await params;
   if (isStaticSpaParam(id)) {
     return {
-      title: 'Audio Walk | Gamana',
+      title: 'Audio Tour | Gamana',
       description: 'Explore this audio walking tour with Gamana.',
     };
   }
@@ -116,7 +116,7 @@ export default async function MarketplaceTourPage({
             data={breadcrumbJsonLd([
               { name: 'Home', path: '/' },
               { name: 'Explore', path: '/marketplace/' },
-              { name: 'Audio Walks', path: '/marketplace/tours/' },
+              { name: 'Audio Tours', path: '/marketplace/tours/' },
               { name: tour.title, path: `/marketplace/tours/${id}/` },
             ])}
           />
@@ -136,7 +136,7 @@ export default async function MarketplaceTourPage({
         )}
         {isWalk && <RelatedRail title={city ? `More to explore in ${city}` : 'More to explore'} tours={related} />}
         <DownloadBand
-          title="Take this walk with Gamana"
+          title="Take this tour with Gamana"
           lead="Stories play automatically as you reach each stop, even offline."
           source="audio_walk_detail_band"
           keyword="audio tour app"
