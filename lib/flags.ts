@@ -18,3 +18,11 @@ export const apiMocksEnabled = webAccountsEnabled && process.env.NEXT_PUBLIC_API
  * off to the app.
  */
 export const webCoinCheckoutEnabled = webAccountsEnabled && process.env.NEXT_PUBLIC_WEB_COIN_CHECKOUT === "1";
+
+/**
+ * With the USD toggle selected, pay through Stripe Checkout in USD instead of Razorpay in INR.
+ * Needs the backend's `/payments/stripe/packs/*` endpoints and Stripe keys on the server. When
+ * off, USD prices are shown but charged in INR through Razorpay.
+ */
+export const webStripeCheckoutEnabled =
+  webCoinCheckoutEnabled && process.env.NEXT_PUBLIC_WEB_STRIPE_CHECKOUT === "1";

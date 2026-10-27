@@ -26,9 +26,17 @@ import { track } from "@/lib/analytics";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/auth-context";
 import { detectPricingCurrency, formatMoney, persistPricingCurrency, type PricingCurrency } from "@/lib/coin-pricing";
-import { webCoinCheckoutEnabled } from "@/lib/flags";
+import { webCoinCheckoutEnabled, webStripeCheckoutEnabled } from "@/lib/flags";
 import { fetchWebPacks, snapshotPacks, type WebPack } from "@/lib/pricing/packages";
 import { createPackOrder, openPackCheckout, verifyPackPayment } from "@/lib/pricing/razorpay";
+import {
+  STRIPE_CANCELLED_PARAM,
+  STRIPE_SESSION_PARAM,
+  createStripeCheckout,
+  isStripeSessionId,
+  redirectToStripe,
+  verifyStripeSession,
+} from "@/lib/pricing/stripe";
 
 const CURRENCIES = ["INR", "USD"] as const;
 
@@ -48,8 +56,9 @@ function packBullets(pack: WebPack): string[] {
 type PayResult =
   | { kind: "success"; coins: number; balance: number | null }
   | { kind: "pending" }
-  | { kind: "cancelled"; pack: WebPack }
-  | { kind: "failed"; message: string; pack: WebPack };
+  | { kind: "cancelled" }
+  | { kind: "failed"; message: string; pack: WebPack }
+  | { kind: "notice"; title: string; message: string };
 
 function PayResultCard({
   result,
@@ -90,6 +99,10 @@ function PayResultCard({
       break;
     case "failed":
       title = "Payment didn't go through";
+      body = result.message;
+      break;
+    case "notice":
+      title = result.title;
       body = result.message;
       break;
   }
@@ -166,7 +179,99 @@ export function PricingCatalog() {
     persistPricingCurrency(next);
   };
 
+  const paysWithStripe = (pack: WebPack) => webStripeCheckoutEnabled && currency === "USD" && pack.amountUsd != null;
+
+  const stripeCheckout = async (pack: WebPack) => {
+    setPaying(pack.id);
+    setResult(null);
+    setPayStatus(`Taking you to secure payment for ${pack.coins + pack.bonusCoins} coins…`);
+    try {
+      const session = await createStripeCheckout(pack.id);
+      track("pricing_checkout_redirect", { pack: pack.id, provider: "stripe" });
+      redirectToStripe(session);
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "Something went wrong. Please try again.";
+      track("pricing_purchase_failed", { pack: pack.id, reason: "order", provider: "stripe" });
+      setPayStatus("");
+      setResult({ kind: "failed", message, pack });
+      setPaying(null);
+    }
+  };
+
+  const confirmStripe = async (sessionId: string) => {
+    setPaying(sessionId);
+    setResult(null);
+    setPayStatus("Payment received. Adding your coins…");
+    try {
+      const verified = await verifyStripeSession(sessionId);
+      track("pricing_purchase_success", { coins: verified.coins_credited, currency: "USD", provider: "stripe" });
+      setResult({
+        kind: "success",
+        coins: Math.floor(verified.coins_credited),
+        balance: verified.new_balance != null ? Math.floor(verified.new_balance) : null,
+      });
+      void refreshBalance();
+      toast({ title: "Coins added", description: `${Math.floor(verified.coins_credited)} coins are in your wallet.` });
+    } catch (err) {
+      track("pricing_purchase_failed", { reason: "verify", provider: "stripe" });
+      if (err instanceof ApiError && err.status === 409 && /review/i.test(err.message)) {
+        setResult({ kind: "notice", title: "Payment under review", message: err.message });
+      } else if (err instanceof ApiError && [400, 403, 404].includes(err.status)) {
+        setResult({ kind: "notice", title: "We couldn't confirm this payment", message: err.message });
+      } else {
+        setResult({ kind: "pending" });
+        window.setTimeout(() => void refreshBalance(), 15000);
+      }
+    } finally {
+      setPayStatus("");
+      setPaying(null);
+    }
+  };
+  const confirmStripeRef = useRef(confirmStripe);
+  confirmStripeRef.current = confirmStripe;
+
+  // Stripe sends the buyer back to /pricing/?stripe_session=… (or ?stripe_cancelled=1).
+  const [returnedSession, setReturnedSession] = useState<string | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get(STRIPE_SESSION_PARAM);
+    const cancelled = params.has(STRIPE_CANCELLED_PARAM);
+    if (!sessionId && !cancelled) return;
+    params.delete(STRIPE_SESSION_PARAM);
+    params.delete(STRIPE_CANCELLED_PARAM);
+    const query = params.toString();
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
+    if (cancelled) {
+      track("pricing_checkout_dismissed", { provider: "stripe" });
+      setResult({ kind: "cancelled" });
+    } else if (isStripeSessionId(sessionId)) {
+      setReturnedSession(sessionId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!returnedSession || status === "loading") return;
+    const sessionId = returnedSession;
+    setReturnedSession(null);
+    requireAuth(() => void confirmStripeRef.current(sessionId), "to add your coins");
+  }, [returnedSession, status, requireAuth]);
+
+  // Coming back from Stripe with the browser's Back button restores this page from cache mid-redirect.
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      setPaying(null);
+      setPayStatus("");
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+
   const checkout = async (pack: WebPack) => {
+    if (paysWithStripe(pack)) {
+      await stripeCheckout(pack);
+      return;
+    }
     const coins = pack.coins + pack.bonusCoins;
     setPaying(pack.id);
     setResult(null);
@@ -183,7 +288,7 @@ export function PricingCatalog() {
       if (outcome.kind === "dismissed") {
         track("pricing_checkout_dismissed", { pack: pack.id });
         setPayStatus("");
-        setResult({ kind: "cancelled", pack });
+        setResult({ kind: "cancelled" });
         return;
       }
       if (outcome.kind === "failed") {
@@ -327,10 +432,11 @@ export function PricingCatalog() {
           <div className="flex flex-wrap justify-center gap-5 xl:items-stretch">
             {packs.map((pack, i) => {
               const price = packPriceLabel(pack, currency);
-              const chargeLabel = webCoinCheckoutEnabled ? formatMoney(pack.amountInr, "INR") : price;
+              const viaStripe = paysWithStripe(pack);
+              const chargeLabel = webCoinCheckoutEnabled && !viaStripe ? formatMoney(pack.amountInr, "INR") : price;
               const featured = pack.highlighted;
               const isPaying = paying === pack.id || queued?.id === pack.id;
-              const chargedInInr = webCoinCheckoutEnabled && currency !== "INR";
+              const chargedInInr = webCoinCheckoutEnabled && !viaStripe && currency !== "INR";
 
               return (
                 <Reveal
@@ -426,7 +532,11 @@ export function PricingCatalog() {
                         Buy {pack.coins} coins · {chargeLabel}
                       </button>
                       <p className={cn("mt-2 text-center text-xs", featured ? "text-white/65" : "text-ink-muted")}>
-                        {webCoinCheckoutEnabled ? "Secure payment in INR · UPI, cards, netbanking" : "Opens the Gamana app"}
+                        {viaStripe
+                          ? "Secure card payment in USD with Stripe"
+                          : webCoinCheckoutEnabled
+                            ? "Secure payment in INR · UPI, cards, netbanking"
+                            : "Opens the Gamana app"}
                       </p>
                     </div>
                   </div>
@@ -440,7 +550,9 @@ export function PricingCatalog() {
           {[
             {
               icon: Smartphone,
-              text: webCoinCheckoutEnabled ? (
+              text: webStripeCheckoutEnabled ? (
+                <>Pay securely with Razorpay in INR or Stripe in USD. Coins land in your wallet here and in the Gamana app.</>
+              ) : webCoinCheckoutEnabled ? (
                 <>Pay securely with Razorpay. Coins land in your wallet here and in the Gamana app.</>
               ) : (
                 <>Buy securely in the Gamana app. Coins appear here instantly.</>
