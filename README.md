@@ -33,6 +33,7 @@ The browser always calls the backend same-origin (`/api/v1/*`, `/api/v2/*`) so t
 | `NEXT_PUBLIC_SITE_URL` | `https://www.gamana.app` | return URLs, canonical |
 | `NEXT_PUBLIC_API_MOCKS` | `1` | dev-only mock API (needs `NEXT_PUBLIC_WEB_ACCOUNTS=1`); never set in production |
 | `NEXT_PUBLIC_WEB_COIN_CHECKOUT` | `1` | Razorpay coin packs on `/pricing` (needs `NEXT_PUBLIC_WEB_ACCOUNTS=1` and the backend's `/payments/razorpay/packs/*`); Razorpay keys live on the backend only |
+| `NEXT_PUBLIC_WEB_STRIPE_CHECKOUT` | `1` | With the USD toggle selected, pay through Stripe Checkout in USD (needs `NEXT_PUBLIC_WEB_COIN_CHECKOUT=1` and the backend's `/payments/stripe/packs/*`); Stripe keys live on the backend only |
 
 ## Mock API (dev only)
 
