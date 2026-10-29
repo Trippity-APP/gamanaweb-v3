@@ -56,9 +56,8 @@ function packBullets(pack: WebPack): string[] {
 type PayResult =
   | { kind: "success"; coins: number; balance: number | null }
   | { kind: "pending" }
-  | { kind: "cancelled" }
-  | { kind: "failed"; message: string; pack: WebPack }
-  | { kind: "notice"; title: string; message: string };
+  | { kind: "cancelled"; pack: WebPack }
+  | { kind: "failed"; message: string; pack: WebPack };
 
 function PayResultCard({
   result,
@@ -99,10 +98,6 @@ function PayResultCard({
       break;
     case "failed":
       title = "Payment didn't go through";
-      body = result.message;
-      break;
-    case "notice":
-      title = result.title;
       body = result.message;
       break;
   }
@@ -288,7 +283,7 @@ export function PricingCatalog() {
       if (outcome.kind === "dismissed") {
         track("pricing_checkout_dismissed", { pack: pack.id });
         setPayStatus("");
-        setResult({ kind: "cancelled" });
+        setResult({ kind: "cancelled", pack });
         return;
       }
       if (outcome.kind === "failed") {
@@ -436,7 +431,7 @@ export function PricingCatalog() {
               const chargeLabel = webCoinCheckoutEnabled && !viaStripe ? formatMoney(pack.amountInr, "INR") : price;
               const featured = pack.highlighted;
               const isPaying = paying === pack.id || queued?.id === pack.id;
-              const chargedInInr = webCoinCheckoutEnabled && !viaStripe && currency !== "INR";
+              const chargedInInr = webCoinCheckoutEnabled && currency !== "INR";
 
               return (
                 <Reveal
