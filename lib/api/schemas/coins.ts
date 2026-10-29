@@ -40,6 +40,20 @@ export const packVerifySchema = z
 
 export type PackVerify = z.infer<typeof packVerifySchema>;
 
+export const stripeCheckoutSchema = z
+  .object({
+    session_id: z.string().min(1),
+    url: z.string().url(),
+    amount: z.number().int().positive(),
+    currency: z.string(),
+    product_id: z.string(),
+    display_name: nullish(z.string()),
+    coins: numberish,
+  })
+  .passthrough();
+
+export type StripeCheckout = z.infer<typeof stripeCheckoutSchema>;
+
 export const passbookEntrySchema = z
   .object({
     id: nullish(idField),

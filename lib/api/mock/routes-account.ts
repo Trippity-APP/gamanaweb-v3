@@ -27,7 +27,14 @@ const MOCK_PACKS = [
   { product_id: "hundred_coin", display_name: "Voyager", amount: 6999, amount_usd: 84.99, currency: "INR", coins: 100, bonus_coins: 15, poi_range: "35–50", tour_range: "8–10", order: 3, is_active: true, show_on_web: true, is_best_value: true, save_percent: 30 },
 ];
 
-type PackLike = { product_id: string; display_name: string; amount: number; coins: number; bonus_coins?: number };
+type PackLike = {
+  product_id: string;
+  display_name: string;
+  amount: number;
+  amount_usd?: number | null;
+  coins: number;
+  bonus_coins?: number;
+};
 
 /** The pricing page shows the real API's packs when it's reachable, so orders must accept those ids too. */
 async function realPacks(): Promise<PackLike[]> {
@@ -289,6 +296,40 @@ export const accountRoutes: MockRoute[] = [
     handle: ({ body }) => {
       const coins = Number(/^order_mock_(\d+)_/.exec(String(body.razorpay_order_id ?? ""))?.[1] ?? 0);
       if (!coins) return fail(400, "payment_order_mismatch", "Payment not found for this order.");
+      const { balance } = writeDb((d) => {
+        d.balance += coins;
+        d.passbook.push({ id: mockId("pb"), type: "purchase", description: `${coins} Coins (website)`, amount: coins, status: "completed", created_at: daysFromNow(0) });
+      });
+      return ok({ coins_credited: String(coins), new_balance: String(balance), already_processed: false }, "Coins added");
+    },
+  },
+  {
+    method: "POST",
+    path: "/payments/stripe/packs/checkout",
+    auth: true,
+    handle: async ({ body }) => {
+      const pack = (await realPacks()).find((p) => p.product_id === body.product_id);
+      if (!pack || pack.amount_usd == null) return fail(404, "pack_unavailable", "This coin pack isn't available.");
+      const coins = Number(pack.coins) + Number(pack.bonus_coins ?? 0);
+      const sessionId = `cs_mock_${coins}_${Date.now()}`;
+      return ok({
+        session_id: sessionId,
+        url: `${window.location.origin}/pricing/?stripe_session=${sessionId}`,
+        amount: Math.round(Number(pack.amount_usd) * 100),
+        currency: "USD",
+        product_id: pack.product_id,
+        display_name: pack.display_name,
+        coins,
+      });
+    },
+  },
+  {
+    method: "POST",
+    path: "/payments/stripe/packs/verify",
+    auth: true,
+    handle: ({ body }) => {
+      const coins = Number(/^cs_mock_(\d+)_/.exec(String(body.session_id ?? ""))?.[1] ?? 0);
+      if (!coins) return fail(404, "session_missing", "Checkout session not found.");
       const { balance } = writeDb((d) => {
         d.balance += coins;
         d.passbook.push({ id: mockId("pb"), type: "purchase", description: `${coins} Coins (website)`, amount: coins, status: "completed", created_at: daysFromNow(0) });
