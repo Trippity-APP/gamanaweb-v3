@@ -5,6 +5,7 @@ import Footer from "@/components/navigation/footer";
 import { JsonLd } from "@/components/site/JsonLd";
 import { ExperienceDetailClient, type LinkedStory } from "@/components/experiences/ExperienceDetailClient";
 import type { ExperienceDetail } from "@/lib/api/schemas/experiences";
+import { EXPERIENCE_SEO } from "@/lib/data/experience-seo";
 import { getExperienceDetailSafe, listAllPublishedExperiences } from "@/lib/experiences/api";
 import { coverImage, experienceHref, galleryImages, locationLabel } from "@/lib/experiences/format";
 import { fetchPublicStoryDetailById, getDefaultTourImage, getTourHref } from "@/lib/marketplace-api";
@@ -44,13 +45,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!experience) return { title: "Experience not found", robots: { index: false } };
 
   const url = absoluteUrl(experienceHref(slug));
-  const description = metaDescription(experience);
+  const override = Object.hasOwn(EXPERIENCE_SEO, slug) ? EXPERIENCE_SEO[slug] : undefined;
+  const description = override?.description ?? metaDescription(experience);
   const image = coverImage(experience);
   const place = locationLabel(experience);
-  const title = place ? `${experience.title} — ${place}` : experience.title;
+  const title = override?.title ?? (place ? `${experience.title} — ${place}` : experience.title);
 
   return {
-    title,
+    title: override ? { absolute: title } : title,
     description,
     alternates: { canonical: url },
     openGraph: { title, description, url, siteName: "Gamana", type: "website", images: [{ url: image }] },
