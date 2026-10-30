@@ -510,7 +510,7 @@ function ListenBeforeYouGo({ story }: { story: LinkedStory }) {
         className="focus-ring group flex items-center gap-4 rounded-3xl bg-white p-3 shadow-card transition-all duration-500 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       >
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-sand-100 sm:h-28 sm:w-28">
-          <MarketplaceCoverImage src={story.image} alt="" fill useDefaultFallback className="object-cover" />
+          <MarketplaceCoverImage src={story.image} alt={story.title} fill useDefaultFallback className="object-cover" />
         </div>
         <div className="min-w-0 flex-1 py-1 pr-2">
           <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brand-700">

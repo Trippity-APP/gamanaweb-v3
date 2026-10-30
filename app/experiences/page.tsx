@@ -28,6 +28,8 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE.url] },
 };
 
+const heroPhoto = getPhoto("hero-explore-tours");
+
 export default function ExperiencesPage() {
   return (
     <>
@@ -35,8 +37,9 @@ export default function ExperiencesPage() {
       <main className="bg-sand-50">
         <PageHero
           size="md"
-          image={getPhoto("hero-explore-tours")}
-          imageAlt=""
+          image={heroPhoto}
+          imageAlt={heroPhoto.alt}
+          imageTitle={heroPhoto.title}
           eyebrow="Experiences"
           breadcrumbs={[{ label: "Experiences", href: "/experiences/" }]}
           heading="Book local experiences. Hear the story first."

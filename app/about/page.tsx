@@ -72,6 +72,8 @@ function PullQuote({ title, children }: { title: ReactNode; children: ReactNode 
   );
 }
 
+const heroPhoto = getPhoto("hero-about");
+
 export default function AboutPage() {
   return (
     <>
@@ -80,8 +82,9 @@ export default function AboutPage() {
         <PageHero
           size="lg"
           className="pb-40 sm:pb-48"
-          image={getPhoto("hero-about")}
-          imageAlt=""
+          image={heroPhoto}
+          imageAlt={heroPhoto.alt}
+          imageTitle={heroPhoto.title}
           eyebrow={
             <span className="normal-case tracking-normal text-base sm:text-lg">
                   <span>gamana</span>

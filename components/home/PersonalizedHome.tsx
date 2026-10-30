@@ -599,7 +599,7 @@ function NextExperience() {
       >
         {next.image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={next.image_url} alt="" className="h-48 w-full object-cover sm:h-auto sm:w-72" />
+          <img src={next.image_url} alt={next.title ?? "Your upcoming experience"} className="h-48 w-full object-cover sm:h-auto sm:w-72" />
         ) : (
           <span className="grid h-48 w-full place-items-center bg-brand-50 text-brand-700 sm:h-auto sm:w-72">
             <Ticket className="h-10 w-10" aria-hidden />

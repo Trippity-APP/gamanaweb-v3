@@ -107,9 +107,9 @@ function RowThumb({ row }: { row: SearchRow }) {
       {row.image &&
         (row.kind === "city" ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={safeSrc(row.image)} alt="" loading="lazy" className="h-full w-full object-cover" />
+          <img src={safeSrc(row.image)} alt={row.title} loading="lazy" className="h-full w-full object-cover" />
         ) : (
-          <MarketplaceCoverImage src={row.image} alt="" fill className="object-cover" />
+          <MarketplaceCoverImage src={row.image} alt={row.title} fill className="object-cover" />
         ))}
     </span>
   );

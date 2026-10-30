@@ -182,7 +182,8 @@ export default function EnhancedPageLayout({
                   >
                     <Image
                       src={f.image}
-                      alt=""
+                      alt={f.photo.alt}
+                      title={f.photo.title}
                       fill
                       sizes="272px"
                       className="object-cover opacity-60 transition-transform duration-700 ease-out-expo group-hover:scale-105"

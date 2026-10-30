@@ -185,7 +185,12 @@ function parse(html) {
       jsonLdTypes.push("(invalid JSON-LD)");
     }
   }
+  const imagesWithoutAlt = [...html.matchAll(/<img\b[^>]*>/gi)]
+    .map((m) => attrs(m[0]))
+    .filter((img) => !img.alt?.trim())
+    .map((img) => img.src ?? "(no src)");
   return {
+    imagesWithoutAlt,
     title: decode(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? "").trim(),
     description: meta("name", "description"),
     canonical: links.find((l) => l.rel === "canonical")?.href,
@@ -249,6 +254,7 @@ async function main() {
       if (!got.jsonLdTypes.includes(type)) failures.push(`${page.path}: missing ${type} JSON-LD (found ${got.jsonLdTypes.join(", ") || "none"})`);
     }
     if (got.jsonLdTypes.includes("(invalid JSON-LD)")) failures.push(`${page.path}: invalid JSON-LD block`);
+    for (const src of got.imagesWithoutAlt) failures.push(`${page.path}: image without alt text (${src})`);
   }
 
   const served = BASE_URL ? 0 : await verifyServedDetailPages(failures);

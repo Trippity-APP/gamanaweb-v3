@@ -124,7 +124,7 @@ export function ExperienceReviews({ slug }: { slug: string }) {
               <div className="mt-3 flex gap-2 overflow-x-auto">
                 {review.photo_urls.map((url) => (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img key={url} src={url} alt="" loading="lazy" className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+                  <img key={url} src={url} alt={`Photo shared by ${review.reviewer?.display_name ?? "a Gamana traveler"}`} loading="lazy" className="h-20 w-20 shrink-0 rounded-xl object-cover" />
                 ))}
               </div>
             )}

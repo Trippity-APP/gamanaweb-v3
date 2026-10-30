@@ -32,10 +32,10 @@ export const FinalCTA = () => {
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#1A5F7A]/5 rounded-full blur-3xl"></div>
                 {/* Travel icons in CTA */}
                 <div className="absolute top-16 left-[8%] opacity-10">
-                    <img src="/Picture8.png" alt="" width={70} height={70} className="drop-shadow-lg" />
+                    <img src="/Picture8.png" alt="Hand-drawn illustration of a small plane with a curving flight trail" width={70} height={70} className="drop-shadow-lg" />
                 </div>
                 <div className="absolute bottom-16 right-[10%] opacity-10">
-                    <img src="/Picture6.png" alt="" width={75} height={75} className="drop-shadow-lg" />
+                    <img src="/Picture6.png" alt="Hand-drawn illustration of an ice lolly with a bite taken out" width={75} height={75} className="drop-shadow-lg" />
                 </div>
             </div>
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

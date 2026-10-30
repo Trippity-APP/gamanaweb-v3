@@ -79,7 +79,7 @@ export function TourRouteTimeline({ stops, loading = false }: TourRouteTimelineP
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={stop.image}
-                          alt=""
+                          alt={stop.name}
                           className="h-36 w-full shrink-0 rounded-xl object-cover sm:h-24 sm:w-32 lg:h-28 lg:w-36"
                         />
                       ) : (

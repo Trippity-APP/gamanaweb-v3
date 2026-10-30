@@ -115,6 +115,8 @@ const inputClass = (error?: string) =>
     error ? "border-red-400 focus:border-red-500 focus:ring-red-500/15" : "border-ink/15 hover:border-ink/30"
   );
 
+const heroPhoto = getPhoto("hero-contact");
+
 export default function ContactPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -185,8 +187,9 @@ export default function ContactPage() {
       <main>
         <PageHero
           className="pb-28 sm:pb-32"
-          image={getPhoto("hero-contact")}
-          imageAlt=""
+          image={heroPhoto}
+          imageAlt={heroPhoto.alt}
+          imageTitle={heroPhoto.title}
           breadcrumbs={[{ label: "Contact", href: "/contact/" }]}
           heading="Get in Touch"
           subtitle="Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible."

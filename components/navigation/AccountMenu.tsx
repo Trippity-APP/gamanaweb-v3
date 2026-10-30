@@ -59,7 +59,7 @@ export function AccountMenu() {
         <DropdownMenuTrigger asChild>
           <button type="button" className="focus-ring shrink-0 rounded-full" aria-label="Account menu">
             <Avatar className="h-11 w-11">
-              {user.profilePic && <AvatarImage src={user.profilePic} alt="" />}
+              {user.profilePic && <AvatarImage src={user.profilePic} alt="Your profile photo" />}
               <AvatarFallback className="bg-gradient-to-r from-brand-600 to-brand-800 text-xs font-bold text-white">
                 {initialsFor(user.firstName, user.lastName, user.email || user.phone)}
               </AvatarFallback>

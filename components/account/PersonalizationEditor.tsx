@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
@@ -29,7 +28,7 @@ import {
   walkingToleranceOptions,
   dietaryOptions,
 } from "@/lib/personalization";
-import { Plus, X, Calendar as CalendarIcon, Pencil, Sparkles } from "@/components/icons";
+import { Plus, X, Calendar as CalendarIcon, Pencil } from "@/components/icons";
 
 interface Draft {
   homeLocation: string;
@@ -254,11 +253,6 @@ export function PersonalizationEditor({ onSave }: { onSave?: (journey: SavedJour
           <Button onClick={startEditing} size="sm" variant="outline" className="gap-1.5">
             <Pencil className="h-3.5 w-3.5" /> {hasAnyJourney ? "Edit preferences" : "Fill this in now"}
           </Button>
-          <Link href="/start-your-journey">
-            <Button size="sm" variant="ghost" className="gap-1.5 text-gray-500">
-              <Sparkles className="h-3.5 w-3.5" /> Redo the full journey instead
-            </Button>
-          </Link>
         </div>
       </div>
     );

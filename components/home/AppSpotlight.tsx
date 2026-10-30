@@ -1,6 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowRight, Play } from "@/components/icons";
+import { Play } from "@/components/icons";
 import { StoreBadges } from "@/components/site/StoreBadges";
 import { StatsStrip } from "@/components/site/StatsStrip";
 import { Reveal } from "@/components/motion/Reveal";
@@ -30,13 +29,6 @@ export function AppSpotlight() {
 
           <div className="mt-8 flex flex-col items-center gap-5 sm:flex-row sm:flex-wrap lg:items-center">
             <StoreBadges source="home_app_spotlight" keyword="travel guide app" size="lg" className="justify-center" />
-            <Link
-              href="/start-your-journey"
-              className="focus-ring group inline-flex items-center gap-2 rounded text-sm font-semibold text-white/90 underline decoration-white/40 underline-offset-4 transition-colors hover:text-white hover:decoration-white"
-            >
-              Or start your Gamana journey online
-              <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out-expo group-hover:translate-x-1" aria-hidden />
-            </Link>
           </div>
         </Reveal>
 

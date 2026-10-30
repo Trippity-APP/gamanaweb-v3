@@ -1,7 +1,6 @@
 "use client";
 
 import { JourneyGreeting } from "@/components/JourneyGreeting";
-import { JourneyCTA } from "@/components/marketplace/JourneyCTA";
 import { useAuth } from "@/lib/auth/auth-context";
 
 export function MarketplaceSignedInHeroExtras() {
@@ -10,13 +9,8 @@ export function MarketplaceSignedInHeroExtras() {
   if (status !== "authenticated") return null;
 
   return (
-    <>
-      <div className="opacity-0 animate-fade-in" style={{ animationDelay: "450ms" }}>
-        <JourneyGreeting />
-      </div>
-      <div className="flex justify-center opacity-0 animate-fade-in" style={{ animationDelay: "600ms" }}>
-        <JourneyCTA />
-      </div>
-    </>
+    <div className="opacity-0 animate-fade-in" style={{ animationDelay: "450ms" }}>
+      <JourneyGreeting />
+    </div>
   );
 }

@@ -15,7 +15,7 @@ export function GamanaCoinIcon({ className, "aria-hidden": ariaHidden }: GamanaC
   return (
     <Image
       src={GAMANA_COIN_ICON_SRC}
-      alt={hidden ? "" : "Gamana Coins"}
+      alt="Gamana Coins"
       aria-hidden={hidden || undefined}
       width={24}
       height={24}

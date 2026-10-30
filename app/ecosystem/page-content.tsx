@@ -125,6 +125,8 @@ const howItWorks = [
 // Bento: the first benefit is the tall feature tile; a photo tile fills the third column.
 const BENEFIT_LAYOUT = ["lg:row-span-2", "", ""];
 
+const partnerPhoto = getPhoto("ecosystem-partner-benefits", "tile");
+
 export default function EcosystemPageContent() {
   return (
     <>
@@ -249,8 +251,9 @@ export default function EcosystemPageContent() {
               })}
               <Reveal variant="scale" delay={270} className="relative hidden min-h-[20rem] overflow-hidden rounded-3xl shadow-card lg:col-start-3 lg:row-span-2 lg:row-start-1 lg:block">
                 <ResponsiveImage
-                  image={getPhoto("ecosystem-partner-benefits", "tile")}
-                  alt=""
+                  image={partnerPhoto}
+                  alt={partnerPhoto.alt}
+                  title={partnerPhoto.title}
                   fill
                   sizes="(min-width: 1280px) 400px, 33vw"
                   className="object-[50%_40%] transition-transform duration-700 ease-out-expo hover:scale-105"
