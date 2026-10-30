@@ -6,14 +6,14 @@ import { OG_IMAGE, organizationJsonLd } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'On-Demand Personalization with Travel AI',
-  description: 'On-demand personalization powered by Travel AI tailors stories and experiences to your interests, pace, and style for smarter, more meaningful journeys.',
+  title: { absolute: "Personalized Travel Experiences & Tours | Gamana" },
+  description: "Enjoy personalized travel experiences with Gamana, with stories, tours, recommendations, and pacing that adapt to your interests, preferences, and travel style.",
   alternates: {
     canonical: 'https://www.gamana.app/features/on-demand-personalization/',
   },
   openGraph: {
-    title: 'On-Demand Personalization with Travel AI | Gamana',
-    description: 'On-demand personalization powered by Travel AI tailors stories and experiences to your interests, pace, and style for smarter, more meaningful journeys.',
+    title: "Personalized Travel Experiences & Tours | Gamana",
+    description: "Enjoy personalized travel experiences with Gamana, with stories, tours, recommendations, and pacing that adapt to your interests, preferences, and travel style.",
     url: 'https://www.gamana.app/features/on-demand-personalization/',
     siteName: 'Gamana',
     type: 'website',
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'On-Demand Personalization with Travel AI | Gamana',
-    description: 'On-demand personalization powered by Travel AI tailors stories and experiences to your interests, pace, and style for smarter, more meaningful journeys.',
+    title: "Personalized Travel Experiences & Tours | Gamana",
+    description: "Enjoy personalized travel experiences with Gamana, with stories, tours, recommendations, and pacing that adapt to your interests, preferences, and travel style.",
     images: [OG_IMAGE.url],
   },
 };
@@ -34,8 +34,11 @@ export default function OnDemandPersonalizationPage() {
       <EnhancedPageLayout
       icon={Sparkles}
       title="On-Demand Personalization"
-      subtitle="Stories and experiences that adapt to your unique preferences and interests"
+      subtitle="Create personalized travel experiences with tours and stories shaped around your interests, preferences, and travel style, with recommendations, pacing, and content that adapt as you explore."
       slug="on-demand-personalization"
+      heading="Personalized Travel Experiences That Adapt to You"
+      heroAlt="Gamana personalized travel experiences with adaptive audio tours"
+      heroTitle="Gamana Personalized Travel Experiences"
       introTitle="Tours That Match How You Travel"
       introText={[
         'Every traveler is unique, and your tour should be too. Gamana learns from your preferences, interests, and travel style to deliver stories and stops that fit your interests.',
