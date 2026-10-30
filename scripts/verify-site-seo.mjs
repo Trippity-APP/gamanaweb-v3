@@ -104,11 +104,46 @@ const PAGES = [
       "Explore travel destinations and cities around the world with Gamana. Discover city stories, local experiences, landmarks, and audio tours as you explore.",
     h1: "Travel Destinations Made for Curious Travelers",
   },
+  {
+    path: "/features/",
+    title: "Audio Tour Features for Smarter Travel | Gamana",
+    description:
+      "Explore Gamana’s audio tour features, from expert storytelling and AI narrators to GPS-triggered playback, offline listening, and flexible walking tours.",
+    h1: "Audio Tour Features for Smarter Travel",
+    jsonLd: ["BreadcrumbList"],
+  },
+  {
+    path: "/marketplace/story/",
+    title: "Audio Stories for Travel & Exploration | Gamana",
+    description:
+      "Listen to audio stories about cities, landmarks, history, and culture, and experience each destination through engaging stories from Gamana.",
+    h1: "Audio Stories That Bring Destinations to Life",
+  },
+  {
+    path: "/marketplace/tours/",
+    title: "Audio Walks for Exploring Cities | Gamana",
+    description:
+      "Find audio walks from Gamana that bring city streets, landmarks, and local stories to life while you walk at your own pace.",
+    h1: "Audio Walks for Exploring Cities at Your Own Pace",
+  },
+  {
+    path: "/features/on-demand-personalization/",
+    title: "Personalized Travel Experiences & Tours | Gamana",
+    description:
+      "Enjoy personalized travel experiences with Gamana, with stories, tours, recommendations, and pacing that adapt to your interests, preferences, and travel style.",
+    h1: "Personalized Travel Experiences That Adapt to You",
+    jsonLd: ["Organization", "BreadcrumbList"],
+  },
+  {
+    path: "/features/discounts-offers/",
+    title: "Travel Offers & Deals for Audio Tours | Gamana",
+    description:
+      "Find travel offers, deals, and discounts on Gamana audio tours and experiences, helping you enjoy more stories and experiences for less.",
+    h1: "Travel Offers and Deals for Your Next Journey",
+    jsonLd: ["Organization", "BreadcrumbList"],
+  },
   // Pages without a workbook sheet: structure only (canonical, h1, JSON-LD, share image).
   { path: "/about/", h1: "About Gamana: stories that walk with you" },
-  { path: "/features/", h1: "Premium Audio Tour Features", jsonLd: ["BreadcrumbList"] },
-  { path: "/features/on-demand-personalization/", h1: "On-Demand Personalization", jsonLd: ["Organization", "BreadcrumbList"] },
-  { path: "/features/discounts-offers/", h1: "Discounts & Offers", jsonLd: ["Organization", "BreadcrumbList"] },
   { path: "/pricing/", h1: "Pay once. Hear the city as you walk.", jsonLd: ["OfferCatalog", "FAQPage", "BreadcrumbList"] },
   { path: "/contact/", h1: "Get in Touch", jsonLd: ["BreadcrumbList"] },
   { path: "/faq/", h1: "Frequently Asked Questions", jsonLd: ["FAQPage", "BreadcrumbList"] },

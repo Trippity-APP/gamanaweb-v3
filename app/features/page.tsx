@@ -16,14 +16,14 @@ import { OG_IMAGE } from '@/lib/seo';
 
 import { IconTile, toneFor } from "@/components/icons/IconTile";
 export const metadata: Metadata = {
-  title: "Features",
-  description: "Discover Gamana's premium features: AI-powered narrators, handcrafted audio stories, location-aware tours, offline access, and expertly researched content for immersive travel experiences.",
+  title: { absolute: "Audio Tour Features for Smarter Travel | Gamana" },
+  description: "Explore Gamana’s audio tour features, from expert storytelling and AI narrators to GPS-triggered playback, offline listening, and flexible walking tours.",
   alternates: {
     canonical: 'https://www.gamana.app/features/',
   },
   openGraph: {
-    title: 'Features | Gamana',
-    description: "Discover Gamana's premium features: AI-powered narrators, handcrafted audio stories, location-aware tours, offline access, and expertly researched content for immersive travel experiences.",
+    title: "Audio Tour Features for Smarter Travel | Gamana",
+    description: "Explore Gamana’s audio tour features, from expert storytelling and AI narrators to GPS-triggered playback, offline listening, and flexible walking tours.",
     url: 'https://www.gamana.app/features/',
     siteName: 'Gamana',
     type: 'website',
@@ -31,8 +31,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Features | Gamana',
-    description: "Discover Gamana's premium features: AI-powered narrators, handcrafted audio stories, location-aware tours, offline access, and expertly researched content for immersive travel experiences.",
+    title: "Audio Tour Features for Smarter Travel | Gamana",
+    description: "Explore Gamana’s audio tour features, from expert storytelling and AI narrators to GPS-triggered playback, offline listening, and flexible walking tours.",
     images: [OG_IMAGE.url],
   },
 };
@@ -75,10 +75,11 @@ export default function FeaturesPage() {
       <main>
         <PageHero
           image={getPhoto("hero-features")}
-          imageAlt=""
+          imageAlt="Gamana audio tour features for smarter travel"
+          imageTitle="Gamana Audio Tour Features for Smarter Travel"
           breadcrumbs={[{ label: "Features", href: "/features/" }]}
-          heading="Premium Audio Tour Features"
-          subtitle="See what Gamana does: audio tours you take on foot, at your pace"
+          heading="Audio Tour Features for Smarter Travel"
+          subtitle="Explore Gamana’s audio tour app features, designed to make every journey more engaging with immersive storytelling, intelligent narration, GPS-triggered playback, and flexible listening. Discover how our audio guide app features help you explore cities, uncover local history, and enjoy cultural experiences at your own pace."
         >
           <StoreBadges source="features_hero" keyword="audio tour app" priority />
         </PageHero>

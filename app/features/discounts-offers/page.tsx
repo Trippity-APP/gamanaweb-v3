@@ -6,14 +6,14 @@ import { OG_IMAGE, organizationJsonLd } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gamana.app'),
-  title: 'Discounts & Offers on Travel Tours',
-  description: 'Discover exclusive discounts, offers, and deals on immersive audio travel experiences. Save more while exploring unforgettable destinations with Gamana.',
+  title: { absolute: "Travel Offers & Deals for Audio Tours | Gamana" },
+  description: "Find travel offers, deals, and discounts on Gamana audio tours and experiences, helping you enjoy more stories and experiences for less.",
   alternates: {
     canonical: 'https://www.gamana.app/features/discounts-offers/',
   },
   openGraph: {
-    title: 'Discounts & Offers on Travel Tours | Gamana',
-    description: 'Discover exclusive discounts, offers, and deals on immersive audio travel experiences. Save more while exploring unforgettable destinations with Gamana.',
+    title: "Travel Offers & Deals for Audio Tours | Gamana",
+    description: "Find travel offers, deals, and discounts on Gamana audio tours and experiences, helping you enjoy more stories and experiences for less.",
     url: 'https://www.gamana.app/features/discounts-offers/',
     siteName: 'Gamana',
     type: 'website',
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Discounts & Offers on Travel Tours | Gamana',
-    description: 'Discover exclusive discounts, offers, and deals on immersive audio travel experiences. Save more while exploring unforgettable destinations with Gamana.',
+    title: "Travel Offers & Deals for Audio Tours | Gamana",
+    description: "Find travel offers, deals, and discounts on Gamana audio tours and experiences, helping you enjoy more stories and experiences for less.",
     images: [OG_IMAGE.url],
   },
 };
@@ -34,8 +34,11 @@ export default function DiscountsOffersPage() {
       <EnhancedPageLayout
       icon={Gift}
       title="Discounts & Offers"
-      subtitle="Partner deals for Gamana members that make your travel experiences more affordable and rewarding"
+      subtitle="Find travel offers and deals on Gamana audio tours and experiences, with special discounts that help you enjoy more stories and memorable moments while you travel."
       slug="discounts-offers"
+      heading="Travel Offers and Deals for Your Next Journey"
+      heroAlt="Gamana travel offers and deals on audio tours"
+      heroTitle="Gamana Travel Offers and Deals"
       introTitle="Save More, Experience More"
       introText={[
         'Gamana partners with hundreds of local businesses, attractions, and services to bring you exclusive discounts and special offers. As you explore, you will discover deals that are only available to Gamana users, making your travel experiences more affordable.',

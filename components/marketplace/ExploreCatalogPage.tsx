@@ -14,8 +14,16 @@ const EXPLORE_SEARCH_ID = 'explore-hero-search';
 
 export async function ExploreCatalogPage({
   heroPhoto = 'hero-pricing',
+  heading = 'Audio Tours and Walking Experiences',
+  subtitle = 'Explore engaging audio stories and walking experiences designed to help you experience cities, landmarks, and destinations at your own pace.',
+  imageAlt = 'Gamana audio tours and walking experiences',
+  imageTitle = 'Gamana Audio Tours and Walking Experiences',
 }: {
   heroPhoto?: PhotoKey;
+  heading?: string;
+  subtitle?: string;
+  imageAlt?: string;
+  imageTitle?: string;
 } = {}) {
   let initialTours: Tour[] = [];
   try {
@@ -32,8 +40,8 @@ export async function ExploreCatalogPage({
           <div className="relative isolate flex min-h-[380px] items-end overflow-hidden rounded-4xl shadow-lift sm:min-h-[420px] lg:min-h-[460px]">
             <ResponsiveImage
               image={getPhoto(heroPhoto)}
-              alt="Gamana audio tours and walking experiences"
-              title="Gamana Audio Tours and Walking Experiences"
+              alt={imageAlt}
+              title={imageTitle}
               fill
               priority
               sizes="(min-width: 1280px) 1216px, 100vw"
@@ -48,10 +56,10 @@ export async function ExploreCatalogPage({
                 Explore your World
               </p>
               <h1 className="text-display mt-4 max-w-3xl text-balance text-white drop-shadow-sm">
-                Audio Tours and Walking Experiences
+                {heading}
               </h1>
               <p className="mt-3 max-w-2xl text-base leading-relaxed text-white/85 sm:text-lg">
-                Explore engaging audio stories and walking experiences designed to help you experience cities, landmarks, and destinations at your own pace.
+                {subtitle}
               </p>
               <div className="mt-2 text-white">
                 <MarketplaceSignedInHeroExtras />
