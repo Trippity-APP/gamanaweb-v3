@@ -69,6 +69,8 @@ export const metadata: Metadata = {
   },
 };
 
+const heroPhoto = getPhoto("hero-pricing");
+
 export default function PricingPage() {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -98,8 +100,9 @@ export default function PricingPage() {
       <HeroHeader transparent />
       <main>
         <PageHero
-          image={getPhoto("hero-pricing")}
-          imageAlt=""
+          image={heroPhoto}
+          imageAlt={heroPhoto.alt}
+          imageTitle={heroPhoto.title}
           eyebrow="Gamana Coins"
           breadcrumbs={[{ label: "Pricing", href: "/pricing/" }]}
           heading="Pay once. Hear the city as you walk."

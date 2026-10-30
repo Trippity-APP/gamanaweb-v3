@@ -31,7 +31,6 @@ const LEGAL_LINKS = [
   { name: "Privacy Policy", href: "/privacy-policy" },
   { name: "Terms of Service", href: "/terms-of-service" },
   { name: "Cookie Policy", href: "/cookie-policy" },
-  { name: "FAQ", href: "/faq" },
 ];
 
 const linkClass =

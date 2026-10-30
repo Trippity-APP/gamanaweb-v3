@@ -34,6 +34,7 @@ import { TourCard } from "@/components/site/TourCard";
 import { TrustBar } from "@/components/site/TrustBar";
 import { FEATURED_TOURS } from "@/components/home/HomeSections";
 import { FEATURED_CITIES } from "@/lib/data/home";
+import { NARRATORS } from "@/lib/data/narrators";
 import { getPhoto } from "@/lib/images";
 import { DownloadCta } from "./download-cta";
 
@@ -137,7 +138,7 @@ const FAQS: FaqItem[] = [
   },
 ];
 
-const NARRATOR_THUMBS = ["/narrator1.png", "/narrator2.png", "/narrator3.png", "/narrator4.png"];
+const NARRATOR_THUMBS = NARRATORS.slice(0, 4);
 
 function PhoneScreen({ src, alt, className, priority }: { src: string; alt: string; className?: string; priority?: boolean }) {
   return (
@@ -233,8 +234,8 @@ export default function LandingContent() {
                     16 narrator voices
                   </p>
                   <div className="flex -space-x-2">
-                    {NARRATOR_THUMBS.map((src) => (
-                      <Image key={src} src={src} alt="" width={28} height={28} className="h-7 w-7 rounded-full border-2 border-white object-cover" />
+                    {NARRATOR_THUMBS.map((n) => (
+                      <Image key={n.image} src={n.image} alt={`Gamana narrator ${n.name}, ${n.role}`} width={28} height={28} className="h-7 w-7 rounded-full border-2 border-white object-cover" />
                     ))}
                     <span className="grid h-7 w-7 place-items-center rounded-full border-2 border-white bg-brand-50 text-[9px] font-bold text-brand-800">
                       +12

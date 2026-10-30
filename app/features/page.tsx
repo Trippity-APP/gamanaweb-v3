@@ -104,7 +104,8 @@ export default function FeaturesPage() {
                         <>
                           <Image
                             src={f.image}
-                            alt=""
+                            alt={f.photo.alt}
+                            title={f.photo.title}
                             fill
                             sizes="(min-width: 768px) 66vw, 100vw"
                             className="object-cover opacity-75 transition-transform duration-700 ease-out-expo group-hover:scale-105"
@@ -175,7 +176,8 @@ export default function FeaturesPage() {
                     >
                       <Image
                         src={f.image}
-                        alt=""
+                        alt={f.photo.alt}
+                        title={f.photo.title}
                         fill
                         sizes="(min-width: 768px) 50vw, 100vw"
                         className="object-cover opacity-45 transition-transform duration-700 ease-out-expo group-hover:scale-105"

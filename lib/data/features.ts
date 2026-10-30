@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 import { BookOpen, Gift, Globe, Headphones, Share2, Sparkles, User } from "@/components/icons";
 import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
-import { getPhoto, type ImageVariant, type PhotoKey } from "@/lib/images";
+import { getPhoto, type Photo, type PhotoKey } from "@/lib/images";
 
 function featurePhoto(key: PhotoKey) {
   const photo = getPhoto(key, "hero");
@@ -26,7 +26,7 @@ export type FeatureEntry = {
   /** Card-sized (960w) path of `photo`. */
   image: string;
   /** Hero photo used on the feature page. */
-  photo: ImageVariant;
+  photo: Photo;
   icon: ComponentType<{ className?: string }>;
   /** Core features appear in the main nav; the rest are secondary. */
   core: boolean;

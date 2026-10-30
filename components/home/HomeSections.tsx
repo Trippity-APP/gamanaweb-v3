@@ -202,7 +202,8 @@ export function FeaturesBento() {
                     <>
                       <Image
                         src="/ai-tour-guide-apps-the-future-of-smart-travel-and-exploration.png"
-                        alt=""
+                        alt="Traveller with headphones and a phone listening to an AI tour guide near the Eiffel Tower in Paris"
+                        title="AI Tour Guide App for Smart Travel and Exploration"
                         fill
                         sizes="(min-width: 768px) 66vw, 100vw"
                         className="-z-0 object-cover opacity-40 transition-transform duration-700 ease-out-expo group-hover:scale-105"

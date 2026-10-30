@@ -12,6 +12,8 @@ import { faqJsonLd } from "@/lib/seo";
 
 const faqSchema = faqJsonLd(FAQ_SECTIONS.flatMap((section) => section.faqs));
 
+const heroPhoto = getPhoto("hero-faq");
+
 export default function FAQPage() {
   return (
     <>
@@ -20,8 +22,9 @@ export default function FAQPage() {
       <main>
         <PageHero
           className="pb-24 sm:pb-28"
-          image={getPhoto("hero-faq")}
-          imageAlt=""
+          image={heroPhoto}
+          imageAlt={heroPhoto.alt}
+          imageTitle={heroPhoto.title}
           breadcrumbs={[{ label: "FAQ", href: "/faq/" }]}
           heading="Frequently Asked Questions"
           subtitle="Find answers to common questions about Gamana"

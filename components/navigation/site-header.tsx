@@ -200,7 +200,7 @@ export default function SiteHeader({ variant = "solid", search, searchAnchorId }
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={encodeURI(city.thumb)}
-                                alt=""
+                                alt={`${city.name} city audio tour`}
                                 loading="lazy"
                                 className="h-full w-full object-cover transition-transform duration-500 ease-out-expo group-hover/city:scale-105"
                               />
@@ -444,7 +444,7 @@ function MobileDrawer({
                     >
                       <span className="block aspect-[4/3] overflow-hidden rounded-xl bg-sand-100">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={encodeURI(city.thumb)} alt="" loading="lazy" className="h-full w-full object-cover" />
+                        <img src={encodeURI(city.thumb)} alt={`${city.name} city audio tour`} loading="lazy" className="h-full w-full object-cover" />
                       </span>
                       <span className="mt-1.5 block px-1 text-sm font-semibold text-ink">{city.name}</span>
                       <span className="block truncate px-1 text-xs text-ink-muted">{city.tagline}</span>
