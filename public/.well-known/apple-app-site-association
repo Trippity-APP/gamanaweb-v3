@@ -38,6 +38,10 @@
           {
             "/": "/experiences/?*",
             "comment": "Detail pages only; the /experiences/ hub stays on the web"
+          },
+          {
+            "/": "/family/join/*",
+            "comment": "Family invite join links"
           }
         ]
       }
