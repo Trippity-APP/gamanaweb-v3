@@ -22,4 +22,9 @@ export const SECTIONS = [
   { id: "logo", label: "Logo" },
   { id: "color", label: "Color" },
   { id: "typography", label: "Typography" },
+  { id: "voice", label: "Voice and tone" },
+  { id: "imagery", label: "Imagery" },
+  { id: "components", label: "Components" },
+  { id: "layout", label: "Layout" },
+  { id: "accessibility", label: "Accessibility" },
 ] as const;
