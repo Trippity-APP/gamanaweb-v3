@@ -128,6 +128,14 @@ const config: Config = {
           soft: '#3B4A55',
           muted: '#5F6E7A',
         },
+        // /guidelines-v1 only: resolve to variables declared under [data-guidelines].
+        g: Object.fromEntries(
+          [
+            'bg', 'surface', 'card', 'elevated', 'border', 'border-strong', 'fg', 'fg-muted', 'fg-subtle',
+            'primary', 'primary-text', 'primary-strong', 'on-primary', 'ring', 'accent',
+            'success', 'success-bg', 'warning', 'warning-bg', 'error', 'error-bg', 'info', 'info-bg',
+          ].map((key) => [key, `var(--g-${key})`])
+        ),
       },
       keyframes: {
         'accordion-down': {

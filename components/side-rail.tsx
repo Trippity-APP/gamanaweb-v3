@@ -27,10 +27,10 @@ import { FeedbackWidget } from "@/components/marketplace/FeedbackWidget";
 export default function SideRail() {
   return (
     <>
-      <div className="fixed right-0 top-1/2 -translate-y-1/2 z-50">
+      <div data-side-rail className="fixed right-0 top-1/2 -translate-y-1/2 z-50">
         <GlobalStickyDownload />
       </div>
-      <div className="fixed right-0 top-1/2 translate-y-[120px] z-50">
+      <div data-side-rail className="fixed right-0 top-1/2 translate-y-[120px] z-50">
         <FeedbackWidget />
       </div>
     </>

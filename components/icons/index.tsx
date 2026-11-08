@@ -32,11 +32,13 @@ import {
   Clock as PhClock,
   CloudArrowDown as PhCloudArrowDown,
   Compass as PhCompass,
+  Copy as PhCopy,
   Cookie as PhCookie,
   Cpu as PhCpu,
   CreditCard as PhCreditCard,
   Crosshair as PhCrosshair,
   CurrencyDollar as PhCurrencyDollar,
+  Desktop as PhDesktop,
   DeviceMobile as PhDeviceMobile,
   DotOutline as PhDotOutline,
   DotsSixVertical as PhDotsSixVertical,
@@ -61,6 +63,7 @@ import {
   InstagramLogo as PhInstagramLogo,
   Lightbulb as PhLightbulb,
   Lightning as PhLightning,
+  LinkSimple as PhLinkSimple,
   LinkedinLogo as PhLinkedinLogo,
   List as PhList,
   Lock as PhLock,
@@ -74,6 +77,7 @@ import {
   Microphone as PhMicrophone,
   MicrophoneStage as PhMicrophoneStage,
   Minus as PhMinus,
+  Moon as PhMoon,
   MusicNotes as PhMusicNotes,
   NavigationArrow as PhNavigationArrow,
   PaperPlaneTilt as PhPaperPlaneTilt,
@@ -102,6 +106,7 @@ import {
   SpeakerHigh as PhSpeakerHigh,
   Star as PhStar,
   Storefront as PhStorefront,
+  Sun as PhSun,
   Tag as PhTag,
   Target as PhTarget,
   ThumbsUp as PhThumbsUp,
@@ -185,6 +190,7 @@ export const Clock = wrap(PhClock as PhosphorComponent, "Clock");
 export const CloudDownload = wrap(PhCloudArrowDown as PhosphorComponent, "CloudDownload");
 export const Compass = wrap(PhCompass as PhosphorComponent, "Compass");
 export const Cookie = wrap(PhCookie as PhosphorComponent, "Cookie");
+export const Copy = wrap(PhCopy as PhosphorComponent, "Copy");
 export const Cpu = wrap(PhCpu as PhosphorComponent, "Cpu");
 export const CreditCard = wrap(PhCreditCard as PhosphorComponent, "CreditCard");
 export const DollarSign = wrap(PhCurrencyDollar as PhosphorComponent, "DollarSign");
@@ -212,6 +218,7 @@ export const Landmark = wrap(PhBank as PhosphorComponent, "Landmark");
 export const Languages = wrap(PhTranslate as PhosphorComponent, "Languages");
 export const Library = wrap(PhBooks as PhosphorComponent, "Library");
 export const Lightbulb = wrap(PhLightbulb as PhosphorComponent, "Lightbulb");
+export const Link = wrap(PhLinkSimple as PhosphorComponent, "Link");
 export const Linkedin = wrap(PhLinkedinLogo as PhosphorComponent, "Linkedin");
 export const Loader2 = wrap(PhCircleNotch as PhosphorComponent, "Loader2");
 export const Locate = wrap(PhCrosshair as PhosphorComponent, "Locate");
@@ -230,6 +237,8 @@ export const MessageSquarePlus = wrap(PhChatCenteredText as PhosphorComponent, "
 export const Mic = wrap(PhMicrophone as PhosphorComponent, "Mic");
 export const Mic2 = wrap(PhMicrophoneStage as PhosphorComponent, "Mic2");
 export const Minus = wrap(PhMinus as PhosphorComponent, "Minus");
+export const Monitor = wrap(PhDesktop as PhosphorComponent, "Monitor");
+export const Moon = wrap(PhMoon as PhosphorComponent, "Moon");
 export const MoreHorizontal = wrap(PhDotsThree as PhosphorComponent, "MoreHorizontal");
 export const Music2 = wrap(PhMusicNotes as PhosphorComponent, "Music2");
 export const Navigation = wrap(PhNavigationArrow as PhosphorComponent, "Navigation");
@@ -254,6 +263,7 @@ export const Shield = wrap(PhShield as PhosphorComponent, "Shield");
 export const ShieldCheck = wrap(PhShieldCheck as PhosphorComponent, "ShieldCheck");
 export const ShoppingBag = wrap(PhShoppingBag as PhosphorComponent, "ShoppingBag");
 export const Smartphone = wrap(PhDeviceMobile as PhosphorComponent, "Smartphone");
+export const Sun = wrap(PhSun as PhosphorComponent, "Sun");
 export const Sparkles = wrap(PhSparkle as PhosphorComponent, "Sparkles");
 export const Star = wrap(PhStar as PhosphorComponent, "Star");
 export const Stars = wrap(PhSparkle as PhosphorComponent, "Stars");
