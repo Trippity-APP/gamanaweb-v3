@@ -37,6 +37,24 @@
           "value": "application/json"
         }
       ]
+    },
+    {
+      "source": "/guidelines-v1/**",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive, noimageindex"
+        }
+      ]
+    },
+    {
+      "source": "/brand/**",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive, noimageindex"
+        }
+      ]
     }
   ],
   "redirects": [
