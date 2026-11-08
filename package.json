@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node -e \"require('fs').rmSync('.next/cache/fetch-cache',{recursive:true,force:true})\" && node scripts/build-pricing-snapshot.mjs && tsx scripts/check-contrast.ts && next build && node scripts/verify-blog-seo.mjs && node scripts/verify-site-seo.mjs",
+    "build": "node -e \"require('fs').rmSync('.next/cache/fetch-cache',{recursive:true,force:true})\" && node scripts/build-pricing-snapshot.mjs && tsx scripts/check-contrast.ts && tsx scripts/build-brand-kit.ts && next build && node scripts/verify-blog-seo.mjs && node scripts/verify-site-seo.mjs",
     "start": "node scripts/serve-out.mjs",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
@@ -12,7 +12,8 @@
     "new:blog": "node scripts/new-blog.js",
     "images:process": "node scripts/process-images.mjs",
     "pricing:snapshot": "node scripts/build-pricing-snapshot.mjs",
-    "check:contrast": "tsx scripts/check-contrast.ts"
+    "check:contrast": "tsx scripts/check-contrast.ts",
+    "brand:kit": "tsx scripts/build-brand-kit.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -85,6 +86,7 @@
   "devDependencies": {
     "@types/google.maps": "^3.58.1",
     "@types/qrcode": "^1.5.6",
+    "jszip": "^3.10.2",
     "tsx": "^4.23.13",
     "vercel": "^50.13.2"
   }

@@ -27,4 +27,11 @@ export const SECTIONS = [
   { id: "components", label: "Components" },
   { id: "layout", label: "Layout" },
   { id: "accessibility", label: "Accessibility" },
+  { id: "marketing", label: "Marketing templates" },
+  { id: "partners", label: "Partner co-brand" },
+  { id: "downloads", label: "Downloads" },
+  { id: "changelog", label: "Changelog" },
 ] as const;
+
+export const QR_HEADLINE = "Scan to hear the story";
+export const QR_MULTILINGUAL_LINE = "कहानी सुनने के लिए स्कैन करें · Escanea para escuchar la historia";
