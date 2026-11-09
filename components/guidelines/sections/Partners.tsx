@@ -1,16 +1,30 @@
+/* eslint-disable @next/next/no-img-element -- partner logo files are shown as supplied */
 import { Check } from "@/components/icons";
 import { APPROVAL_SLA_DAYS, BRAND_OWNER_EMAIL, isPlaceholder } from "@/lib/guidelines/config";
 import { AccentChecker } from "../AccentChecker";
 import { LogoMark } from "../LogoMark";
-import { Placeholder, ProposedBadge } from "../Badges";
+import { ProposedBadge } from "../Badges";
 import { SectionHeader, SubHeading } from "../SectionHeader";
+
+/** Example partner used to demonstrate the lockups; swap per partner. */
+const PARTNER_LOGO = {
+  name: "The Organization Learning Labs",
+  light: "/brand-templates/partners/partner-logo-light.png",
+  dark: "/brand-templates/partners/partner-logo-dark.png",
+};
 
 function Lockup({ label, stacked, dark }: { label: string; stacked?: boolean; dark?: boolean }) {
   return (
     <figure className="overflow-hidden rounded-3xl border border-g-border bg-g-card">
       <div className={`flex min-h-[160px] items-center justify-center p-6 ${dark ? "bg-ink" : "bg-white"}`}>
         <div className={`flex items-center gap-4 ${stacked ? "flex-col" : ""}`}>
-          <Placeholder name="partner-logo" className="h-12 w-28 p-1" />
+          <img
+            src={dark ? PARTNER_LOGO.dark : PARTNER_LOGO.light}
+            alt={`${PARTNER_LOGO.name} logo (example partner)`}
+            width={177}
+            height={68}
+            className="h-12 w-auto"
+          />
           <span className={stacked ? "h-px w-24 bg-sand-200" : "h-10 w-px bg-sand-200"} aria-hidden="true" />
           <div className={`flex flex-col ${stacked ? "items-center" : "items-start"}`}>
             <span className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${dark ? "text-white/80" : "text-ink-soft"}`}>
