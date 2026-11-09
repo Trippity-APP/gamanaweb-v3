@@ -1,5 +1,5 @@
 /**
- * Editable brand copy for /guidelines-v1. Mission and promise are drafts for the brand owner
+ * Editable brand copy for /guidelines-v1. Mission and promise are drafts for Sameer Ul Haque
  * to finalise (spec section 11).
  */
 
@@ -55,3 +55,20 @@ export const audiences = [
   { name: "Inbound travellers", line: "Visiting from overseas and wanting a trusted local voice." },
   { name: "Package travellers", line: "On a set itinerary, filling free time with self-paced stories." },
 ];
+
+/** Company email signature. Personal fields are placeholders; staff replace them with their own. */
+export const emailSignature = {
+  signOff: "Kind regards,",
+  name: "FULL NAME",
+  role: "Role",
+  website: { label: "gamana.app", href: "https://www.gamana.app" },
+  logo: { src: "https://www.gamana.app/gamana-logo.png", width: 160 },
+  company: "Gamana India LLP",
+  lines: [
+    { label: "m:", value: "+91 00000 00000" },
+    { label: "a:", value: "New Canaan, CT, USA | Bengaluru, KA, IND" },
+    { label: "w:", value: "www.gamana.app", href: "https://www.gamana.app" },
+  ],
+  disclaimer:
+    "Any opinions expressed in this email are those of the individual and not necessarily of Gamana India LLP. This email and any files transmitted with it are confidential and intended solely for the recipient.",
+};

@@ -4,11 +4,12 @@ export const GUIDELINES_VERSION = "v1.0";
 export const GUIDELINES_DATE = "2026-11-08";
 export const GUIDELINES_STATUS = "Draft for team review";
 
-/** Flip to true once the brand owner signs off the derived dark tokens. */
+/** Flip to true once Sameer Ul Haque signs off the derived dark tokens. */
 export const DARK_TOKENS_APPROVED = false;
 
-export const BRAND_OWNER_ROLE = "Head of Product & Growth";
-export const BRAND_OWNER_EMAIL = "{{BRAND_OWNER_EMAIL}}";
+export const BRAND_OWNER_NAME = "SAMEER UL HAQUE";
+export const BRAND_OWNER_ROLE = "Head, Product & Growth";
+export const BRAND_OWNER_EMAIL = "sam@gamana.app";
 export const FIGMA_URL = "{{FIGMA_URL}}";
 export const APPROVAL_SLA_DAYS = 3;
 
@@ -27,4 +28,11 @@ export const SECTIONS = [
   { id: "components", label: "Components" },
   { id: "layout", label: "Layout" },
   { id: "accessibility", label: "Accessibility" },
+  { id: "marketing", label: "Marketing templates" },
+  { id: "partners", label: "Partner co-brand" },
+  { id: "downloads", label: "Downloads" },
+  { id: "changelog", label: "Changelog" },
 ] as const;
+
+export const QR_HEADLINE = "Scan to hear the story";
+export const QR_MULTILINGUAL_LINE = "कहानी सुनने के लिए स्कैन करें · Escanea para escuchar la historia";

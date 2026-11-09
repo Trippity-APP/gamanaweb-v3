@@ -5,13 +5,12 @@ import { ResponsiveImage } from "@/components/site/ResponsiveImage";
 import { getPhoto } from "@/lib/images";
 import { DoDont } from "../DoDont";
 import { LogoMark } from "../LogoMark";
-import { Placeholder, Pill, ProposedBadge } from "../Badges";
+import { Pill, ProposedBadge } from "../Badges";
 import { SectionHeader, SubHeading } from "../SectionHeader";
 
 const LOGO_PNG = "/gamana-logo.png";
 const APP_ICON = "/favicon-gamana.png";
-const COINS_ICON = "/coins-ic-gamana.png";
-
+const COINS_SVG = "/brand-templates/coins/coins-ic-gamana.svg";
 function Tile({ title, note, className, children }: { title: string; note?: ReactNode; className?: string; children: ReactNode }) {
   return (
     <figure className="overflow-hidden rounded-3xl border border-g-border bg-g-card">
@@ -77,7 +76,7 @@ export function Logo() {
 
       <SubHeading id="lockups">Lockups and variants</SubHeading>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Tile title="Primary lockup, full colour" note="gamana-logo.png. Use on white and light surfaces." className="bg-white">
+        <Tile title="Primary lockup, full colour" note="logo/gamana-logo-color.svg (vector) or gamana-logo.png." className="bg-white">
           <img src={LOGO_PNG} alt="Gamana logo, full colour" width={2000} height={589} className="h-auto w-56" />
         </Tile>
         <Tile title="Mono dark" note="For one-colour print and light photography." className="bg-white">
@@ -89,19 +88,26 @@ export function Logo() {
         <Tile title="App icon" note="favicon-gamana.png, 513 × 513." className="bg-g-surface">
           <img src={APP_ICON} alt="Gamana app icon" width={513} height={513} className="h-24 w-24 rounded-[22%]" />
         </Tile>
-        <Tile title="Gamana Coins icon" note="coins-ic-gamana.png. Always shown with the word “Coins”." className="bg-g-surface">
+        <Tile title="Gamana Coins icon" note="coins/coins-ic-gamana.svg (vector) or .png. Always shown with the word “Coins”." className="bg-g-surface">
           <span className="flex items-center gap-3">
-            <img src={COINS_ICON} alt="Gamana Coins icon" width={249} height={249} className="h-16 w-16" />
+            <img src={COINS_SVG} alt="Gamana Coins icon" width={249} height={249} className="h-16 w-16" />
             <span className="font-display text-2xl font-bold text-g-fg">120 Coins</span>
           </span>
         </Tile>
-        <Tile title="Missing variants" note="Needed for the brand kit; listed in the PR." className="bg-g-surface">
-          <div className="grid w-full grid-cols-2 gap-2">
-            <Placeholder name="gamana-icon.svg" />
-            <Placeholder name="gamana-icon-white.svg" />
-            <Placeholder name="gamana-logo-stacked.svg" />
-            <Placeholder name="gamana-logo (vector, colour)" />
-          </div>
+        <Tile title="Icon only" note="logo/gamana-icon.svg, plus white and black versions." className="bg-white">
+          <span className="flex items-center gap-6">
+            <img src="/logo/gamana-icon.svg" alt="Gamana icon, full colour" className="h-20 w-auto" />
+            <img src="/logo/gamana-icon-black.svg" alt="Gamana icon, black" className="h-20 w-auto" />
+            <span className="rounded-2xl bg-ink p-3">
+              <img src="/logo/gamana-icon-white.svg" alt="Gamana icon, white" className="h-14 w-auto" />
+            </span>
+          </span>
+        </Tile>
+        <Tile title="Stacked lockup" note="logo/gamana-logo-stacked.svg, for square and narrow spaces." className="bg-white">
+          <img src="/logo/gamana-logo-stacked.svg" alt="Gamana stacked logo, full colour" className="h-32 w-auto" />
+        </Tile>
+        <Tile title="Stacked, reversed" note="logo/gamana-logo-stacked-white.svg" className="bg-ink">
+          <img src="/logo/gamana-logo-stacked-white.svg" alt="Gamana stacked logo, white" className="h-32 w-auto" />
         </Tile>
       </div>
 
@@ -195,14 +201,15 @@ export function Logo() {
       <SubHeading id="app-icon">App icon</SubHeading>
       <div className="grid gap-4 sm:grid-cols-2">
         <figure className="flex flex-col items-center rounded-3xl border border-g-border bg-g-card p-6">
-          <img src={APP_ICON} alt="Gamana app icon in the iOS rounded-square mask" width={513} height={513} className="h-32 w-32 rounded-[22%]" />
+          <img src="/logo/app-icon/ios-1024.png" alt="Gamana app icon in the iOS rounded-square mask" width={1024} height={1024} className="h-32 w-32 rounded-[22%]" />
           <figcaption className="mt-4 text-center text-sm text-g-fg-muted">
             <strong className="text-g-fg">iOS:</strong> supply a square 1024 × 1024 file with no transparency; iOS applies the mask.
           </figcaption>
         </figure>
         <figure className="flex flex-col items-center rounded-3xl border border-g-border bg-g-card p-6">
           <div className="relative h-32 w-32">
-            <img src={APP_ICON} alt="Gamana app icon in the Android adaptive circle mask" width={513} height={513} className="h-32 w-32 rounded-full" />
+            <img src="/logo/app-icon/android-adaptive-background.png" alt="" width={432} height={432} className="absolute inset-0 h-32 w-32 rounded-full" />
+            <img src="/logo/app-icon/android-adaptive-foreground.png" alt="Gamana app icon in the Android adaptive circle mask" width={432} height={432} className="relative h-32 w-32 rounded-full" />
             <span className="absolute inset-[17%] rounded-full border-2 border-dashed border-white" aria-hidden="true" />
           </div>
           <figcaption className="mt-4 text-center text-sm text-g-fg-muted">
@@ -210,11 +217,11 @@ export function Logo() {
           </figcaption>
         </figure>
       </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Placeholder name="app-icon/ios-1024.png" className="flex-1" />
-        <Placeholder name="app-icon/android-512.png" className="flex-1" />
-        <Placeholder name="app-icon/android-adaptive-foreground.png" className="flex-1" />
-      </div>
+      <p className="mt-4 text-sm text-g-fg-muted">
+        Files: <code className="font-mono">app-icon/ios-1024.png</code>, <code className="font-mono">android-512.png</code>,{" "}
+        <code className="font-mono">android-adaptive-foreground.png</code> and{" "}
+        <code className="font-mono">android-adaptive-background.png</code>, all in Downloads.
+      </p>
 
       <SubHeading id="store-badges">Store badges</SubHeading>
       <div className="rounded-3xl border border-g-border bg-g-card p-6">

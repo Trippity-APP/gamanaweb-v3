@@ -1,32 +1,10 @@
 /* eslint-disable @next/next/no-img-element -- narrator portraits are static files */
 import type { ReactNode } from "react";
-import {
-  ArrowRight,
-  Calendar,
-  Check,
-  ChevronRight,
-  Clock,
-  Compass,
-  Download,
-  Gift,
-  Globe,
-  Headphones,
-  Heart,
-  Languages,
-  Lock,
-  Map,
-  MapPin,
-  Pause,
-  Play,
-  Search,
-  Share2,
-  Star,
-  Ticket,
-  User,
-  WifiOff,
-  X,
-  type LucideIcon,
-} from "@/components/icons";
+import * as Icons from "@/components/icons";
+import { Check, Headphones, type LucideIcon } from "@/components/icons";
+import { AppleMark, GoogleMark, TikTokMark, XMark } from "@/components/icons/brand-marks";
+import { GamanaCoinIcon } from "@/components/GamanaCoinIcon";
+import { scanIconUsage } from "@/lib/guidelines/icon-usage";
 import { ResponsiveImage } from "@/components/site/ResponsiveImage";
 import { NARRATORS } from "@/lib/data/narrators";
 import { getPhoto, type PhotoKey } from "@/lib/images";
@@ -56,32 +34,15 @@ function PhotoTile({ k, caption, className, children }: { k: PhotoKey; caption: 
   );
 }
 
-const ICONS: [string, LucideIcon][] = [
-  ["MapPin", MapPin],
-  ["Headphones", Headphones],
-  ["Play", Play],
-  ["Pause", Pause],
-  ["Download", Download],
-  ["WifiOff", WifiOff],
-  ["Languages", Languages],
-  ["Search", Search],
-  ["Star", Star],
-  ["Clock", Clock],
-  ["Compass", Compass],
-  ["Map", Map],
-  ["Ticket", Ticket],
-  ["Gift", Gift],
-  ["Heart", Heart],
-  ["Share2", Share2],
-  ["Lock", Lock],
-  ["Check", Check],
-  ["X", X],
-  ["ChevronRight", ChevronRight],
-  ["ArrowRight", ArrowRight],
-  ["Globe", Globe],
-  ["Calendar", Calendar],
-  ["User", User],
-];
+const ICON_LIBRARY = Icons as unknown as Record<string, LucideIcon>;
+
+const MARKS: Record<string, { label: string; note: string; render: ReactNode }> = {
+  GamanaCoinIcon: { label: "Gamana Coins", note: "Coin artwork; always with the word “Coins”", render: <GamanaCoinIcon className="h-6 w-6" aria-hidden /> },
+  GoogleMark: { label: "Google", note: "Sign-in button only", render: <GoogleMark className="h-6 w-6" /> },
+  AppleMark: { label: "Apple", note: "Sign-in button only", render: <AppleMark className="h-6 w-6" /> },
+  XMark: { label: "X", note: "Footer social link", render: <XMark className="h-6 w-6" /> },
+  TikTokMark: { label: "TikTok", note: "Footer social link", render: <TikTokMark className="h-6 w-6" /> },
+};
 
 const AI_POLICY = [
   "Allowed only for abstract backgrounds, illustrations and internal concepts.",
@@ -93,6 +54,7 @@ const AI_POLICY = [
 
 export function Imagery() {
   const narratorPhoto = NARRATORS[1];
+  const usage = scanIconUsage();
   return (
     <section id="imagery" className="scroll-mt-32">
       <SectionHeader
@@ -233,17 +195,44 @@ export function Imagery() {
 
       <SubHeading id="imagery-icons">Icons</SubHeading>
       <p className="-mt-2 mb-5 max-w-[65ch] text-g-fg-muted">
-        Phosphor icons through <code className="font-mono text-sm">@/components/icons</code>. Bold weight by default; add a{" "}
-        <code className="font-mono text-sm">fill-*</code> class for the solid weight. Sizes 16, 20 and 24; colour inherits from
-        text. Never mix in another icon set.
+        Every icon used on the website ({usage.icons.length}), read from the site&apos;s source at build time so this list
+        never drifts. Phosphor icons through <code className="font-mono text-sm">@/components/icons</code>; the second line
+        is the Phosphor glyph name for Figma. Bold weight by default; add a <code className="font-mono text-sm">fill-*</code>{" "}
+        class for the solid weight. Sizes 16, 20 and 24; colour inherits from text. Never mix in another icon set.
       </p>
-      <ul className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8">
-        {ICONS.map(([name, Icon]) => (
-          <li key={name} className="flex flex-col items-center gap-2 rounded-2xl border border-g-border bg-g-card p-3 text-g-fg">
-            <Icon size={24} aria-hidden="true" />
-            <span className="w-full truncate text-center font-mono text-[11px] text-g-fg-subtle">{name}</span>
-          </li>
-        ))}
+      <ul className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-7">
+        {usage.icons.map(({ name, glyph, files }) => {
+          const Icon = ICON_LIBRARY[name];
+          return (
+            <li
+              key={name}
+              title={`Used in ${files.length} file${files.length === 1 ? "" : "s"}`}
+              className="flex flex-col items-center gap-1.5 rounded-2xl border border-g-border bg-g-card p-3 text-g-fg"
+            >
+              {Icon ? <Icon size={24} aria-hidden="true" /> : null}
+              <span className="w-full truncate text-center font-mono text-[11px] text-g-fg">{name}</span>
+              {glyph !== name && <span className="w-full truncate text-center font-mono text-[10px] text-g-fg-subtle">{glyph}</span>}
+            </li>
+          );
+        })}
+      </ul>
+
+      <h4 className="mt-8 font-display text-base font-bold text-g-fg">Brand and third-party marks</h4>
+      <p className="mt-1 mb-4 max-w-[65ch] text-sm text-g-fg-muted">
+        Official artwork, not Phosphor glyphs. Use each only for what it represents and never recolour the multi-colour marks.
+      </p>
+      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+        {usage.marks.map(({ name }) => {
+          const mark = MARKS[name];
+          if (!mark) return null;
+          return (
+            <li key={name} className="flex flex-col items-center gap-1.5 rounded-2xl border border-g-border bg-g-card p-3 text-center text-g-fg">
+              {mark.render}
+              <span className="font-mono text-[11px] text-g-fg">{mark.label}</span>
+              <span className="text-[11px] text-g-fg-subtle">{mark.note}</span>
+            </li>
+          );
+        })}
       </ul>
       <div className="mt-4 flex items-end gap-6 text-g-fg">
         {[16, 20, 24].map((s) => (

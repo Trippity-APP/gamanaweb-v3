@@ -18,6 +18,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
+import { guardGuidelines } from "./guidelines-auth.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
@@ -421,6 +422,20 @@ if (Array.isArray(config.rewrites)) {
 const handler = await loadHandler();
 
 const server = http.createServer(async (request, response) => {
+  let rawPath = "/";
+  try {
+    rawPath = new URL(request.url || "/", "http://localhost").pathname;
+  } catch {
+    rawPath = String(request.url || "/").split("?")[0];
+  }
+  try {
+    if (!guardGuidelines(request, response, rawPath)) return;
+  } catch (err) {
+    console.error("[guidelines auth]", err);
+    response.writeHead(500, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+    response.end("Server error");
+    return;
+  }
   try {
     const host = request.headers.host || `localhost:${PORT}`;
     const url = new URL(request.url || "/", `http://${host}`);
