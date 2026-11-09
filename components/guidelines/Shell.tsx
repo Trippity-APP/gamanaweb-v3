@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Download } from "@/components/icons";
 import {
   BRAND_OWNER_EMAIL,
+  BRAND_OWNER_NAME,
   BRAND_OWNER_ROLE,
   GUIDELINES_DATE,
   GUIDELINES_STATUS,
@@ -73,7 +74,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <footer className="border-t border-g-border bg-g-surface">
         <div className="container-site flex flex-col gap-4 py-10 text-sm text-g-fg-muted md:flex-row md:items-center md:justify-between">
           <p>
-            Owner: <strong className="text-g-fg">{BRAND_OWNER_ROLE}</strong>
+            Owner: <strong className="text-g-fg">{BRAND_OWNER_NAME}</strong>, {BRAND_OWNER_ROLE}
             {" · "}
             {ownerEmailSet ? (
               <a className="focus-ring rounded text-g-primary-text underline" href={`mailto:${BRAND_OWNER_EMAIL}`}>

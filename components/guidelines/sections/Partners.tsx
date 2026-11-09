@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- partner logo files are shown as supplied */
 import { Check } from "@/components/icons";
-import { APPROVAL_SLA_DAYS, BRAND_OWNER_EMAIL, isPlaceholder } from "@/lib/guidelines/config";
+import { APPROVAL_SLA_DAYS, BRAND_OWNER_EMAIL, BRAND_OWNER_NAME, isPlaceholder } from "@/lib/guidelines/config";
 import { AccentChecker } from "../AccentChecker";
 import { LogoMark } from "../LogoMark";
 import { ProposedBadge } from "../Badges";
@@ -56,8 +56,8 @@ const OVERRIDABLE = [
 ];
 
 const STEPS = [
-  "Submit the brief and assets to the brand owner.",
-  `Brand owner reviews within ${APPROVAL_SLA_DAYS} business days.`,
+  `Submit the brief and assets to ${BRAND_OWNER_NAME}.`,
+  `${BRAND_OWNER_NAME} reviews within ${APPROVAL_SLA_DAYS} business days.`,
   "Provide a proof (mockup) of the final placement.",
   "Get written sign-off before anything is printed or published.",
   "Log the approval in the changelog and approvals register.",

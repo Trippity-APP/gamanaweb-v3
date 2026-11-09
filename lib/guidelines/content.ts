@@ -1,5 +1,5 @@
 /**
- * Editable brand copy for /guidelines-v1. Mission and promise are drafts for the brand owner
+ * Editable brand copy for /guidelines-v1. Mission and promise are drafts for Sameer Ul Haque
  * to finalise (spec section 11).
  */
 

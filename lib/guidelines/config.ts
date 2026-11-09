@@ -4,10 +4,11 @@ export const GUIDELINES_VERSION = "v1.0";
 export const GUIDELINES_DATE = "2026-11-08";
 export const GUIDELINES_STATUS = "Draft for team review";
 
-/** Flip to true once the brand owner signs off the derived dark tokens. */
+/** Flip to true once Sameer Ul Haque signs off the derived dark tokens. */
 export const DARK_TOKENS_APPROVED = false;
 
-export const BRAND_OWNER_ROLE = "Head of Product & Growth";
+export const BRAND_OWNER_NAME = "SAMEER UL HAQUE";
+export const BRAND_OWNER_ROLE = "Head, Product & Growth";
 export const BRAND_OWNER_EMAIL = "sam@gamana.app";
 export const FIGMA_URL = "{{FIGMA_URL}}";
 export const APPROVAL_SLA_DAYS = 3;

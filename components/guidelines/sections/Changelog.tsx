@@ -2,6 +2,7 @@ import { changelog } from "@/lib/guidelines/changelog";
 import {
   APPROVAL_SLA_DAYS,
   BRAND_OWNER_EMAIL,
+  BRAND_OWNER_NAME,
   BRAND_OWNER_ROLE,
   FIGMA_URL,
   GUIDELINES_DATE,
@@ -23,7 +24,7 @@ export function Changelog() {
         id="changelog"
         number={13}
         title="Changelog and ownership"
-        intro="What changed, when, and who to ask. Anything not covered here needs the brand owner's sign-off."
+        intro={`What changed, when, and who to ask. Anything not covered here needs sign-off from ${BRAND_OWNER_NAME}.`}
       />
 
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
@@ -63,7 +64,7 @@ export function Changelog() {
           <div className="rounded-3xl border border-g-border bg-g-card p-6 text-sm">
             <p className="font-semibold text-g-fg">Owner and approvals</p>
             <p className="mt-2 text-g-fg-muted">
-              {BRAND_OWNER_ROLE} (brand owner). New uses and exceptions are reviewed within {APPROVAL_SLA_DAYS} business days.
+              <strong className="text-g-fg">{BRAND_OWNER_NAME}</strong>, {BRAND_OWNER_ROLE} at Gamana. New uses and exceptions are reviewed within {APPROVAL_SLA_DAYS} business days.
             </p>
             <p className="mt-2">
               {ownerSet ? (
