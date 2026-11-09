@@ -8,7 +8,7 @@ export const GUIDELINES_STATUS = "Draft for team review";
 export const DARK_TOKENS_APPROVED = false;
 
 export const BRAND_OWNER_ROLE = "Head of Product & Growth";
-export const BRAND_OWNER_EMAIL = "{{BRAND_OWNER_EMAIL}}";
+export const BRAND_OWNER_EMAIL = "sam@gamana.app";
 export const FIGMA_URL = "{{FIGMA_URL}}";
 export const APPROVAL_SLA_DAYS = 3;
 
