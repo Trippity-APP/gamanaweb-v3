@@ -7,7 +7,7 @@ import "regenerator-runtime/runtime";
 import fontkit from "@pdf-lib/fontkit";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { rgb, type PDFPage } from "pdf-lib";
+import { clip, endPath, popGraphicsState, pushGraphicsState, rectangle, rgb, type PDFPage } from "pdf-lib";
 
 export type Op = {
   d: string;
@@ -16,6 +16,8 @@ export type Op = {
   stroke?: string;
   strokeWidth?: number;
   dash?: number[];
+  /** Horizontal fill gradient between x0 and x1 in scene units (overrides fill). */
+  gradient?: { from: string; to: string; x0: number; x1: number };
 };
 
 type Matrix = [number, number, number, number, number, number];
@@ -151,11 +153,18 @@ export function textBlock(
 export function toSvg(ops: Op[], width: number, height: number, opts: { defs?: string; pixelWidth?: number } = {}) {
   const pw = opts.pixelWidth ?? width;
   const ph = (pw / width) * height;
+  let defs = opts.defs ?? "";
   const body = ops
-    .map((o) => {
+    .map((o, i) => {
+      let fill = o.fill ?? "none";
+      if (o.gradient) {
+        const g = o.gradient;
+        defs += `<linearGradient id="og${i}" gradientUnits="userSpaceOnUse" x1="${fmt(g.x0)}" y1="0" x2="${fmt(g.x1)}" y2="0"><stop offset="0" stop-color="${g.from}"/><stop offset="1" stop-color="${g.to}"/></linearGradient>`;
+        fill = `url(#og${i})`;
+      }
       const attrs = [
         `d="${o.d}"`,
-        `fill="${o.fill ?? "none"}"`,
+        `fill="${fill}"`,
         o.opacity !== undefined ? `opacity="${o.opacity}"` : "",
         o.stroke ? `stroke="${o.stroke}" stroke-width="${o.strokeWidth ?? 1}"` : "",
         o.dash ? `stroke-dasharray="${o.dash.join(" ")}"` : "",
@@ -163,7 +172,7 @@ export function toSvg(ops: Op[], width: number, height: number, opts: { defs?: s
       return `<path ${attrs.filter(Boolean).join(" ")}/>`;
     })
     .join("");
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${fmt(pw)}" height="${fmt(ph)}" viewBox="0 0 ${fmt(width)} ${fmt(height)}">${opts.defs ? `<defs>${opts.defs}</defs>` : ""}${body}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${fmt(pw)}" height="${fmt(ph)}" viewBox="0 0 ${fmt(width)} ${fmt(height)}">${defs ? `<defs>${defs}</defs>` : ""}${body}</svg>`;
 }
 
 const hexToRgb = (hex: string) => {
@@ -171,10 +180,34 @@ const hexToRgb = (hex: string) => {
   return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
 };
 
+const mix = (a: string, b: string, t: number) => {
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+  const ch = (shift: number) => Math.round(((pa >> shift) & 255) * (1 - t) + ((pb >> shift) & 255) * t);
+  return `#${[16, 8, 0].map((sh) => ch(sh).toString(16).padStart(2, "0")).join("")}`;
+};
+
+const GRADIENT_STRIPS = 60;
+
 /** Draws a scene whose units are millimetres from the top-left of the page. */
 export function drawPdf(page: PDFPage, ops: Op[]) {
   const scale = 72 / 25.4;
   for (const o of ops) {
+    if (o.gradient) {
+      // pdf-lib has no gradient API: clip the path into thin vertical strips, each a solid step.
+      const { from, to, x0, x1 } = o.gradient;
+      const lo = Math.min(x0, x1), hi = Math.max(x0, x1);
+      const step = (hi - lo) / GRADIENT_STRIPS;
+      for (let k = 0; k < GRADIENT_STRIPS; k++) {
+        const sx = lo + k * step;
+        const t = (sx + step / 2 - x0) / (x1 - x0);
+        // Each strip overlaps the next so anti-aliased clip edges never show the page through.
+        const width = k === GRADIENT_STRIPS - 1 ? step : step * 2;
+        page.pushOperators(pushGraphicsState(), rectangle(sx * scale, 0, width * scale, page.getHeight()), clip(), endPath());
+        page.drawSvgPath(o.d, { x: 0, y: page.getHeight(), scale, color: hexToRgb(mix(from, to, t)) });
+        page.pushOperators(popGraphicsState());
+      }
+      continue;
+    }
     page.drawSvgPath(o.d, {
       x: 0,
       y: page.getHeight(),

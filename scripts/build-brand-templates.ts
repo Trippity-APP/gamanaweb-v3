@@ -37,6 +37,12 @@ function logo(path: string, box: Box, x: number, y: number, w: number) {
   return { d: transformPath(path, [s, 0, 0, s, x - box.x * s, y - box.y * s]), h: box.h * s };
 }
 
+/** The full-colour lockup at `w` wide, using the master's horizontal teal gradient. */
+function colorLogo(x: number, y: number, w: number): { op: Op; h: number } {
+  const m = logo(lockupD, lockupBox, x, y, w);
+  return { op: { d: m.d, gradient: { from: GRADIENT_FROM, to: GRADIENT_TO, x0: x, x1: x + w } }, h: m.h };
+}
+
 const write = (rel: string, data: string | Buffer | Uint8Array) => {
   const file = join(OUT, rel);
   mkdirSync(join(file, ".."), { recursive: true });
@@ -289,13 +295,19 @@ function tentFace(): Op[] {
   ops.push(...code.ops);
   const colX = 12 + side + code.quiet + 8;
   const colW = fw - colX - 10;
-  const mark = logo(lockupD, lockupBox, colX, 20, 44);
-  ops.push({ d: mark.d, fill: INK });
+  const mark = colorLogo(colX, 20, 44);
+  ops.push(mark.op);
   ops.push(...qrCopy(colX, 20 + mark.h + 7, colW, 5.6, 3.2, "left").ops);
   return ops;
 }
 
-const moveOps = (ops: Op[], m: [number, number, number, number, number, number]) => ops.map((op) => ({ ...op, d: transformPath(op.d, m) }));
+/** Moves ops by an affine matrix; gradient ends follow along x (layouts only flip or translate). */
+const moveOps = (ops: Op[], m: [number, number, number, number, number, number]) =>
+  ops.map((op) => ({
+    ...op,
+    d: transformPath(op.d, m),
+    gradient: op.gradient && { ...op.gradient, x0: m[0] * op.gradient.x0 + m[4], x1: m[0] * op.gradient.x1 + m[4] },
+  }));
 
 const PRINT: PrintSpec[] = [
   {
@@ -321,8 +333,8 @@ const PRINT: PrintSpec[] = [
       ops.push(...code.ops);
       const colX = o + 7 + side + code.quiet + 3;
       const colW = o + 85.6 - 5 - colX;
-      const mark = logo(lockupD, lockupBox, colX, o + 10, 28);
-      ops.push({ d: mark.d, fill: INK });
+      const mark = colorLogo(colX, o + 10, 28);
+      ops.push(mark.op);
       ops.push(...qrCopy(colX, o + 10 + mark.h + 4, colW, 3.6, 1.9, "left").ops);
       return ops;
     },
@@ -338,8 +350,8 @@ const PRINT: PrintSpec[] = [
       const headH = 20 * 1.15;
       const stackH = markH + 22 + headH + 16 + 150 + 5 + 8 + 9 * 1.5 + 9 * 1.4;
       const markTop = o + (400 - stackH) / 2;
-      const mark = logo(lockupD, lockupBox, o + (297 - 140) / 2, markTop, 140);
-      ops.push({ d: mark.d, fill: INK });
+      const mark = colorLogo(o + (297 - 140) / 2, markTop, 140);
+      ops.push(mark.op);
       const copyTop = markTop + mark.h + 22;
       const head = textBlock(QR_HEADLINE, "display800", 20, { x: o + 148.5, top: copyTop, maxWidth: 250, lineHeight: 1.15, fill: INK, align: "center" });
       ops.push(...head.ops);

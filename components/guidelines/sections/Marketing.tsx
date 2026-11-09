@@ -11,6 +11,7 @@ import { SectionHeader, SubHeading } from "../SectionHeader";
 const QR = "/badges/download-qr.svg";
 const APP_ICON = "/favicon-gamana.png";
 const KIT = "/brand/templates";
+const GAMANA_COLOR_LOGO = "/logo/gamana-logo-color.svg";
 const PLACEHOLDER_SCREEN = "/brand-templates/store-listing/placeholder-screen.png";
 
 /** Download link for one template export in the brand kit. */
@@ -88,7 +89,7 @@ function Frame({ title, note, links, children }: { title: string; note: string; 
 function QrBlock({ small }: { small?: boolean }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <LogoMark className={small ? "w-16 text-ink" : "w-24 text-ink"} label="Gamana" />
+      <img src={GAMANA_COLOR_LOGO} alt="Gamana" width={96} height={27} className={small ? "h-auto w-16" : "h-auto w-24"} />
       <p className={`mt-2 font-display font-extrabold text-ink ${small ? "text-sm" : "text-lg"}`}>{QR_HEADLINE}</p>
       <img src={QR} alt="QR code to download the Gamana app" className={`mt-2 rounded-lg bg-white p-1.5 ${small ? "h-16 w-16" : "h-24 w-24"}`} />
       <p className="mt-2 text-[10px] text-ink-soft">{QR_MULTILINGUAL_LINE}</p>
@@ -165,7 +166,7 @@ export function Marketing() {
           <div className="flex w-56 items-center gap-3 rounded-xl bg-white p-3 shadow-card">
             <img src={QR} alt="" className="h-16 w-16 rounded-md" />
             <div>
-              <LogoMark className="w-16 text-ink" label="Gamana" />
+              <img src={GAMANA_COLOR_LOGO} alt="Gamana" width={64} height={18} className="h-auto w-16" />
               <p className="mt-1 font-display text-sm font-extrabold text-ink">{QR_HEADLINE}</p>
             </div>
           </div>
