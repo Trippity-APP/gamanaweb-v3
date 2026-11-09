@@ -4,6 +4,7 @@ import { Download } from "@/components/icons";
 import { ResponsiveImage } from "@/components/site/ResponsiveImage";
 import { getPhoto, type PhotoKey } from "@/lib/images";
 import { QR_HEADLINE, QR_MULTILINGUAL_LINE } from "@/lib/guidelines/config";
+import { emailSignature } from "@/lib/guidelines/content";
 import { LogoMark } from "../LogoMark";
 import { SectionHeader, SubHeading } from "../SectionHeader";
 
@@ -197,12 +198,24 @@ export function Marketing() {
             </div>
           </div>
         </Frame>
-        <Frame title="Signature" note="Plain text plus the mono logo; no banners">
-          <div className="w-full max-w-sm rounded-xl bg-white p-4 text-sm shadow-card">
-            <p className="font-semibold text-ink">Full name</p>
-            <p className="text-ink-soft">Role · Gamana</p>
-            <p className="text-ink-soft">gamana.app</p>
-            <LogoMark className="mt-3 w-20 text-ink" label="Gamana" />
+        <Frame
+          title="Signature"
+          note="HTML table, inline styles, Arial (mail clients skip web fonts) and the colour PNG logo; no banners"
+          links={<FileLink href={`${KIT}/email/signature.html`} label="HTML signature" />}
+        >
+          <div className="w-full max-w-sm rounded-xl bg-white p-4 font-[Arial,Helvetica,sans-serif] leading-[1.45] shadow-card">
+            <p className="pb-1.5 text-sm font-bold text-ink">{emailSignature.signOff}</p>
+            <p className="text-lg font-bold text-brand-900">{emailSignature.name}</p>
+            <p className="pb-2 text-[13px] italic text-ink">{emailSignature.role}</p>
+            <img src="/gamana-logo.png" alt="Gamana" width={emailSignature.logo.width} className="mb-2 block h-auto" />
+            <p className="pb-1.5 text-[15px] font-bold text-ink">{emailSignature.website.label}</p>
+            <p className="pb-2.5 text-xs text-ink">{emailSignature.company}</p>
+            {emailSignature.lines.map((line, i) => (
+              <p key={line.label} className={`text-[13px] text-ink ${i === emailSignature.lines.length - 1 ? "pb-3" : ""}`}>
+                <span className="text-brand-700">{line.label}</span> {line.value}
+              </p>
+            ))}
+            <p className="text-[10px] italic leading-[1.4] text-ink-muted">{emailSignature.disclaimer}</p>
           </div>
         </Frame>
       </div>

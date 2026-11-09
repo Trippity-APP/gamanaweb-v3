@@ -7,6 +7,7 @@
  * - social/*.png: the Marketing section's SocialFrame layouts at platform size
  * - qr/*.pdf: print files at exact mm sizes with 3 mm bleed and crop marks
  * - store-listing/*.png: App Store and Play screenshot layouts with a placeholder screen
+ * - email/signature.html: the company email signature, inline-styled for mail clients
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -14,6 +15,7 @@ import sharp from "sharp";
 import { PDFDocument } from "pdf-lib";
 import { brandScale, colorGroups, PRIMARY_HEX } from "../lib/guidelines/tokens";
 import { QR_HEADLINE, QR_MULTILINGUAL_LINE } from "../lib/guidelines/config";
+import { emailSignature } from "../lib/guidelines/content";
 import { GRADIENT_FROM, GRADIENT_TO, INK, ROOT, WHITE, iconBox, iconD, lockupBox, lockupD, type Box } from "./brand-assets/logo-paths";
 import { circle, drawPdf, measure, rect, roundRect, textBlock, textPath, toSvg, transformPath, type Op } from "./brand-assets/draw";
 import manifest from "../lib/data/image-manifest.json";
@@ -379,13 +381,53 @@ async function buildPrint() {
   }
 }
 
+/* ----------------------------------------------------------------- email */
+
+const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/** Mail clients ignore stylesheets and web fonts, so this is a table with inline styles and Arial. */
+function signatureHtml() {
+  const sig = emailSignature;
+  const brand900 = token("brand-900");
+  const brand700 = token("brand-700");
+  const muted = token("ink-muted");
+  const row = (style: string, content: string) => `    <tr>\n      <td style="${style}">${content}</td>\n    </tr>`;
+  const link = (href: string, text: string, style: string) => `<a href="${href}" target="_blank" style="${style}">${esc(text)}</a>`;
+  const rows = [
+    row(`padding-bottom:6px; font-size:14px; color:${INK}`, `<b>${esc(sig.signOff)}</b>`),
+    row(`font-size:18px; color:${brand900}; font-weight:bold`, esc(sig.name)),
+    row(`font-size:13px; color:${INK}; font-style:italic; padding-bottom:8px`, esc(sig.role)),
+    row(
+      "padding-bottom:8px",
+      `<a href="${sig.website.href}" target="_blank"><img src="${sig.logo.src}" alt="Gamana" width="${sig.logo.width}" style="display:block; border:0; outline:none"></a>`,
+    ),
+    row("font-size:15px; padding-bottom:6px", link(sig.website.href, sig.website.label, `color:${INK}; text-decoration:none; font-weight:bold`)),
+    row(`font-size:12px; color:${INK}; padding-bottom:10px`, esc(sig.company)),
+    ...sig.lines.map((line, i) =>
+      row(
+        `font-size:13px; color:${INK}${i === sig.lines.length - 1 ? "; padding-bottom:12px" : ""}`,
+        `<span style="color:${brand700}">${esc(line.label)}</span> ${line.href ? link(line.href, line.value, `color:${INK}; text-decoration:none`) : esc(line.value)}`,
+      ),
+    ),
+    row(`font-size:10px; color:${muted}; font-style:italic; line-height:1.4`, esc(sig.disclaimer)),
+  ];
+  return `<!-- Gamana email signature. Replace FULL NAME, Role and the mobile number, then paste into your mail client. -->
+<table border="0" cellpadding="0" cellspacing="0" style="font-family:Arial, Helvetica, sans-serif; line-height:1.45">
+  <tbody>
+${rows.join("\n")}
+  </tbody>
+</table>
+`;
+}
+
 async function main() {
   write("coins/coins-ic-gamana.svg", coinSvg());
   await preview("coin", coinSvg().replace('width="249" height="249"', 'width="498" height="498"'));
   await buildSocial();
   await buildStore();
   await buildPrint();
-  console.log("brand templates: coin SVG, 6 social PNGs, 7 store PNGs, 3 QR PDFs in public/brand-templates/");
+  write("email/signature.html", signatureHtml());
+  console.log("brand templates: coin SVG, 6 social PNGs, 7 store PNGs, 3 QR PDFs, email signature in public/brand-templates/");
 }
 
 main().catch((err) => {

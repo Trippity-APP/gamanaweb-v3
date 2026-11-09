@@ -54,7 +54,7 @@ const COPIES: [string, string][] = [
 ];
 
 /** Committed template folders under public/brand-templates, copied whole into templates/. */
-const TEMPLATE_DIRS = ["social", "qr", "store-listing"];
+const TEMPLATE_DIRS = ["social", "qr", "store-listing", "email"];
 
 function write(path: string, data: string | Buffer) {
   mkdirSync(dirname(path), { recursive: true });
