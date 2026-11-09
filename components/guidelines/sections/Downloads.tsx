@@ -18,13 +18,6 @@ function readManifest(): Asset[] {
 }
 
 const MISSING = [
-  "logo/gamana-icon.svg",
-  "logo/gamana-icon-white.svg",
-  "logo/gamana-logo-stacked.svg",
-  "logo/gamana-logo.svg (colour vector)",
-  "app-icon/ios-1024.png",
-  "app-icon/android-512.png",
-  "app-icon/android-adaptive-foreground.png",
   "coins/coins-ic-gamana.svg",
   "templates/social/*.png",
   "templates/qr/*.pdf",
@@ -37,6 +30,9 @@ function formatBytes(bytes: number) {
 
 const PREVIEW_BG: Record<string, string> = {
   "logo/gamana-logo-white.svg": "bg-ink",
+  "logo/gamana-logo-stacked-white.svg": "bg-ink",
+  "logo/gamana-icon-white.svg": "bg-ink",
+  "app-icon/android-adaptive-foreground.png": "bg-ink",
 };
 
 export function Downloads() {

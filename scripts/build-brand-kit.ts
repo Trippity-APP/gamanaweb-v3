@@ -1,6 +1,6 @@
 /**
  * Builds public/brand: tokens (JSON, CSS, Tailwind snippet) from lib/guidelines/tokens.ts, copies the
- * brand files the site already ships, writes a manifest for the Downloads section, and zips it all.
+ * brand files the site already ships (including the variants in public/logo from build-logo-variants.ts), writes a manifest for the Downloads section, and zips it all.
  * Run: npm run brand:kit (also part of `npm run build`). Output is generated, not committed.
  */
 import { mkdirSync, readFileSync, rmSync, writeFileSync, readdirSync, statSync, copyFileSync } from "node:fs";
@@ -32,6 +32,17 @@ const WHITE = themes.light.bg;
 /** Files copied as-is from public/, with their place in the kit. */
 const COPIES: [string, string][] = [
   ["gamana-logo.png", "logo/gamana-logo.png"],
+  ["logo/gamana-logo-color.svg", "logo/gamana-logo.svg"],
+  ["logo/gamana-logo-stacked.svg", "logo/gamana-logo-stacked.svg"],
+  ["logo/gamana-logo-stacked-white.svg", "logo/gamana-logo-stacked-white.svg"],
+  ["logo/gamana-logo-stacked-black.svg", "logo/gamana-logo-stacked-black.svg"],
+  ["logo/gamana-icon.svg", "logo/gamana-icon.svg"],
+  ["logo/gamana-icon-white.svg", "logo/gamana-icon-white.svg"],
+  ["logo/gamana-icon-black.svg", "logo/gamana-icon-black.svg"],
+  ["logo/app-icon/ios-1024.png", "app-icon/ios-1024.png"],
+  ["logo/app-icon/android-512.png", "app-icon/android-512.png"],
+  ["logo/app-icon/android-adaptive-foreground.png", "app-icon/android-adaptive-foreground.png"],
+  ["logo/app-icon/android-adaptive-background.png", "app-icon/android-adaptive-background.png"],
   ["favicon-gamana.png", "app-icon/gamana-app-icon-513.png"],
   ["badges/app-store-badge.svg", "badges/app-store-badge.svg"],
   ["badges/google-play-badge.svg", "badges/google-play-badge.svg"],
