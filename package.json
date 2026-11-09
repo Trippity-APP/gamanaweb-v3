@@ -13,7 +13,8 @@
     "images:process": "node scripts/process-images.mjs",
     "pricing:snapshot": "node scripts/build-pricing-snapshot.mjs",
     "check:contrast": "tsx scripts/check-contrast.ts",
-    "brand:kit": "tsx scripts/build-brand-kit.ts"
+    "brand:kit": "tsx scripts/build-brand-kit.ts",
+    "brand:templates": "tsx scripts/build-logo-variants.ts && tsx scripts/build-brand-templates.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -84,9 +85,12 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
     "@types/google.maps": "^3.58.1",
     "@types/qrcode": "^1.5.6",
     "jszip": "^3.10.2",
+    "pdf-lib": "^1.17.1",
+    "regenerator-runtime": "^0.14.1",
     "tsx": "^4.23.13",
     "vercel": "^50.13.2"
   }

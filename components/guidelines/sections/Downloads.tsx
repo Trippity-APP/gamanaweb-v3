@@ -17,12 +17,7 @@ function readManifest(): Asset[] {
   return existsSync(file) ? (JSON.parse(readFileSync(file, "utf8")) as Asset[]) : [];
 }
 
-const MISSING = [
-  "coins/coins-ic-gamana.svg",
-  "templates/social/*.png",
-  "templates/qr/*.pdf",
-  "templates/store-listing/*.png",
-];
+const MISSING: string[] = [];
 
 function formatBytes(bytes: number) {
   return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
@@ -33,6 +28,9 @@ const PREVIEW_BG: Record<string, string> = {
   "logo/gamana-logo-stacked-white.svg": "bg-ink",
   "logo/gamana-icon-white.svg": "bg-ink",
   "app-icon/android-adaptive-foreground.png": "bg-ink",
+  "templates/social/instagram-post-1080x1350-guides.png": "bg-sand-100",
+  "templates/social/instagram-story-1080x1920-guides.png": "bg-sand-100",
+  "templates/social/linkedin-1200x627-guides.png": "bg-sand-100",
 };
 
 export function Downloads() {
@@ -85,7 +83,10 @@ export function Downloads() {
                 {previewable ? (
                   <img src={a.path} alt="" loading="lazy" className="max-h-full max-w-full object-contain" />
                 ) : (
-                  <FileText size={24} className="text-ink-muted" aria-hidden="true" />
+                  <span className="flex flex-col items-center gap-0.5 text-ink-muted">
+                    <FileText size={22} aria-hidden="true" />
+                    <span className="text-[10px] font-semibold uppercase tracking-wide">{a.format}</span>
+                  </span>
                 )}
               </div>
               <div className="min-w-0 flex-1">
@@ -112,14 +113,18 @@ export function Downloads() {
         })}
       </ul>
 
-      <SubHeading id="downloads-missing">Still to supply</SubHeading>
-      <ul className="grid grid-cols-2 gap-2 md:grid-cols-3">
-        {MISSING.map((m) => (
-          <li key={m}>
-            <Placeholder name={m} />
-          </li>
-        ))}
-      </ul>
+      {MISSING.length > 0 && (
+        <>
+          <SubHeading id="downloads-missing">Still to supply</SubHeading>
+          <ul className="grid grid-cols-2 gap-2 md:grid-cols-3">
+            {MISSING.map((m) => (
+              <li key={m}>
+                <Placeholder name={m} />
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </section>
   );
 }

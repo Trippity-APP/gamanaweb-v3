@@ -63,6 +63,24 @@
           "value": "noindex, nofollow, noarchive, noimageindex"
         }
       ]
+    },
+    {
+      "source": "/brand-templates/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive, noimageindex"
+        }
+      ]
+    },
+    {
+      "source": "/logo/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive, noimageindex"
+        }
+      ]
     }
   ],
   "redirects": [

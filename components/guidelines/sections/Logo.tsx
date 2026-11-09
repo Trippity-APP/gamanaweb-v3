@@ -10,8 +10,7 @@ import { SectionHeader, SubHeading } from "../SectionHeader";
 
 const LOGO_PNG = "/gamana-logo.png";
 const APP_ICON = "/favicon-gamana.png";
-const COINS_ICON = "/coins-ic-gamana.png";
-
+const COINS_SVG = "/brand-templates/coins/coins-ic-gamana.svg";
 function Tile({ title, note, className, children }: { title: string; note?: ReactNode; className?: string; children: ReactNode }) {
   return (
     <figure className="overflow-hidden rounded-3xl border border-g-border bg-g-card">
@@ -89,9 +88,9 @@ export function Logo() {
         <Tile title="App icon" note="favicon-gamana.png, 513 × 513." className="bg-g-surface">
           <img src={APP_ICON} alt="Gamana app icon" width={513} height={513} className="h-24 w-24 rounded-[22%]" />
         </Tile>
-        <Tile title="Gamana Coins icon" note="coins-ic-gamana.png. Always shown with the word “Coins”." className="bg-g-surface">
+        <Tile title="Gamana Coins icon" note="coins/coins-ic-gamana.svg (vector) or .png. Always shown with the word “Coins”." className="bg-g-surface">
           <span className="flex items-center gap-3">
-            <img src={COINS_ICON} alt="Gamana Coins icon" width={249} height={249} className="h-16 w-16" />
+            <img src={COINS_SVG} alt="Gamana Coins icon" width={249} height={249} className="h-16 w-16" />
             <span className="font-display text-2xl font-bold text-g-fg">120 Coins</span>
           </span>
         </Tile>
