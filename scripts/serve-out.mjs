@@ -423,15 +423,19 @@ const handler = await loadHandler();
 
 const server = http.createServer(async (request, response) => {
   let rawPath = "/";
+  let rawSearch = "";
   try {
-    rawPath = new URL(request.url || "/", "http://localhost").pathname;
+    const parsed = new URL(request.url || "/", "http://localhost");
+    rawPath = parsed.pathname;
+    rawSearch = parsed.search;
   } catch {
     rawPath = String(request.url || "/").split("?")[0];
   }
   try {
-    if (!guardGuidelines(request, response, rawPath)) return;
+    if (!(await guardGuidelines(request, response, rawPath, rawSearch))) return;
   } catch (err) {
     console.error("[guidelines auth]", err);
+    if (response.headersSent) return response.end();
     response.writeHead(500, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
     response.end("Server error");
     return;

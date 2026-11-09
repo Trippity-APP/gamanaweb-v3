@@ -46,6 +46,7 @@ import {
   DownloadSimple as PhDownloadSimple,
   Envelope as PhEnvelope,
   Eye as PhEye,
+  EyeSlash as PhEyeSlash,
   FacebookLogo as PhFacebookLogo,
   FileText as PhFileText,
   Footprints as PhFootprints,
@@ -199,6 +200,7 @@ export const Download = wrap(PhDownloadSimple as PhosphorComponent, "Download");
 export const Edit3 = wrap(PhPencilLine as PhosphorComponent, "Edit3");
 export const ExternalLink = wrap(PhArrowSquareOut as PhosphorComponent, "ExternalLink");
 export const Eye = wrap(PhEye as PhosphorComponent, "Eye");
+export const EyeOff = wrap(PhEyeSlash as PhosphorComponent, "EyeOff");
 export const Facebook = wrap(PhFacebookLogo as PhosphorComponent, "Facebook");
 export const FileText = wrap(PhFileText as PhosphorComponent, "FileText");
 export const Filter = wrap(PhFunnel as PhosphorComponent, "Filter");
