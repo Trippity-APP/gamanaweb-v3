@@ -1,39 +1,75 @@
 /**
- * HTTP Basic auth for the internal brand guidelines and their assets. The password comes from
- * the GUIDELINES_PASSWORD environment variable (set in Railway); any username is accepted.
+ * Password gate for the internal brand guidelines and their assets. The password comes from
+ * the GUIDELINES_PASSWORD environment variable (set in Railway). Visitors without a valid
+ * session cookie are sent to the /guidelines-unlock/ page, which posts the password back here.
  * Fails closed: when the variable is missing, protected paths return 503 instead of opening up.
  */
 import crypto from "node:crypto";
 
 const PROTECTED = [/^\/guidelines-v1(\/|$)/, /^\/brand(\/|$)/, /^\/brand-templates(\/|$)/, /^\/logo(\/|$)/];
-const REALM = "Gamana brand guidelines";
+export const UNLOCK_PATH = "/guidelines-unlock/";
+const DEFAULT_NEXT = "/guidelines-v1/";
+const COOKIE = "gmn_guidelines";
+const SESSION_SECONDS = 7 * 24 * 60 * 60;
+const MAX_BODY_BYTES = 4096;
 const MAX_FAILURES = 10;
 const WINDOW_MS = 15 * 60 * 1000;
 
-export function isProtectedPath(pathname) {
+function normalize(pathname) {
   let decoded = pathname;
   try {
     decoded = decodeURIComponent(pathname);
   } catch {
     // Malformed escapes still go through the check on the raw path.
   }
-  const normalized = decoded.replace(/\/{2,}/g, "/").toLowerCase();
+  return decoded.replace(/\/{2,}/g, "/").toLowerCase();
+}
+
+export function isProtectedPath(pathname) {
+  const normalized = normalize(pathname);
   return PROTECTED.some((re) => re.test(normalized));
 }
 
-const digest = (value) => crypto.createHash("sha256").update(value, "utf8").digest();
+const isUnlockPath = (pathname) => /^\/guidelines-unlock\/?$/.test(normalize(pathname));
 
-export function passwordMatches(header, expected) {
-  if (!header || !expected || !/^Basic /i.test(header)) return false;
-  let decoded;
-  try {
-    decoded = Buffer.from(header.slice(6).trim(), "base64").toString("utf8");
-  } catch {
-    return false;
+const digest = (value) => crypto.createHash("sha256").update(value, "utf8").digest();
+const sameSecret = (a, b) => crypto.timingSafeEqual(digest(a), digest(b));
+
+export function passwordMatches(candidate, expected) {
+  if (typeof candidate !== "string" || !candidate || !expected) return false;
+  return sameSecret(candidate, expected);
+}
+
+const sign = (expires, expected) =>
+  crypto.createHmac("sha256", expected).update(`guidelines-v1:${expires}`).digest("base64url");
+
+/** `<expiry seconds>.<hmac>`; changing the password invalidates every issued session. */
+export function issueSession(expected, now = Date.now()) {
+  const expires = Math.floor(now / 1000) + SESSION_SECONDS;
+  return `${expires}.${sign(expires, expected)}`;
+}
+
+export function sessionValid(token, expected, now = Date.now()) {
+  if (!token || !expected) return false;
+  const [expires, mac] = String(token).split(".");
+  if (!/^\d+$/.test(expires || "") || !mac) return false;
+  if (Number(expires) * 1000 <= now) return false;
+  return sameSecret(mac, sign(expires, expected));
+}
+
+function readCookie(request, name) {
+  const header = request.headers.cookie || "";
+  for (const part of header.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq !== -1 && part.slice(0, eq).trim() === name) return part.slice(eq + 1).trim();
   }
-  const sep = decoded.indexOf(":");
-  if (sep === -1) return false;
-  return crypto.timingSafeEqual(digest(decoded.slice(sep + 1)), digest(expected));
+  return "";
+}
+
+/** Only protected same-site paths, so `next` can't be used as an open redirect. */
+export function safeNext(raw) {
+  if (typeof raw !== "string" || !raw.startsWith("/") || raw.startsWith("//") || raw.includes("\\")) return DEFAULT_NEXT;
+  return isProtectedPath(raw.split(/[?#]/)[0]) ? raw : DEFAULT_NEXT;
 }
 
 const failures = new Map();
@@ -56,38 +92,89 @@ function recordFailure(ip, now) {
   if (failures.size > 10_000) failures.clear();
 }
 
-function deny(response, status, body, extra = {}) {
-  response.writeHead(status, {
-    "Content-Type": "text/plain; charset=utf-8",
-    "Cache-Control": "no-store",
-    "X-Robots-Tag": "noindex, nofollow",
-    ...extra,
-  });
+const NO_STORE = { "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" };
+
+function deny(response, status, body) {
+  response.writeHead(status, { "Content-Type": "text/plain; charset=utf-8", ...NO_STORE });
   response.end(body);
 }
 
+function redirect(response, location, extra = {}) {
+  response.writeHead(303, { Location: location, ...NO_STORE, ...extra });
+  response.end();
+}
+
+function unlockUrl(next, error) {
+  const params = new URLSearchParams({ next });
+  if (error) params.set("error", error);
+  return `${UNLOCK_PATH}?${params}`;
+}
+
+function readForm(request) {
+  return new Promise((resolve) => {
+    let size = 0;
+    const chunks = [];
+    request.on("data", (chunk) => {
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) {
+        request.destroy();
+        resolve(new URLSearchParams());
+      } else chunks.push(chunk);
+    });
+    request.on("end", () => resolve(new URLSearchParams(Buffer.concat(chunks).toString("utf8"))));
+    request.on("error", () => resolve(new URLSearchParams()));
+  });
+}
+
+async function handleUnlock(request, response, expected, now) {
+  const form = await readForm(request);
+  const next = safeNext(form.get("next"));
+  if (!expected) return redirect(response, unlockUrl(next, "unavailable"));
+  const ip = clientIp(request);
+  if (tooManyFailures(ip, now)) return redirect(response, unlockUrl(next, "locked"));
+  if (!passwordMatches(form.get("password"), expected)) {
+    recordFailure(ip, now);
+    return redirect(response, unlockUrl(next, tooManyFailures(ip, now) ? "locked" : "wrong"));
+  }
+  failures.delete(ip);
+  const secure = String(request.headers["x-forwarded-proto"] || "").split(",")[0].trim() === "https";
+  const cookie = [
+    `${COOKIE}=${issueSession(expected, now)}`,
+    "Path=/",
+    `Max-Age=${SESSION_SECONDS}`,
+    "HttpOnly",
+    "SameSite=Lax",
+    ...(secure ? ["Secure"] : []),
+  ].join("; ");
+  redirect(response, next, { "Set-Cookie": cookie });
+}
+
 /**
- * Returns true when the request may continue. Otherwise the response has been sent.
+ * Resolves true when the request may continue. Otherwise the response has been sent.
  * Allowed responses on protected paths are marked private so shared caches never store them.
  */
-export function guardGuidelines(request, response, pathname, expected = process.env.GUIDELINES_PASSWORD, now = Date.now()) {
+export async function guardGuidelines(
+  request,
+  response,
+  pathname,
+  search = "",
+  expected = process.env.GUIDELINES_PASSWORD,
+  now = Date.now()
+) {
+  if (request.method === "POST" && isUnlockPath(pathname)) {
+    await handleUnlock(request, response, expected, now);
+    return false;
+  }
   if (!isProtectedPath(pathname)) return true;
   if (!expected) {
     deny(response, 503, "Brand guidelines are not configured.");
     return false;
   }
-  const ip = clientIp(request);
-  if (tooManyFailures(ip, now)) {
-    deny(response, 429, "Too many attempts. Try again later.", { "Retry-After": String(WINDOW_MS / 1000) });
+  if (!sessionValid(readCookie(request, COOKIE), expected, now)) {
+    if (request.method === "GET" || request.method === "HEAD") redirect(response, unlockUrl(safeNext(pathname + search)));
+    else deny(response, 401, "Password required.");
     return false;
   }
-  const header = request.headers.authorization;
-  if (!passwordMatches(header, expected)) {
-    if (header) recordFailure(ip, now);
-    deny(response, 401, "Password required.", { "WWW-Authenticate": `Basic realm="${REALM}", charset="UTF-8"` });
-    return false;
-  }
-  failures.delete(ip);
   const writeHead = response.writeHead.bind(response);
   response.writeHead = (status, ...rest) => {
     response.setHeader("Cache-Control", "private, no-store");

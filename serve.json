@@ -73,6 +73,15 @@
           "value": "noindex, nofollow, noarchive, noimageindex"
         }
       ]
+    },
+    {
+      "source": "/guidelines-unlock/**",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive, noimageindex"
+        }
+      ]
     }
   ],
   "redirects": [
