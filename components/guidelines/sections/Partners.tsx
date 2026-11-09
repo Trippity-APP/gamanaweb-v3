@@ -13,6 +13,8 @@ const PARTNER_LOGO = {
   dark: "/brand-templates/partners/partner-logo-dark.png",
 };
 
+const GAMANA_COLOR_LOGO = "/logo/gamana-logo-color.svg";
+
 function Lockup({ label, stacked, dark }: { label: string; stacked?: boolean; dark?: boolean }) {
   return (
     <figure className="overflow-hidden rounded-3xl border border-g-border bg-g-card">
@@ -30,7 +32,11 @@ function Lockup({ label, stacked, dark }: { label: string; stacked?: boolean; da
             <span className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${dark ? "text-white/80" : "text-ink-soft"}`}>
               {label}
             </span>
-            <LogoMark className={`mt-1 w-24 ${dark ? "text-white" : "text-ink"}`} label="Gamana" />
+            {dark ? (
+              <LogoMark className="mt-1 w-24 text-white" label="Gamana" />
+            ) : (
+              <img src={GAMANA_COLOR_LOGO} alt="Gamana" width={96} height={27} className="mt-1 h-auto w-24" />
+            )}
           </div>
         </div>
       </div>
@@ -101,7 +107,7 @@ export function Partners() {
         <Lockup label="In partnership with" stacked dark />
       </div>
       <p className="mt-4 text-sm text-g-fg-muted">
-        Gamana is never taller than 100% of the partner logo height. Clear space applies to both marks. Approved
+        Use the full-colour teal Gamana logo on light backgrounds and the reversed white logo on dark; never black. Gamana is never taller than 100% of the partner logo height. Clear space applies to both marks. Approved
         backgrounds are the same as for the Gamana logo.
       </p>
 
