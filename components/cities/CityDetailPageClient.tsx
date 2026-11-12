@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CityDetail } from "@/components/cities/CityDetail";
 import { fetchCityById, type ApiCity } from "@/lib/services/cityService";
-import { cityCatalog, fetchPublicTours } from "@/lib/marketplace-api";
+import { cityCatalog, fetchPublicTours, refreshCatalog } from "@/lib/marketplace-api";
 import type { Tour } from "@/lib/marketplace-data";
 import {
     isStaticSpaParam,
@@ -45,7 +45,8 @@ export function CityDetailPageClient({
         initialCity || needsFetch ? null : "This city is not available."
     );
 
-    // Pre-rendered pages carry image URLs signed at build time, which expire after 24h.
+    // Pre-rendered pages carry image URLs signed at build time, which expire after 24h, and the
+    // tour shelves from the last deploy. Refresh both so dashboard edits show without a redeploy.
     useEffect(() => {
         if (!initialCity) return;
         let cancelled = false;
@@ -54,6 +55,14 @@ export function CityDetailPageClient({
                 setCity((current) => (current ? { ...current, images: fresh.images } : current));
             }
         });
+        void fetchPublicTours()
+            .then((all) => {
+                if (cancelled || all.length === 0) return;
+                const catalog = cityCatalog(all, initialCity.name);
+                setTours((current) => refreshCatalog(current, catalog.tours, initialTours, false));
+                setStories((current) => refreshCatalog(current, catalog.stories, initialStories, false));
+            })
+            .catch(() => undefined);
         return () => {
             cancelled = true;
         };
