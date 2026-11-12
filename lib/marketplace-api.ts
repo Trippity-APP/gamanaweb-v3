@@ -887,6 +887,30 @@ export function mergeTours<T extends { id: string; searchTerms?: string[] }>(bas
   return [...merged, ...added];
 }
 
+/**
+ * Replaces a pre-rendered `snapshot` with the live `fresh` catalog. A content kind that the
+ * snapshot had but `fresh` lacks entirely is kept as it was, since one half of the catalog fetch
+ * may have failed. With `keepExtras`, tours merged in after load (search and city matches) stay.
+ */
+export function refreshCatalog<T extends { id: string; contentKind?: string }>(
+  current: T[],
+  fresh: T[],
+  snapshot: T[],
+  keepExtras = true,
+): T[] {
+  if (fresh.length === 0) return current;
+  const kind = (tour: T) => tour.contentKind ?? "walk";
+  const freshIds = new Set(fresh.map((tour) => tour.id));
+  const freshKinds = new Set(fresh.map(kind));
+  const snapshotIds = new Set(snapshot.map((tour) => tour.id));
+  const kept = current.filter((tour) => {
+    if (freshIds.has(tour.id)) return false;
+    if (!freshKinds.has(kind(tour)) && snapshotIds.has(tour.id)) return true;
+    return keepExtras && !snapshotIds.has(tour.id);
+  });
+  return [...fresh, ...kept];
+}
+
 export async function fetchPublicTourById(id: string): Promise<Tour | null> {
   const storylist = await fetchStorylistDetailById(id);
   return storylist ? mapStorylistToTour(storylist) : null;

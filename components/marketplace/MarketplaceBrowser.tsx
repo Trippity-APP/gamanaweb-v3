@@ -21,6 +21,7 @@ import { TourGridSkeleton } from '@/components/ui/list-skeletons';
 import {
   fetchCityCatalog,
   fetchPublicTours,
+  refreshCatalog,
   getExploreCityId,
   getExploreSearchQuery,
   isWalkCatalogVisible,
@@ -146,21 +147,14 @@ export function MarketplaceBrowser({
     void loadTours();
   }, [initialTours.length]);
 
-  // Pre-rendered catalogs carry image SAS URLs signed at build time, which expire after 24h.
-  // Only cover URLs are swapped so the build-time list, order and filters stay as they are.
+  // The pre-rendered catalog is a snapshot from the last deploy (with image SAS URLs that expire
+  // after 24h). Swap in the live catalog so dashboard edits show without a redeploy.
   useEffect(() => {
     if (initialTours.length === 0) return;
     let cancelled = false;
     fetchPublicTours()
       .then((fresh) => {
-        if (cancelled) return;
-        const images = new Map(fresh.map((tour) => [tour.id, tour.image]));
-        setTours((current) =>
-          current.map((tour) => {
-            const image = images.get(tour.id);
-            return image && image !== tour.image ? { ...tour, image } : tour;
-          }),
-        );
+        if (!cancelled) setTours((current) => refreshCatalog(current, fresh, initialTours));
       })
       .catch(() => undefined);
     return () => {
